@@ -1,6 +1,6 @@
 databaseChangeLog:
 
- - changeSet:
+- changeSet:
       id: FIBI-10795
       author: robin
       labels: 'PROCEDURES'
