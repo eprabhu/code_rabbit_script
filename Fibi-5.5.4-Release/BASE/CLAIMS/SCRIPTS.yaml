@@ -1,0 +1,106 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7562-2
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert lookup_window Claim Type (idempotent)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO lookup_window (LOOKUP_WINDOW_NAME, DESCRIPTION, TABLE_NAME, COLUMN_NAME, OTHERS_DISPLAY_COLUMNS, DATA_TYPE_CODE)
+              SELECT 'Claim Type', 'User Dropdown', 'CLAIM_TYPE_V', 'CLAIM_TYPE', 'DESCRIPTION', '8'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM lookup_window
+                WHERE LOOKUP_WINDOW_NAME = 'Claim Type' AND TABLE_NAME = 'CLAIM_TYPE_V' AND COLUMN_NAME = 'CLAIM_TYPE'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM lookup_window
+              WHERE LOOKUP_WINDOW_NAME = 'Claim Type' AND TABLE_NAME = 'CLAIM_TYPE_V' AND COLUMN_NAME = 'CLAIM_TYPE';
+
+  - changeSet:
+      id: FIBI-7562-3
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Claim Lead Unit (module 14)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Claim Lead Unit', 14, 0, 'Lead Unit', 'CLAIM', 'HOST_UNIT_NUMBER', 'Y', UTC_TIMESTAMP(), 'admin', 'UNIT_LOOKUP'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Claim Lead Unit' AND MODULE_CODE = 14 AND TABLE_NAME = 'CLAIM'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Claim Lead Unit' AND MODULE_CODE = 14 AND TABLE_NAME = 'CLAIM';
+
+  - changeSet:
+      id: FIBI-7562-4
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Claim Sponsor Code (module 14)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Claim Sponsor Code', 14, 0, 'Sponsor', 'AWARD', 'SPONSOR_CODE', 'Y', UTC_TIMESTAMP(), 'admin', 'SPONSOR_LOOKUP'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Claim Sponsor Code' AND MODULE_CODE = 14 AND TABLE_NAME = 'AWARD'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Claim Sponsor Code' AND MODULE_CODE = 14 AND TABLE_NAME = 'AWARD';
+
+  - changeSet:
+      id: FIBI-7562-5
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Claim Duration (module 14)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Claim Duration', 14, 0, 'Claim Duration', 'CLAIM', 'DURATION', 'N', UTC_TIMESTAMP(), 'admin', ''
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Claim Duration' AND MODULE_CODE = 14 AND TABLE_NAME = 'CLAIM'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Claim Duration' AND MODULE_CODE = 14 AND TABLE_NAME = 'CLAIM';
+
+  - changeSet:
+      id: FIBI-7562-6
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Claim Type (module 14)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Claim Type', 14, 0, 'Claim Type', 'CLAIM', 'CLAIM_NUMBER', 'Y', UTC_TIMESTAMP(), 'admin', 'Claim Type'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Claim Type' AND MODULE_CODE = 14 AND TABLE_NAME = 'CLAIM'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Claim Type' AND MODULE_CODE = 14 AND TABLE_NAME = 'CLAIM';

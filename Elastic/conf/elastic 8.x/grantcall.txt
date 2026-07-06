@@ -1,0 +1,110 @@
+// These commands should be used in elastic server for various things
+
+1. To delete and index from the elastic server (update the IP as required a dummy IP for refernce is added)
+
+    curl -XDELETE http://172.21.44.97:9200/grantcall/ 
+
+2. To create an Index in elastic server , the command will create an index in elastic server named "grantcall".
+
+    curl -XPUT 'http://172.21.44.97:9200/grantcall/' -H 'Content-Type: application/json' -d '{"settings":{"number_of_shards":5,"analysis":{"filter":{"ngram_filter":{"type":"edge_ngram","min_gram":1,"max_gram":20}},"analyzer":{"ngram_analyzer":{"type":"custom","tokenizer":"whitespace","filter":["lowercase","ngram_filter"]}}}},"mappings":{"properties":{"grant_header_id":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard","fields":{"sort":{"type":"keyword","index":true}}},"title":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard"},"grant_type":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"sponsor":{"type":"text","index":"false"},"sponsor_display_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"funding_scheme":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"}}}}'
+3. logstash configuration that need to used to sync elastic index from Database
+    1.jdbc_driver_library = path to library for jar for mysqlconnector ( eg:/root/conf/mysql-connector.jar) 
+    2.jdbc_connection_string = The URL for the Database that need to be used.
+    3.hosts = the ip address of the elastic search sever thats used for data sync.
+    4.Other properties dont need to be changed. only add DB password and user details. 
+
+    input {
+        jdbc {
+            jdbc_driver_library => ""
+            jdbc_driver_class => "Java::com.mysql.jdbc.Driver"
+            jdbc_connection_string => "jdbc:mysql://192.168.1.6:3306/fibi_base?useSSL=false&useTimezone=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+            jdbc_user => ""
+            jdbc_password =>"" 
+            jdbc_validate_connection => true
+            statement => "SELECT CAST(T1.GRANT_HEADER_ID AS CHAR(10)) GRANT_HEADER_ID,T1.NAME AS TITLE,T2.DESCRIPTION AS GRANT_TYPE,T3.SPONSOR_NAME AS SPONSOR,T3.DISPLAY_NAME AS SPONSOR_DISPLAY_NAME,
+                            T7.DESCRIPTION AS FUNDING_SCHEME,T5.DESCRIPTION AS STATUS FROM GRANT_CALL_HEADER T1
+                            LEFT OUTER JOIN GRANT_CALL_TYPE T2 ON T1.GRANT_TYPE_CODE = T2.GRANT_TYPE_CODE
+                            LEFT OUTER JOIN SPONSOR T3 ON T1.SPONSOR_CODE = T3.SPONSOR_CODE
+                            LEFT OUTER JOIN GRANT_CALL_STATUS T5 ON T5.GRANT_STATUS_CODE = T1.GRANT_STATUS_CODE
+                            LEFT OUTER JOIN SPONSOR_FUNDING_SCHEME T6 ON T1.FUNDING_SCHEME_ID = T6.FUNDING_SCHEME_ID
+                            LEFT OUTER JOIN FUNDING_SCHEME T7 ON T6.FUNDING_SCHEME_CODE = T7.FUNDING_SCHEME_CODE"
+        }
+      }
+      output {
+        elasticsearch {
+            index => "grantcall"
+            document_id => "%{grant_header_id}"
+            hosts => "192.168.1.242:9200"
+        } 
+      }
+
+4. The JSON object used for Developers and miantainers so that its easy to identify the propoerties used to create an index
+
+{
+    "settings": {
+        "number_of_shards": 5,
+        "analysis": {
+            "filter": {
+                "ngram_filter": {
+                    "type": "edge_ngram",
+                    "min_gram": 1,
+                    "max_gram": 20
+                }
+            },
+            "analyzer": {
+                "ngram_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                    "filter": [
+                        "lowercase",
+                        "ngram_filter"
+                    ]
+                }
+            }
+        }
+    },
+    "mappings": {
+            "properties": {
+                "grant_header_id": {
+                    "type": "text",
+                    "term_vector": "with_positions_offsets",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard",
+                    "fields": {
+                        "sort": {
+                            "type": "keyword",
+                            "index": true
+                        }
+                    } 
+                },
+                "title": {
+                    "type": "text",
+                    "term_vector": "with_positions_offsets",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "grant_type": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "sponsor": {
+                    "type": "text",
+                    "index": "false"
+                },
+                "sponsor_display_name": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "funding_scheme": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                }
+            }
+        }
+}

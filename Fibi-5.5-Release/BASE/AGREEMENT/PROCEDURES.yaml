@@ -1,0 +1,127 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7701-1
+      author: Farsana Khadar
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MODULE_DETAILS_FOR_AGREEMENT
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_MODULE_DETAILS_FOR_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8307-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7324-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_DYN_JSON
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_DYN_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7259-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS CREATE_AGREEMENT
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/CREATE_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGREEMENT_DASHBOARD_V1
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS CREATE_AGREEMENT;
+                DROP PROCEDURE IF EXISTS GET_AGMENT_DASHBOARD_CATEGORY;
+                DROP PROCEDURE IF EXISTS GET_AGMT_ADMIN_ASSIGNEE_OVERVIEW_DETAILS;
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_COUNT_BY_STATUS;
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_COUNT_BY_STATUS_DETAIL;
+                DROP PROCEDURE IF EXISTS GET_ASSIGNEES_FOR_ADMINISTRATOR;
+                DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_AGREEMENT_COUNT;
+                DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_AGREEMENT_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/CREATE_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGMENT_DASHBOARD_CATEGORY.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGMT_ADMIN_ASSIGNEE_OVERVIEW_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_COUNT_BY_STATUS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_COUNT_BY_STATUS_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_ASSIGNEES_FOR_ADMINISTRATOR.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_RESEARCH_SUMMARY_AGREEMENT_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_RESEARCH_SUMMARY_AGREEMENT_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,29 @@
+databaseChangeLog:
+
+    #REPORT
+    - include:
+        file: Fibi-5.6.4-Release/NTU/REPORT/SCRIPTS.yaml
+        labels: 'REPORT'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6.4-Release/NTU/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.6.4-Release/NTU/INSTITUTE_PROPOSAL/SCRIPTS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #AWARD
+    - include:
+        file: Fibi-5.6.4-Release/NTU/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.6.4-Release/NTU/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'
+
+    #CORE
+    - include:
+        file: Fibi-5.6.4-Release/NTU/CORE/FUNCTIONS.yaml
+        labels: 'CORE'

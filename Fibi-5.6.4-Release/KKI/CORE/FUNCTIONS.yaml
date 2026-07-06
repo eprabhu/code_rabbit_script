@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9478-1
+      author: Shyla
+      labels: 'FUNCTIONS'
+      comment: Update Function FN_WORKFLOW_APPROVE to include Service Request type in user message
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP FUNCTION IF EXISTS FN_WORKFLOW_APPROVE;
+        - sqlFile:
+            path: ROUTINES/KKI/CORE/FUNCTIONS/FN_WORKFLOW_APPROVE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

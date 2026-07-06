@@ -1,0 +1,72 @@
+databaseChangeLog: 
+
+- changeSet:
+      id: FC-6968-1
+      author: Prabhu.E
+      labels: 'DDL'
+      comment: added new column IS_DIRECT_CLAIM in CLAIM_LETTER_TEMPLATE_MAPPING table
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE CLAIM_LETTER_TEMPLATE_MAPPING;
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                   FROM information_schema.COLUMNS 
+                   WHERE TABLE_SCHEMA = DATABASE() 
+                     AND TABLE_NAME = 'CLAIM_LETTER_TEMPLATE_MAPPING' 
+                     AND COLUMN_NAME = 'IS_DIRECT_CLAIM') = 0,
+
+                  'ALTER TABLE CLAIM_LETTER_TEMPLATE_MAPPING ADD COLUMN `IS_DIRECT_CLAIM` VARCHAR(1) NOT NULL DEFAULT ''N'';',
+
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE CLAIM_LETTER_TEMPLATE_MAPPING DROP COLUMN IS_DIRECT_CLAIM
+
+- changeSet:
+      id: FC-6968-2
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  updated CLAIM_LETTER_TEMPLATE_MAPPING code table configuration
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE CLAIM_LETTER_TEMPLATE_MAPPING SET IS_DIRECT_CLAIM = 'Y' WHERE LETTER_TEMPLATE_TYPE_CODE IN (905, 906, 907, 908, 909, 910);
+              SET SQL_SAFE_UPDATES = 1;
+
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE CLAIM_LETTER_TEMPLATE_MAPPING SET IS_DIRECT_CLAIM = 'N' WHERE LETTER_TEMPLATE_TYPE_CODE IN (905, 906, 907, 908, 909, 910);
+              SET SQL_SAFE_UPDATES = 1;
+
+- changeSet:
+      id: FC-6968-3
+      author: Prabhu.E
+      labels: 'DML'
+      comment: updated CLAIM_LETTER_TEMPLATE_MAPPING code table configuration
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE code_table_configuration SET `CONTENT` = '{\"group\":\"Claim\",\"codeTableName\":\"Claim Letter Template Mapping\",\"description\":\"List of all Claim Letter Template Mapping\",\"databaseTableName\":\"CLAIM_LETTER_TEMPLATE_MAPPING\",\"fields\":[{\"columnName\":\"CLAIM_TEMPLATE_CODE\",\"displayName\":\"Claim Template Code\",\"dataType\":\"String\",\"isEditable\":true,\"length\":10,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":\"claimTemplates\",\"filterType\":\"endpoint\",\"valueField\":\"claimTemplateCode\",\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":\"DESCRIPTION\"},{\"columnName\":\"DESCRIPTION\",\"refColumnName\":\"CLAIM_TEMPLATES#CLAIM_TEMPLATE_CODE\",\"displayName\":\"Description\",\"dataType\":\"String\",\"isEditable\":\"false\",\"length\":\"150\",\"canEmpty\":\"false\",\"visible\":\"true\",\"isTransient\":\"true\"},{\"columnName\":\"LETTER_TEMPLATE_TYPE_CODE\",\"displayName\":\"Letter Template Code\",\"dataType\":\"String\",\"isEditable\":true,\"length\":10,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":\"letterTemplate\",\"filterType\":\"endpoint\",\"valueField\":\"letterTemplateTypeCode\",\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":\"FILE_NAME\"},{\"columnName\":\"FILE_NAME\",\"refColumnName\":\"LETTER_TEMPLATE_TYPE#LETTER_TEMPLATE_TYPE_CODE\",\"displayName\":\"File Name\",\"dataType\":\"String\",\"isEditable\":\"false\",\"length\":\"150\",\"canEmpty\":\"false\",\"visible\":\"true\",\"isTransient\":\"true\"},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null},{\"columnName\":\"IS_DIRECT_CLAIM\",\"displayName\":\"Use Same For Direct Claim\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"IS_ACTIVE\",\"displayName\":\"Is Active\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null}],\"primaryKey\":[\"CLAIM_TEMPLATE_CODE\",\"LETTER_TEMPLATE_TYPE_CODE\"],\"dependency\":[{\"displayName\":\"Claim Templates\",\"table_name\":\"CLAIM_TEMPLATES\",\"columnName\":\"CLAIM_TEMPLATE_CODE\",\"showTableName\":\"true\"},{\"displayName\":\"Letter Template Type\",\"table_name\":\"LETTER_TEMPLATE_TYPE\",\"columnName\":\"LETTER_TEMPLATE_TYPE_CODE\",\"showTableName\":\"true\"}],\"actions\":null,\"fileColumnName\":null}' ,
+              `DESCRIPTION` = 'List of all Claim Letter Template Mapping.Note: By default, letter templates mapped here will be used for Reimbursement Claim. If you want to use the same letter template for Direct Claims, please turn on "Use Same For Direct Claim.'
+              WHERE (`TABLE_NAME` = 'CLAIM_LETTER_TEMPLATE_MAPPING');
+              SET SQL_SAFE_UPDATES = 1;
+
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE code_table_configuration SET `CONTENT` = '{"group":"Claim","codeTableName":"Claim Letter Template Mapping","description":"List of all Claim Letter Template Mapping","databaseTableName":"CLAIM_LETTER_TEMPLATE_MAPPING","fields":[{"columnName":"CLAIM_TEMPLATE_CODE","displayName":"Claim Template Code","dataType":"String","isEditable":true,"length":10,"canEmpty":false,"visible":true,"valueChanged":null,"index":"claimTemplates","filterType":"endpoint","valueField":"claimTemplateCode","isTransient":null,"values":null,"refColumnName":null,"defaultValue":"DESCRIPTION"},{"columnName":"DESCRIPTION","refColumnName":"CLAIM_TEMPLATES#CLAIM_TEMPLATE_CODE","displayName":"Description","dataType":"String","isEditable":"false","length":"150","canEmpty":"false","visible":"true","isTransient":"true"},{"columnName":"LETTER_TEMPLATE_TYPE_CODE","displayName":"Letter Template Code","dataType":"String","isEditable":true,"length":10,"canEmpty":false,"visible":true,"valueChanged":null,"index":"letterTemplate","filterType":"endpoint","valueField":"letterTemplateTypeCode","isTransient":null,"values":null,"refColumnName":null,"defaultValue":"FILE_NAME"},{"columnName":"FILE_NAME","refColumnName":"LETTER_TEMPLATE_TYPE#LETTER_TEMPLATE_TYPE_CODE","displayName":"File Name","dataType":"String","isEditable":"false","length":"150","canEmpty":"false","visible":"true","isTransient":"true"},{"columnName":"UPDATE_TIMESTAMP","displayName":"Update timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#USER_NAME","defaultValue":null},{"columnName":"IS_ACTIVE","displayName":"Is Active","dataType":"String","isEditable":true,"length":1,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":"switch","valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null}],"primaryKey":["CLAIM_TEMPLATE_CODE","LETTER_TEMPLATE_TYPE_CODE"],"dependency":[{"displayName":"Claim Templates","table_name":"CLAIM_TEMPLATES","columnName":"CLAIM_TEMPLATE_CODE","showTableName":"true"},{"displayName":"Letter Template Type","table_name":"LETTER_TEMPLATE_TYPE","columnName":"LETTER_TEMPLATE_TYPE_CODE","showTableName":"true"}],"actions":null,"fileColumnName":null}',
+              `DESCRIPTION` = 'List of all Claim Letter Template Mapping'
+              WHERE (`TABLE_NAME` = 'CLAIM_LETTER_TEMPLATE_MAPPING');
+              SET SQL_SAFE_UPDATES = 1;

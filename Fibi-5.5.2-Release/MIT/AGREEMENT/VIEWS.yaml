@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8588-1
+      author: Vishnu.BH
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS ag_assoc_detail_v;
+        - sqlFile:
+            path: ROUTINES/MIT/AGREEMENT/VIEWS/ag_assoc_detail_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

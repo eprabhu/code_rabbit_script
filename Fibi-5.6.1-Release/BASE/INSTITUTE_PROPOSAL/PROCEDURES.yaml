@@ -1,0 +1,50 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10053-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment: Update the Procedure with add the Key Personnel Role Filter
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_INST_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/INSTITUTE_PROPOSAL/PROCEDURES/GET_INST_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+
+  - changeSet:
+      id: FIBI-10053-2
+      author: Reshma Antony
+      labels: 'PROCEDURES,5.6.1-Release'
+      comment: Update the Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_INST_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/INSTITUTE_PROPOSAL/PROCEDURES/GET_INST_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9922-1
+      author: Nabeel Ahamed M.
+      labels: 'PROCEDURES'
+      comment: Changes in Procedure GET_INST_PROPOSAL_DASHBOARD_V1
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_INST_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/INSTITUTE_PROPOSAL/PROCEDURES/GET_INST_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty 

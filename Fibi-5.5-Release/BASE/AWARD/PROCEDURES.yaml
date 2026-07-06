@@ -1,0 +1,287 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7788-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS VALIDATE_CREATE_TASK
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/VALIDATE_CREATE_TASK.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7753-1
+      author: Farsana Khadar
+      labels: 'PROCEDURES'
+      comment: Modified Procedure UPDATE_AWD_REPREQ_DUE_DT
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS UPDATE_AWD_REPREQ_DUE_DT
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/UPDATE_AWD_REPREQ_DUE_DT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7597-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SAP_FEED_BATCH_HISTORY
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_BATCH_HISTORY.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7597-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SAP_FEED_DASHBOARD
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_SAP_FEED_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7824-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SAP_FEED_GENERATE_BATCH
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_GENERATE_BATCH.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7335-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure (LOA)
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS CREATE_AWARD
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/CREATE_AWARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8423-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SAP_FEED_REINTERFACE
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_REINTERFACE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7259-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS CREATE_AWARD
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/CREATE_AWARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8154-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS AWARD_EXPENSE_TRACKER_SYNC
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/AWARD_EXPENSE_TRACKER_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8154-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS AWARD_EXPENSE_TRACKER_REFRESH
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/AWARD_EXPENSE_TRACKER_REFRESH.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS AWARD_EXPENSE_TRACKER_REFRESH_INSERT;
+                DROP PROCEDURE IF EXISTS CREATE_AWARD;
+                DROP PROCEDURE IF EXISTS GENERATE_AWARD_WBS_NUMBER;
+                DROP PROCEDURE IF EXISTS GEN_AWARD_WBS_NUMBER;
+                DROP PROCEDURE IF EXISTS LOAD_ALL_AWARD_VERSION_REPORT;
+                DROP PROCEDURE IF EXISTS MERGE_AWARD_MASTER_DATA;
+                DROP PROCEDURE IF EXISTS MERGE_AWARD_MASTER_GENERAL;
+                DROP PROCEDURE IF EXISTS MERGE_AWD_MASTER_COST_SHARE;
+                DROP PROCEDURE IF EXISTS MERGE_AWD_MASTER_DATA;
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_COST_SHARE;
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_GENERAL;
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_KEY_PERSON;
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_PROJECT_OUTCOME;
+                DROP PROCEDURE IF EXISTS SAP_AWARD_FEED;
+                DROP PROCEDURE IF EXISTS SAP_FEED_BUDGET_REPORT;
+                DROP PROCEDURE IF EXISTS SAP_FEED_GENERATE_BATCH;
+                DROP PROCEDURE IF EXISTS SAP_FEED_GENERATE_BATCH_MOD;
+                DROP PROCEDURE IF EXISTS SAP_FEED_PROBLEMATIC_GRANT_CODE_REPORT;
+                DROP PROCEDURE IF EXISTS SAP_FEED_REINTERFACE;
+                DROP PROCEDURE IF EXISTS SAP_FEED_REPORT;
+                DROP PROCEDURE IF EXISTS SAP_FEED_SOFT_LAUNCH_NO_REPORT;
+                DROP PROCEDURE IF EXISTS TEMP_AWARD_ALL_IN_ONE;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/AWARD_EXPENSE_TRACKER_REFRESH_INSERT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/CREATE_AWARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GENERATE_AWARD_WBS_NUMBER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GEN_AWARD_WBS_NUMBER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/LOAD_ALL_AWARD_VERSION_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWARD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWARD_MASTER_GENERAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_MASTER_COST_SHARE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_COST_SHARE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_GENERAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_KEY_PERSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_PROJECT_OUTCOME.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_AWARD_FEED.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_BUDGET_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_GENERATE_BATCH.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_GENERATE_BATCH_MOD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_PROBLEMATIC_GRANT_CODE_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_REINTERFACE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_SOFT_LAUNCH_NO_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/TEMP_AWARD_ALL_IN_ONE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8708-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AWARD_BUDGET_MIGRATED_TO_AGREEMENT_FINANCIAL
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_BUDGET_MIGRATED_TO_AGREEMENT_FINANCIAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,65 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10342-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Create GET_SERVICE_REQUEST_WIDGET procedure for the Service Request by Type dashboard widget.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET;
+        - sqlFile: 
+            path: ROUTINES/MIT/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10342-2
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Create GET_SERVICE_REQUEST_WIDGET_COUNT procedure for the Service Request by Type dashboard widget.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT;
+        - sqlFile:
+            path: ROUTINES/MIT/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10342-3
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Create GET_SERVICE_REQUEST_WIDGET procedure for the Service Request by Type dashboard widget.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET;
+        - sqlFile:
+            path: ROUTINES/MIT/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10342-4
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Create GET_SERVICE_REQUEST_WIDGET_COUNT procedure for the Service Request by Type dashboard widget.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT;
+        - sqlFile:
+            path: ROUTINES/MIT/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

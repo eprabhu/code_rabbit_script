@@ -1,0 +1,18 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9439
+      author: Sreejith T
+      labels: 'DML'
+      comment: Update configuration for JHU instance
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config` SET `IS_ACTIVE` = 'N', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2005');
+              UPDATE `dyn_section_config` SET `IS_ACTIVE` = 'Y', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2014');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config` SET `IS_ACTIVE` = 'Y', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2005');
+              UPDATE `dyn_section_config` SET `IS_ACTIVE` = 'N', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2014');
+

@@ -1,0 +1,28 @@
+databaseChangeLog:
+    
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5.1-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5.1-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5.1-Release/BASE/SERVICE_REQUEST/VIEWS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.1-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5.1-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5.1-Release/BASE/AGREEMENT/VIEWS.yaml
+        labels: 'AGREEMENT'
+   
+    #EXTERNAL_REVIEWER
+    - include:
+        file: Fibi-5.5.1-Release/BASE/EXTERNAL_REVIEWER/PROCEDURES.yaml
+        labels: 'EXTERNAL_REVIEWER'

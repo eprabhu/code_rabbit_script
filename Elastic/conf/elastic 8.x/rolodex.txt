@@ -1,0 +1,133 @@
+// These commands should be used in elastic server for various things
+
+1. To delete and index from the elastic server (update the IP as required a dummy IP for refernce is added)
+
+    curl -XDELETE http://172.21.44.97:9200/fibirolodex/ 
+
+2. To create an Index in elastic server , the command will create an index in elastic server named "fibirolodex".
+
+    curl -XPUT 'http://172.21.44.97:9200/fibirolodex/' -H 'Content-Type: application/json' -d '{"settings":{"number_of_shards":5,"analysis":{"filter":{"ngram_filter":{"type":"edge_ngram","min_gram":2,"max_gram":20}},"analyzer":{"ngram_analyzer":{"type":"custom","tokenizer":"whitespace","filter":["lowercase","ngram_filter"]}}}},"mappings":{"properties":{"rolodex_id":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard","fields":{"sort":{"type":"keyword","index":true}}},"organization":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"last_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"first_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"middle_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"email_address":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"designation":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"phone_number":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"full_name":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard"}}}}'
+
+
+3. logstash configuration that need to used to sync elastic index from Database
+    1.jdbc_driver_library = path to library for jar for mysqlconnector ( eg:/root/conf/mysql-connector.jar) 
+    2.jdbc_connection_string = The URL for the Database that need to be used.
+    3.hosts = the ip address of the elastic search sever thats used for data sync.
+    4.Other properties dont need to be changed. only add DB password and user details. 
+
+    input {
+        jdbc {
+            jdbc_driver_library => ""
+            jdbc_driver_class => "Java::com.mysql.jdbc.Driver"
+            jdbc_connection_string => "jdbc:mysql://192.168.1.6:3306/fibi_base?useSSL=false&useTimezone=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+            jdbc_user => ""
+            jdbc_password =>"" 
+            jdbc_validate_connection => true
+            statement => "SELECT cast(T1.rolodex_id as char(10)) as rolodex_id,IFNULL(T2.organization_name,T1.organization_name) AS organization,T1.last_name,T1.first_name,T1.middle_name,
+                        T1.email_address,T1.phone_number,
+                        T1.FULL_NAME,T1.designation,T3.full_name AS create_user, concat(coalesce(T1.ADDRESS_LINE_1,'') , if (T1.ADDRESS_LINE_1 IS NULL OR T1.ADDRESS_LINE_2 IS NULL ,'',', '), (coalesce(T1.ADDRESS_LINE_2,'')),if (T1.ADDRESS_LINE_3 IS NULL OR T1.ADDRESS_LINE_2 IS NULL,'',', '),coalesce(T1.ADDRESS_LINE_3,'')) as address
+                        ,T1.city,T4.country_name as country, T1.STATE, T1.POSTAL_CODE
+                        FROM ROLODEX T1
+                        LEFT OUTER JOIN ORGANIZATION T2 ON T1.ORGANIZATION = T2.ORGANIZATION_ID
+                        LEFT OUTER JOIN PERSON T3 ON T1.create_user = T3.user_name
+                        LEFT OUTER JOIN COUNTRY T4 ON T1.COUNTRY_CODE=T4.COUNTRY_CODE
+                        WHERE T1.IS_ACTIVE = 'Y'"
+        }
+      }
+      output {
+        elasticsearch {
+            index => "fibirolodex"
+            document_id => "%{rolodex_id}"
+            hosts => "192.168.1.242:9200"
+        }
+      }
+4. The JSON object used for Developers and miantainers so that its easy to identify the propoerties used to create an index
+
+{
+    "settings": {
+        "number_of_shards": 5,
+        "analysis": {
+            "filter": {
+                "ngram_filter": {
+                    "type": "edge_ngram",
+                    "min_gram": 2,
+                    "max_gram": 20
+                }
+            },
+            "analyzer": {
+                "ngram_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                    "filter": [
+                        "lowercase",
+                        "ngram_filter"
+                    ]
+                }
+            }
+        }
+    },
+    "mappings": {
+            "properties": {
+                "rolodex_id": {
+                    "type": "text",
+                    "term_vector": "with_positions_offsets",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard",
+                    "fields": {
+                        "sort": {
+                            "type": "keyword",
+                            "index": true
+                        }
+                    }
+                },
+                "organization": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "last_name": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "first_name": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "middle_name": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "email_address": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "designation": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "phone_number": {
+                    "type": "text",
+                    "term_vector": "yes",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                },
+                "full_name": {
+                    "type": "text",
+                    "term_vector": "with_positions_offsets",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard"
+                }
+            }
+        }
+}

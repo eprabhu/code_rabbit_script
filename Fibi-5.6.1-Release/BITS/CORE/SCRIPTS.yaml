@@ -1,0 +1,63 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10326-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Configure the PARAMETER value for IS_FIBI_LANDING_PORTAL_ENABLED.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `parameter` SET `VALUE` = 'N', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE (`PARAMETER_NAME` = 'IS_FIBI_LANDING_PORTAL_ENABLED');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-2
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Configure the PARAMETER value for GLOBAL_SEARCH_ENABLED_MODULES.
+      changes:
+        - sql:
+            sql: |
+             UPDATE `parameter` SET `VALUE` = 'SR20,AG13,DP03,IP02,AW01', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE (`PARAMETER_NAME` = 'GLOBAL_SEARCH_ENABLED_MODULES');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-3
+      author: Reshma Antony
+      labels: 'DML'
+      comment:  Configure the PARAMETER value for SHOW_DISCLOSURE_DETAILS_IN_PROPOSAL_KEY_PERSON.
+      changes:
+        - sql:
+            sql: |
+             UPDATE `parameter` SET `VALUE` = 'N', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE (`PARAMETER_NAME` = 'SHOW_DISCLOSURE_DETAILS_IN_PROPOSAL_KEY_PERSON');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-4
+      author: Reshma Antony
+      labels: 'DML'
+      comment:  Configure the dyn_section_config value for Formbuilder section.
+      changes:
+        - sql:
+            sql: |
+             UPDATE `dyn_section_config` SET `IS_ACTIVE` = 'N', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),`UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2012');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-5
+      author: Reshma Antony
+      labels: 'DML'
+      comment:  Configure the scheduler_job_info IS_ACTIVE as N
+      changes:
+        - sql:
+            sql: |
+             set sql_safe_updates = 0;
+             UPDATE `scheduler_job_info` SET `IS_ACTIVE` = 'N' WHERE (`JOB_CLASS` = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.SapConcurSftpScheduler');
+             UPDATE `scheduler_job_info` SET `IS_ACTIVE` = 'N' WHERE (`JOB_CLASS` = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsScheduler');
+             UPDATE `scheduler_job_info` SET `IS_ACTIVE` = 'N' WHERE (`JOB_CLASS` = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastRevenueTransactionRTProcessingScheduler');
+             UPDATE `scheduler_job_info` SET `IS_ACTIVE` = 'N' WHERE (`JOB_CLASS` = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityMonthlyTenthDayScheduler');
+             UPDATE `scheduler_job_info` SET `IS_ACTIVE` = 'N' WHERE (`JOB_CLASS` = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityMonthEndScheduler');
+             UPDATE `scheduler_job_info` SET `IS_ACTIVE` = 'N' WHERE (`JOB_CLASS` = 'com.polus.fibicomp.orcid.scheduler.AwardSyncToOrcidScheduler');
+             set sql_safe_updates = 1;
+      rollback: empty

@@ -1,0 +1,30 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10730-1
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: Update PROPOSAL table to increase CFDA_NUMBER column size to 255
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE PROPOSAL;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'PROPOSAL'
+                        AND COLUMN_NAME = 'CFDA_NUMBER'
+                        AND CHARACTER_MAXIMUM_LENGTH < 255
+                  ),
+                  'ALTER TABLE PROPOSAL
+                      MODIFY COLUMN `CFDA_NUMBER` VARCHAR(255) DEFAULT NULL;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback: empty

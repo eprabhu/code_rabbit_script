@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-6979-1
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS eps_proposal_report_v
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/VIEWS/eps_proposal_report_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6979-2
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS eps_proposal_v
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/VIEWS/eps_proposal_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

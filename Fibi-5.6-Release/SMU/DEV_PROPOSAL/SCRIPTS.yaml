@@ -1,0 +1,34 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8341
+      author: Reshma Antony
+      labels: 'DML'
+      comment: update in DASHBOARD_COLUMN_LOOKUP,DASHBOARD_CRITERIA_LOOKUP
+      changes:
+        - sql:
+            sql: |
+                UPDATE DASHBOARD_COLUMN_LOOKUP 
+                                SET IS_ACTIVE = 'N' 
+                                WHERE COLUMN_ID = 'COL_DEV_PROP_GRANT_CALL_ABBREVATION';
+
+                UPDATE DASHBOARD_COLUMN_LOOKUP 
+                                SET IS_ACTIVE = 'N' 
+                                WHERE COLUMN_ID = 'COL_DEV_PROPOSAL_TYPE';
+
+                UPDATE DASHBOARD_COLUMN_LOOKUP 
+                                SET IS_ACTIVE = 'N' 
+                                WHERE COLUMN_ID = 'COL_DEV_PROP_INTERNAL_DEADLINE_DATE';
+
+                UPDATE DASHBOARD_COLUMN_LOOKUP 
+                                SET IS_ACTIVE = 'N' 
+                                WHERE COLUMN_ID = 'COL_DEV_PROP_SPONSOR_DEADLINE_DATE';
+
+                UPDATE DASHBOARD_CRITERIA_LOOKUP 
+                                SET IS_ACTIVE = 'N' 
+                                WHERE CRITERIA_KEY = 'CRT_DEV_PROP_SPONSOR_DEADLINE_DATE';
+
+                UPDATE DASHBOARD_CRITERIA_LOOKUP 
+                                SET IS_ACTIVE = 'N' 
+                                WHERE CRITERIA_KEY = 'CRT_DEV_PROP_INTERNAL_DEADLINE_DATE';
+      rollback: empty

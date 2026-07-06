@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9261-1
+      author: Mohamed Fazil
+      labels: 'PROCEDURES'
+      comment: Create or update DELETE_AGREEMENT_RECORD procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS DELETE_AGREEMENT_RECORD;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/DELETE_AGREEMENT_RECORD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

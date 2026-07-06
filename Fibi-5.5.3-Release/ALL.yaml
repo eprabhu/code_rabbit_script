@@ -1,0 +1,19 @@
+databaseChangeLog:
+
+    #AWARD
+    - include:
+        file: Fibi-5.5.3-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'
+        
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5.3-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.3-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5.3-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'

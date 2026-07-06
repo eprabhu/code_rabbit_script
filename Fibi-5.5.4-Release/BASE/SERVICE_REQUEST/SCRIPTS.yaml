@@ -1,0 +1,15 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8955
+      author: Sasikumar Chandran
+      labels: 'DML'
+      comment: Insert section type for Task Comments.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `section_type` (`SECTION_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('2026', 'Task Comments', utc_timestamp(), 'admin');
+      rollback: 
+        - sql:
+            sql: |    
+              DELETE FROM `section_type` WHERE `SECTION_CODE` = '2026';

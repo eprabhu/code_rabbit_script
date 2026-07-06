@@ -1,0 +1,25 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.2-Release/MIT/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5.2-Release/MIT/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5.2-Release/MIT/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5.2-Release/MIT/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5.2-Release/MIT/SERVICE_REQUEST/VIEWS.yaml
+        labels: 'SERVICE_REQUEST'         
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.2-Release/MIT/AGREEMENT/VIEWS.yaml
+        labels: 'AGREEMENT'

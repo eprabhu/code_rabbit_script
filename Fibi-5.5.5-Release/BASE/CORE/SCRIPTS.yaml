@@ -1,0 +1,20 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10100
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Insert dyn_section_config for SR2015 Additional Information (SR20)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO dyn_section_config (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'SR2015', 'SR20', 'Additional Information', 'N', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM dyn_section_config
+                  WHERE SECTION_CODE = 'SR2015' AND MODULE_CODE = 'SR20'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dyn_section_config WHERE SECTION_CODE = 'SR2015' AND MODULE_CODE = 'SR20';

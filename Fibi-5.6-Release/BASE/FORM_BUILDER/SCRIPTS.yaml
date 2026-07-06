@@ -1,0 +1,73 @@
+databaseChangeLog: 
+
+  - changeSet:
+      id: FC-1770-1
+      author: Kiran
+      labels: 'DDL'
+      comment:  Create table for Programmed Element
+      changes:
+        - sql:
+            sql: |  
+              CREATE TABLE IF NOT EXISTS FORM_REVIEWER_DETAILS (
+              FORM_REVIEWER_DETAILS_ID INT NOT NULL AUTO_INCREMENT,
+              FORM_ID INT NOT NULL,
+              REVIEWER_PERSON_ID VARCHAR(60) NOT NULL,
+              FORM_LABEL VARCHAR(500) NOT NULL,
+              FORM_COMPONENT_ID INT NOT NULL,
+              FORM_NUMBER VARCHAR(20) DEFAULT NULL,
+              UPDATE_TIMESTAMP DATETIME NOT NULL,
+              UPDATED_BY VARCHAR(60) NOT NULL,
+              PRIMARY KEY (FORM_REVIEWER_DETAILS_ID),
+              KEY FORM_REVIEWER_DETAILS_IDX1 (REVIEWER_PERSON_ID),
+              CONSTRAINT FORM_REVIEWER_DETAILS_FK1
+                FOREIGN KEY (REVIEWER_PERSON_ID)
+                REFERENCES person (PERSON_ID));            
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FORM_REVIEWER_DETAILS; 
+
+  - changeSet:
+        id: FC-1770-2
+        author: Kiran
+        labels: 'DML'
+        comment:  Insert entry into prgrammed elements table  
+        changes:
+          - sql:
+              sql: |    
+                INSERT IGNORE INTO form_builder_prog_element (PROG_ELEMENT_ID, PROG_ELEMENT_NUMBER, VERSION_NUMBER, VERSION_STATUS, PROG_ELEMENT_NAME, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) 
+                VALUES ('8', '1008', '1', 'ACTIVE', 'FormReviewerDetailsComponent', 'For Form Reviewer Details', 'Y', utc_timestamp(), 'admin');     
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM form_builder_prog_element WHERE (PROG_ELEMENT_ID = '8');
+
+  - changeSet:
+      id: FC-1812-1
+      author: Kiran
+      labels: 'DDL'
+      comment: To add column ‘MODULE_CODE’ in table ‘FORM_REVIEWER_DETAILS’. , 
+      changes:
+        - sql:
+            sql: |
+              SET @col_exists := ( 
+              SELECT COUNT(*) 
+              FROM INFORMATION_SCHEMA.COLUMNS 
+              WHERE TABLE_SCHEMA = DATABASE() 
+              AND TABLE_NAME = 'FORM_REVIEWER_DETAILS' 
+              AND COLUMN_NAME = 'MODULE_CODE' 
+              ); 
+
+              SET @sql := IF( 
+              @col_exists = 0, 
+              'ALTER TABLE FORM_REVIEWER_DETAILS ADD COLUMN MODULE_CODE INT NOT NULL DEFAULT 0 AFTER FORM_ID', 
+              'SELECT 1' 
+              ); 
+
+              PREPARE stmt FROM @sql; 
+              EXECUTE stmt; 
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE FORM_REVIEWER_DETAILS DROP COLUMN MODULE_CODE;

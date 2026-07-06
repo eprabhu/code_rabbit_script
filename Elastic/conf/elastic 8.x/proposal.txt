@@ -1,0 +1,134 @@
+// These commands should be used in elastic server for various things
+
+1. To delete and index from the elastic server (update the IP as required a dummy IP for refernce is added)
+
+    curl -XDELETE http://172.21.44.97:9200/fibiproposal/ 
+
+2. To create an Index in elastic server , the command will create an index in elastic server named "fibiproposal".
+
+    curl -XPUT 'http://172.21.44.97:9200/fibiproposal/' -H 'Content-Type: application/json' -d  '{"settings":{"number_of_shards":1,"analysis":{"filter":{"ngram_filter":{"type":"edge_ngram","min_gram":1,"max_gram":20}},"analyzer":{"ngram_analyzer":{"type":"custom","tokenizer":"whitespace","filter":["lowercase","ngram_filter"]}}}},"mappings":{"properties":{"proposal_id":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard","fields":{"sort":{"type":"keyword","index":true}}},"title":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard"},"full_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"category":{"type":"text","analyzer":"standard","search_analyzer":"standard"},"type":{"type":"text","analyzer":"standard","search_analyzer":"standard"},"status":{"type":"text","term_vector":"yes","analyzer":"standard","search_analyzer":"standard"},"sponsor":{"type":"text","index":"false"},"lead_unit_number":{"type":"text","index":"false"},"lead_unit_name":{"type":"text","index":"false"},"funding_scheme":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"sponsor_display_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"unit_display_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"}}}}'
+3. logstash configuration that need to used to sync elastic index from Database
+    1.jdbc_driver_library = path to library for jar for mysqlconnector ( eg:/root/conf/mysql-connector.jar) 
+    2.jdbc_connection_string = The URL for the Database that need to be used.
+    3.hosts = the ip address of the elastic search sever thats used for data sync.
+    4.Other properties dont need to be changed. only add DB password and user details. 
+
+    input {
+        jdbc {
+            jdbc_driver_library => ""
+            jdbc_driver_class => "Java::com.mysql.jdbc.Driver"
+            jdbc_connection_string => "jdbc:mysql://192.168.1.6:3306/fibi_base?useSSL=false&useTimezone=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+            jdbc_user => ""
+            jdbc_password =>"" 
+            jdbc_validate_connection => true 
+            statement => "SELECT cast(t1.proposal_id as char(10)) as proposal_id,t1.title,t1.full_name,t1.category,t1.type,t1.status,t1.sponsor,t1.sponsor_display_name,t1.lead_unit_name ,t1.lead_unit_number,t1.funding_scheme, t1.unit_display_name FROM ELASTIC_FIBI_PROPOSAL_V t1
+        }
+      }
+      output {
+        elasticsearch {
+            index => "fibiproposal"
+            document_id => "%{proposal_id}"
+            hosts => "192.168.1.242:9200" 
+        }
+      }
+4. The JSON object used for Developers and miantainers so that its easy to identify the propoerties used to create an index
+
+    {
+    "settings": {
+        "number_of_shards": 1,
+        "analysis": {
+            "filter": {
+                "ngram_filter": {
+                    "type": "edge_ngram",
+                    "min_gram": 1,
+                    "max_gram": 20
+                }
+            },
+            "analyzer": {
+                "ngram_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                    "filter": [
+                        "lowercase",
+                        "ngram_filter"
+                    ]
+                }
+            }
+        }
+    },
+    "mappings": { 
+        "properties": {
+            "proposal_id": {
+                "type": "text",
+                "term_vector": "with_positions_offsets",
+                "analyzer": "ngram_analyzer",
+                "search_analyzer": "standard",
+                "fields": {
+                    "sort": {
+                        "type": "keyword",
+                        "index": true
+                    }
+                } 
+            },
+            "title": {
+                "type": "text",
+                "term_vector": "with_positions_offsets",
+                "analyzer": "ngram_analyzer",
+                "search_analyzer": "standard"
+            },
+            "full_name": {
+                "type": "text",
+                "term_vector": "yes",
+                "analyzer": "ngram_analyzer",
+                "search_analyzer": "standard"
+            },
+            "category": {
+                "type": "text",
+                "analyzer": "standard",
+                "search_analyzer": "standard"
+            },
+            "type": {
+                "type": "text",
+                "analyzer": "standard",
+                "search_analyzer": "standard"
+            },
+            "status": {
+                "type": "text",
+                "term_vector": "yes",
+                "analyzer": "standard",
+                "search_analyzer": "standard"
+            },
+            "sponsor": {
+                "type": "text",
+                "index": "false"
+            },
+            "lead_unit_number": {
+                "type": "text",
+                "index": "false"
+            },
+            "lead_unit_name": {
+                 "type": "text",
+                "index": "false"
+            },
+            "funding_scheme": {
+               "type": "text",
+                "term_vector": "yes",
+                "analyzer": "ngram_analyzer",
+                "search_analyzer": "standard"
+            },
+            "sponsor_display_name": {
+               "type": "text",
+                "term_vector": "yes",
+                "analyzer": "ngram_analyzer",
+                "search_analyzer": "standard"
+            },
+            "unit_display_name": {
+                "type": "text",
+                "term_vector": "yes",
+                "analyzer": "ngram_analyzer",
+                "search_analyzer": "standard"
+            }
+            
+        }
+    }
+    }

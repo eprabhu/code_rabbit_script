@@ -1,0 +1,27 @@
+CREATE PROCEDURE `GET_IP_DETAILS_FOR_ASSOC`(
+    IN AV_MODULE_ITEM_ID INT
+)
+BEGIN
+SELECT 'ID'
+	,'Title'
+	,'Status'
+	,'PI Name',
+	'Lead Unit'
+  ,'Proposed Start Date'
+  ,'Proposed End Date'
+	,'Sponsor'
+	,'Total Project Cost'
+UNION 
+SELECT 
+        MODULE_ITEM_KEY,
+		TITLE,
+		STATUS, 
+		PI_NAME,
+		CONCAT(LEAD_UNIT_NUMBER, ' - ',LEAD_UNIT_NAME) AS LEAD_UNIT,
+        START_DATE,
+        END_DATE,
+        CONCAT(SPONSOR_CODE, ' - ', SPONSOR_NAME) AS SPONSOR,
+		IP_TOT_PROJ_COST
+    FROM SR_INT_STAGE_ELASTIC_INDEX
+    WHERE DOCUMENT_NUMBER = AV_MODULE_ITEM_ID AND MODULE_CODE = 2;  
+END

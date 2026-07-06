@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9389-3
+        author: Robin
+        labels: 'PROCEDURES'
+        comment: Modified GET_ALL_RIGHTS_FOR_A_MODULE
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE;
+          - sqlFile:
+              path: ROUTINES/JHU/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty

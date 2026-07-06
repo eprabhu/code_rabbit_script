@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9477-1
+      author: Vishnu B H
+      labels: 'PROCEDURES'
+      comment: Create GET_SERVICE_REQUEST_DASHBOARD_WIDGET_DATA procedure for the Service Request by Type dashboard widget.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_WIDGET_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_WIDGET_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10847-1
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: Updated GET_SERVICE_REQUEST_DASHBOARD_V1 to support SR mail creation and from email filters
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangeLogFile: false
+            splitStatements: false
+      rollback: empty

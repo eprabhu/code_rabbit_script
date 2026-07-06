@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10399-1
+      author: Hridya
+      labels: 'VIEWS'
+      comment: Updated view ELASTIC_FIBI_PROPOSAL_V
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS ELASTIC_FIBI_PROPOSAL_V;
+        - sqlFile:
+            path: ROUTINES/KU/DEV_PROPOSAL/VIEWS/ELASTIC_FIBI_PROPOSAL_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

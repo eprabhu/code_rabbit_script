@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+    - changeSet:
+      id: FIBI-10851-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Removing all notification_type other than SR module
+      changes:
+        - sql:
+            sql: |
+              set sql_safe_updates = 0;
+              DELETE from notification_type where MODULE_CODE != 20;
+              set sql_safe_updates = 1;
+      rollback: empty

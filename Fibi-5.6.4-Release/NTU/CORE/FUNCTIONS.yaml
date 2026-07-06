@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10985
+      author: Robin
+      labels: 'FUNCTIONS'
+      comment:  Update in Function FN_PERSON_HAS_AUTHORIZATION
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS FN_PERSON_HAS_AUTHORIZATION;
+        - sqlFile:
+            path: ROUTINES/NTU/CORE/FUNCTIONS/FN_PERSON_HAS_AUTHORIZATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

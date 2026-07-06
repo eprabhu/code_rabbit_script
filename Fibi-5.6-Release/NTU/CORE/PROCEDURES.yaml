@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9373-1
+        author: Solih
+        labels: 'PROCEDURES'
+        comment: Drop and create GET_RESEARCH_SUMMARY_DETAILS.
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+          - sqlFile:
+              path: ROUTINES/NTU/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty

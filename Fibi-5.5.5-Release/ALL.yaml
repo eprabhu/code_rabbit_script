@@ -1,0 +1,13 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.5-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5.5-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5.5-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'

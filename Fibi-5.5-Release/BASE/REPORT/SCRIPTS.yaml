@@ -1,0 +1,161 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-8206-1
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update KEY_PERSON_ORGANIZATION in AWARD_MASTER_DATASET_RT table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE AWARD_MASTER_DATASET_RT amd
+                JOIN ROLODEX r ON amd.KEY_PERSON_ID = r.ROLODEX_ID
+                LEFT JOIN ORGANIZATION o ON r.ORGANIZATION = o.ORGANIZATION_ID
+                SET amd.KEY_PERSON_ORGANIZATION =
+                    CASE
+                        WHEN r.ORGANIZATION IS NULL THEN r.ORGANIZATION_NAME
+                        ELSE o.ORGANIZATION_NAME
+                    END
+                WHERE amd.EMPLOYEE_FLAG = 'N';
+                SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-8678-1
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Unit number report changes
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'pr_master_dataset_rt'
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE pr_master_dataset_rt MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'temp_award_master_dataset'
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE temp_award_master_dataset MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'temp_award_master_dataset_dmp'
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE temp_award_master_dataset_dmp MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'custom_data_report_rt'
+                      AND COLUMN_NAME = 'SUB_LEAD_UNIT') > 0,
+                    'ALTER TABLE custom_data_report_rt MODIFY COLUMN SUB_LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'pr_master_dataset_rt'
+                      AND COLUMN_NAME = 'LEAD_UNIT') > 0,
+                    'ALTER TABLE pr_master_dataset_rt MODIFY COLUMN LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'pr_master_dataset_rt'
+                      AND COLUMN_NAME = 'SUB_LEAD_UNIT') > 0,
+                    'ALTER TABLE pr_master_dataset_rt MODIFY COLUMN SUB_LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'temp_award_master_dataset_dmp'
+                      AND COLUMN_NAME = 'SUB_LEAD_UNIT') > 0,
+                    'ALTER TABLE temp_award_master_dataset_dmp MODIFY COLUMN SUB_LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'special_term_quest_report_dataset'
+                      AND COLUMN_NAME = 'LEAD_UNIT') > 0,
+                    'ALTER TABLE special_term_quest_report_dataset MODIFY COLUMN LEAD_UNIT VARCHAR(250);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'award_master_dataset_rt'
+                      AND COLUMN_NAME = 'SUB_LEAD_UNIT') > 0,
+                    'ALTER TABLE award_master_dataset_rt MODIFY COLUMN SUB_LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'prog_rpt_hdr_rt'
+                      AND COLUMN_NAME = 'LEAD_UNIT') > 0,
+                    'ALTER TABLE prog_rpt_hdr_rt MODIFY COLUMN LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'prog_rpt_hdr_rt'
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE prog_rpt_hdr_rt MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'prog_rpt_hdr_rt'
+                      AND COLUMN_NAME = 'SUB_LEAD_UNIT') > 0,
+                    'ALTER TABLE prog_rpt_hdr_rt MODIFY COLUMN SUB_LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'person_rt'
+                      AND COLUMN_NAME = 'HOME_UNIT') > 0,
+                    'ALTER TABLE person_rt MODIFY COLUMN HOME_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback: empty

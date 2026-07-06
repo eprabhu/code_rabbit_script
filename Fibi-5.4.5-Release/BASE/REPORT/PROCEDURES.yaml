@@ -1,0 +1,46 @@
+databaseChangeLog: 
+ 
+  - changeSet: 
+      id: FIBI-7267-1
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS AWARD_MASTER_DATASET_SYNC; 
+        - sqlFile: 
+            path: ROUTINES/BASE/REPORT/PROCEDURES/AWARD_MASTER_DATASET_SYNC.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7267-2
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS CUSTOM_DATA_SYNC; 
+        - sqlFile: 
+            path: ROUTINES/BASE/REPORT/PROCEDURES/CUSTOM_DATA_SYNC.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7267-3
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS PR_MASTER_DATASET_SYNC; 
+        - sqlFile: 
+            path: ROUTINES/BASE/REPORT/PROCEDURES/PR_MASTER_DATASET_SYNC.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty

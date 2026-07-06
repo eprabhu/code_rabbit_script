@@ -1,0 +1,58 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5-Release/JHU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5-Release/JHU/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5-Release/JHU/CORE/FUNCTIONS.yaml
+        labels: 'CORE'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5-Release/JHU/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5-Release/JHU/AGREEMENT/FUNCTIONS.yaml
+        labels: 'AGREEMENT'
+
+    #AWARD
+    - include:
+        file: Fibi-5.5-Release/JHU/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.5-Release/JHU/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.5-Release/JHU/DEV_PROPOSAL/FUNCTIONS.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.5-Release/JHU/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #PROGRESS_REPORT
+    - include:
+        file: Fibi-5.5-Release/JHU/PROGRESS_REPORT/PROCEDURES.yaml
+        labels: 'PROGRESS_REPORT'
+
+    #REPORT
+    - include:
+        file: Fibi-5.5-Release/JHU/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'
+
+    #RESEARCHER_PROFILE
+    - include:
+        file: Fibi-5.5-Release/JHU/RESEARCHER_PROFILE/PROCEDURES.yaml
+        labels: 'RESEARCHER_PROFILE'
+    
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5-Release/JHU/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'

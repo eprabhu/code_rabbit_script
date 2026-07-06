@@ -1,0 +1,1167 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9411-1
+      author: Adarsh
+      labels: 'DDL'
+      comment: Add VERSION column to EXT_REVIEW_REVIEWERS 
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_REVIEWERS'
+                   AND COLUMN_NAME = 'VERSION') = 0,
+                'ALTER TABLE EXT_REVIEW_REVIEWERS ADD COLUMN VERSION INT;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_REVIEWERS'
+                   AND COLUMN_NAME = 'VERSION') > 0,
+                'ALTER TABLE EXT_REVIEW_REVIEWERS DROP COLUMN VERSION;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-9411-2
+      author: Adarsh
+      labels: 'DML'
+      comment: Initialize VERSION for existing EXT_REVIEW_REVIEWERS rows
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES=0;
+              UPDATE EXT_REVIEW_REVIEWERS
+              SET VERSION = 1,
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin';
+              SET SQL_SAFE_UPDATES=1;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEW_REVIEWERS
+              SET VERSION = NULL,
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin';
+
+  - changeSet:
+      id: FIBI-9411-3
+      author: Adarsh
+      labels: 'DML'
+      comment: Remap QUEST_ANSWER_HEADER MODULE_SUB_ITEM_KEY to REVIEW_REVIEWER_ID
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES=0;
+              UPDATE QUEST_ANSWER_HEADER QAH
+              JOIN EXT_REVIEW_REVIEWERS ERR ON QAH.MODULE_SUB_ITEM_KEY = ERR.EXTERNAL_REVIEWER_ID
+              SET QAH.MODULE_SUB_ITEM_KEY = ERR.REVIEW_REVIEWER_ID,
+                  QAH.UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  QAH.UPDATE_USER = 'admin';
+              SET SQL_SAFE_UPDATES=1;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE QUEST_ANSWER_HEADER QAH
+              JOIN EXT_REVIEW_REVIEWERS ERR ON QAH.MODULE_SUB_ITEM_KEY = ERR.REVIEW_REVIEWER_ID
+              SET QAH.MODULE_SUB_ITEM_KEY = ERR.EXTERNAL_REVIEWER_ID,
+                  QAH.UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  QAH.UPDATE_USER = 'admin';
+
+  - changeSet:
+      id: FIBI-9411-4
+      author: Adarsh
+      labels: 'DDL'
+      comment: Add EXT_REVIEW_COMMENT_ID to EXT_REV_COMMENT_ATTACHMENT 
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REV_COMMENT_ATTACHMENT'
+                   AND COLUMN_NAME = 'EXT_REVIEW_COMMENT_ID') = 0,
+                'ALTER TABLE EXT_REV_COMMENT_ATTACHMENT ADD COLUMN EXT_REVIEW_COMMENT_ID INT NULL;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REV_COMMENT_ATTACHMENT'
+                   AND CONSTRAINT_NAME = 'EXT_REV_COMMENT_ATTACHMENT_FK3') = 0,
+                'ALTER TABLE EXT_REV_COMMENT_ATTACHMENT ADD CONSTRAINT EXT_REV_COMMENT_ATTACHMENT_FK3 FOREIGN KEY (EXT_REVIEW_COMMENT_ID) REFERENCES EXT_REVIEW_COMMENTS (EXT_REVIEW_COMMENT_ID);',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REV_COMMENT_ATTACHMENT'
+                   AND CONSTRAINT_NAME = 'EXT_REV_COMMENT_ATTACHMENT_FK3') > 0,
+                'ALTER TABLE EXT_REV_COMMENT_ATTACHMENT DROP FOREIGN KEY EXT_REV_COMMENT_ATTACHMENT_FK3;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REV_COMMENT_ATTACHMENT'
+                   AND COLUMN_NAME = 'EXT_REVIEW_COMMENT_ID') > 0,
+                'ALTER TABLE EXT_REV_COMMENT_ATTACHMENT DROP COLUMN EXT_REVIEW_COMMENT_ID;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-9411-5
+      author: Adarsh
+      labels: 'DDL'
+      comment: Add EXT_REVIEW_COMMENT_ID to EXT_REVIEW_HISTORY 
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_HISTORY'
+                   AND COLUMN_NAME = 'EXT_REVIEW_COMMENT_ID') = 0,
+                'ALTER TABLE EXT_REVIEW_HISTORY ADD COLUMN EXT_REVIEW_COMMENT_ID INT NULL;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_HISTORY'
+                   AND CONSTRAINT_NAME = 'EXT_REVIEW_HISTORY_FK8') = 0,
+                'ALTER TABLE EXT_REVIEW_HISTORY ADD CONSTRAINT EXT_REVIEW_HISTORY_FK8 FOREIGN KEY (EXT_REVIEW_COMMENT_ID) REFERENCES EXT_REVIEW_COMMENTS (EXT_REVIEW_COMMENT_ID);',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_HISTORY'
+                   AND CONSTRAINT_NAME = 'EXT_REVIEW_HISTORY_FK8') > 0,
+                'ALTER TABLE EXT_REVIEW_HISTORY DROP FOREIGN KEY EXT_REVIEW_HISTORY_FK8;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_HISTORY'
+                   AND COLUMN_NAME = 'EXT_REVIEW_COMMENT_ID') > 0,
+                'ALTER TABLE EXT_REVIEW_HISTORY DROP COLUMN EXT_REVIEW_COMMENT_ID;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-9411-6
+      author: Adarsh
+      labels: 'DDL'
+      comment: Add EXT_REVIEW_ACTION_TYPE_CODE to EXT_REVIEW_COMMENTS 
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                   AND COLUMN_NAME = 'EXT_REVIEW_ACTION_TYPE_CODE') = 0,
+                'ALTER TABLE EXT_REVIEW_COMMENTS ADD COLUMN EXT_REVIEW_ACTION_TYPE_CODE INT NULL;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                   AND CONSTRAINT_NAME = 'EXT_REVIEW_COMMENTS_FK5') = 0,
+                'ALTER TABLE EXT_REVIEW_COMMENTS ADD CONSTRAINT EXT_REVIEW_COMMENTS_FK5 FOREIGN KEY (EXT_REVIEW_ACTION_TYPE_CODE) REFERENCES EXT_REVIEW_ACTION_TYPE (EXT_REVIEW_ACTION_TYPE_CODE);',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                   AND CONSTRAINT_NAME = 'EXT_REVIEW_COMMENTS_FK5') > 0,
+                'ALTER TABLE EXT_REVIEW_COMMENTS DROP FOREIGN KEY EXT_REVIEW_COMMENTS_FK5;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                   AND COLUMN_NAME = 'EXT_REVIEW_ACTION_TYPE_CODE') > 0,
+                'ALTER TABLE EXT_REVIEW_COMMENTS DROP COLUMN EXT_REVIEW_ACTION_TYPE_CODE;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-9411-7
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert Archive flow status in EXT_REV_REVIEWER_FLOW_STATUS
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO EXT_REV_REVIEWER_FLOW_STATUS
+                (EXT_REV_REVIEWER_FLOW_STATUS_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '6', 'Archive', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                SELECT 1
+                FROM EXT_REV_REVIEWER_FLOW_STATUS
+                WHERE EXT_REV_REVIEWER_FLOW_STATUS_CODE = '6'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM EXT_REV_REVIEWER_FLOW_STATUS
+              WHERE EXT_REV_REVIEWER_FLOW_STATUS_CODE = '6';
+
+  - changeSet:
+      id: FIBI-9411-8
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert Resend Review action type
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO EXT_REVIEW_ACTION_TYPE
+                (EXT_REVIEW_ACTION_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, MESSAGE)
+              SELECT '25', 'Resend Review', UTC_TIMESTAMP(), 'admin',
+                     'External Review against <b>{REVIEWER NAME}</b> has been resent for review by <b>{ACTION OWNER}</b>\n'
+              WHERE NOT EXISTS (
+                SELECT 1
+                FROM EXT_REVIEW_ACTION_TYPE
+                WHERE EXT_REVIEW_ACTION_TYPE_CODE = '25'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM EXT_REVIEW_ACTION_TYPE
+              WHERE EXT_REVIEW_ACTION_TYPE_CODE = '25';
+
+  - changeSet:
+      id: FIBI-9411-9
+      author: Adarsh
+      labels: 'DML'
+      comment: Update notification message placeholders for action types 15 and 16
+      changes:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEW_ACTION_TYPE
+              SET MESSAGE = '{COMMENTS}',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE EXT_REVIEW_ACTION_TYPE_CODE = '15';
+
+              UPDATE EXT_REVIEW_ACTION_TYPE
+              SET MESSAGE = '{CHANGED DEADLINE DATE}',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE EXT_REVIEW_ACTION_TYPE_CODE = '16';
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9411-10
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert Review Reassigned notification template
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO NOTIFICATION_TYPE
+                (NOTIFICATION_TYPE_ID, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, SUBJECT, MESSAGE,
+                 PROMPT_USER, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP,
+                 IS_SYSTEM_SPECIFIC, SHOW_TEMPLATE_IN_MODULE, SENT_TO_INITIATOR)
+              SELECT
+                '2220', '22', '0', 'Review Reassigned ', 'Review Reassigned - Action Required',
+                '    <p>Dear {REVIEWER_NAME},</p>\n    <p>\n        A review that you previously completed has been reassigned to you for further review.\n    </p>\n    <p>\n        <strong>Proposal Type:</strong> {REVIEW_TYPE}<br>\n        <strong>Proposal ID:</strong> {PROPOSAL_ID}<br>\n        <strong>Proposal Title:</strong> {PROPOSAL_TITLE}<br>\n        <strong>Assigned By:</strong> {UPDATE_USER}<br>\n        <strong>Reviewer Deadline:</strong> {REVIEWER_DEADLINE_DATE}\n    </p>\n    <p>\n        <strong>Comments from Administrator:</strong><br>\n        {COMMENTS}\n    </p>\n    <p>\n        Please note that this is a new review request and will appear as a separate entry in your review dashboard. \n        The earlier review has been archived for reference.\n    </p>\n    <p>\n        Kindly log in to ERM and complete the review before the due date.\n    </p>',
+                'N', 'Y', 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'N', 'N', 'Y'
+              WHERE NOT EXISTS (
+                SELECT 1
+                FROM NOTIFICATION_TYPE
+                WHERE NOTIFICATION_TYPE_ID = '2220'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM NOTIFICATION_TYPE
+              WHERE NOTIFICATION_TYPE_ID = '2220';
+
+  - changeSet:
+      id: FIBI-9410-1
+      author: Shiva krishnan R
+      labels: 'DML'
+      comment: Insert notification type for external reviewer deadline update
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO notification_type (
+                NOTIFICATION_TYPE_ID,
+                MODULE_CODE,
+                SUB_MODULE_CODE,
+                DESCRIPTION,
+                SUBJECT,
+                MESSAGE,
+                PROMPT_USER,
+                IS_ACTIVE,
+                CREATE_USER,
+                CREATE_TIMESTAMP,
+                UPDATE_USER,
+                UPDATE_TIMESTAMP,
+                IS_SYSTEM_SPECIFIC,
+                SHOW_TEMPLATE_IN_MODULE,
+                SENT_TO_INITIATOR
+              )
+              VALUES (
+                '2000',
+                '22',
+                '0',
+                'Reviewer Deadline Date Updation',
+                'Reviewer Deadline Updated for External Review',
+                '<p>Dear {REVIEWER_NAME},</p>
+
+                <p>The deadline for completing your external review for the proposal #{PROPOSAL_ID} has been updated.</p>
+
+                <p>Previous Deadline: {REVIEWER_PREVIOUS_DEADLINE_DATE}</p>
+                <p>New Deadline: {REVIEWER_DEADLINE_DATE}</p>
+
+                <p>Please ensure that your review is completed by the revised deadline.</p>
+
+                <p>If you have any questions, please contact the review administrator.</p>
+
+                <p>Thank you.</p>
+
+                <p>
+                <span style="background-color:rgb(255,255,255);color:rgb(0,0,0);">
+                Note: This is a system-generated email. Please do not reply to this email.
+                </span>
+                </p>
+
+                <p> </p>',
+                'N',
+                'Y',
+                'quickstart',
+                UTC_TIMESTAMP(),
+                'quickstart',
+                UTC_TIMESTAMP(),
+                'N',
+                'N',
+                'Y'
+              );
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM notification_type
+              WHERE NOTIFICATION_TYPE_ID = '2000';
+
+  - changeSet:
+        id: FIBI-9687-1
+        author: Shiva krishnan R
+        labels: 'DML'
+        comment: Insert notification type for reviewer removal from review
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO notification_type (
+                  NOTIFICATION_TYPE_ID,
+                  MODULE_CODE,
+                  SUB_MODULE_CODE,
+                  DESCRIPTION,
+                  SUBJECT,
+                  MESSAGE,
+                  PROMPT_USER,
+                  IS_ACTIVE,
+                  CREATE_USER,
+                  CREATE_TIMESTAMP,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  IS_SYSTEM_SPECIFIC,
+                  SHOW_TEMPLATE_IN_MODULE,
+                  SENT_TO_INITIATOR
+                ) VALUES (
+                  2001,
+                  22,
+                  0,
+                  'Reviewer Removal From Review',
+                  'Removal from Review – {REVIEW_NAME}',
+                  '<p>Dear {REVIEWER_NAME},</p>
+
+                  <p>You have been removed from the review "{REVIEW_NAME}".</p>
+
+                  <p> </p>
+
+                  <p><strong>Details:</strong></p>
+
+                  <p>Removed By: {UPDATE_USER}</p>
+                  <p>Date &amp; Time: {REMOVAL_DATETIME}</p>
+                  <p>Status at Removal: Pending</p>
+
+                  <p> </p>
+
+                  <p>As a result, you will no longer have access to this review.</p>
+
+                  <p>If you believe this was done in error or need further clarification, please contact the administrator.</p>
+
+                  <p>Regards,<br>ERM System</p>
+
+                  <p>
+                  <span style="background-color:rgb(255,255,255);color:rgb(0,0,0);">
+                  Note: This is a system-generated email. Please do not reply to this email.
+                  </span>
+                  </p>
+
+                  <p> </p>',
+                  'N',
+                  'Y',
+                  'quickstart',
+                  UTC_TIMESTAMP(),
+                  'quickstart',
+                  UTC_TIMESTAMP(),
+                  'N',
+                  'N',
+                  'Y'
+                );
+
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM notification_type
+                WHERE NOTIFICATION_TYPE_ID = 2001;
+
+  - changeSet:
+        id: FIBI-9416-1
+        author: Adarsh
+        labels: 'DML'
+        comment: Insert new Action type
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO EXT_REVIEW_ACTION_TYPE (EXT_REVIEW_ACTION_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, MESSAGE) VALUES ('24', 'Delete Document', UTC_TIMESTAMP(), 'admin', '{DOCUMENT_NAME}');
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM EXT_REVIEW_ACTION_TYPE
+                WHERE EXT_REVIEW_ACTION_TYPE_CODE = '24';
+
+  - changeSet:
+        id: FIBI-9416-2
+        author: Adarsh
+        labels: 'DML'
+        comment: Update in attachment table
+        changes:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_ATTACHMENTS ADD IS_DELETED_IN_ERM VARCHAR(1) DEFAULT NULL; 
+        rollback:
+          - sql:
+              sql: |
+                 ALTER TABLE EXT_REVIEW_ATTACHMENTS 
+                 DROP COLUMN IS_DELETED_IN_ERM;
+
+  - changeSet:
+        id: FIBI-10113-1
+        author: Adarsh
+        labels: 'DDL'
+        comment: Add file metadata columns to EXT_REVIEW_ATTACHMENT_FILE
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENT_FILE'
+                     AND COLUMN_NAME = 'MODULE_CODE') = 0,
+                  'ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE ADD COLUMN MODULE_CODE VARCHAR(3) DEFAULT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENT_FILE'
+                     AND COLUMN_NAME = 'FILE_PATH') = 0,
+                  'ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE ADD COLUMN FILE_PATH VARCHAR(255) DEFAULT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENT_FILE'
+                     AND COLUMN_NAME = 'ORIGINAL_FILE_NAME') = 0,
+                  'ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE ADD COLUMN ORIGINAL_FILE_NAME VARCHAR(500) DEFAULT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENT_FILE'
+                     AND COLUMN_NAME = 'FILE_NAME') = 0,
+                  'ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE ADD COLUMN FILE_NAME VARCHAR(100) DEFAULT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENT_FILE'
+                     AND COLUMN_NAME = 'IS_ARCHIVED') = 0,
+                  'ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE ADD COLUMN IS_ARCHIVED CHAR(1) DEFAULT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENT_FILE'
+                     AND COLUMN_NAME = 'UPDATE_TIMESTAMP') = 0,
+                  'ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE ADD COLUMN UPDATE_TIMESTAMP DATETIME DEFAULT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENT_FILE'
+                     AND COLUMN_NAME = 'UPDATE_USER') = 0,
+                  'ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE ADD COLUMN UPDATE_USER VARCHAR(60) DEFAULT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE
+                  DROP COLUMN UPDATE_USER,
+                  DROP COLUMN UPDATE_TIMESTAMP,
+                  DROP COLUMN IS_ARCHIVED,
+                  DROP COLUMN FILE_NAME,
+                  DROP COLUMN ORIGINAL_FILE_NAME,
+                  DROP COLUMN FILE_PATH,
+                  DROP COLUMN MODULE_CODE;
+
+  - changeSet:
+        id: FIBI-10113-2
+        author: Adarsh
+        labels: 'DDL'
+        comment: EXT_REVIEW_ATTACHMENT_FILE — MODIFY ATTACHMENT to LONGBLOB NULL
+        changes:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE MODIFY COLUMN ATTACHMENT LONGBLOB NULL;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_ATTACHMENT_FILE MODIFY COLUMN ATTACHMENT LONGBLOB NOT NULL;
+
+  - changeSet:
+        id: FIBI-10113-3
+        author: Adarsh
+        labels: 'DML'
+        comment: Migration EXT_REVIEW_ATTACHMENT_FILE from EXT_REV_COMMENT_ATTACHMENT 
+        changes:
+          - sql:
+              sql: |
+                UPDATE EXT_REVIEW_ATTACHMENT_FILE ERAF
+                JOIN EXT_REV_COMMENT_ATTACHMENT ERCA
+                  ON ERAF.FILE_DATA_ID = ERCA.FILE_DATA_ID
+                SET
+                  ERAF.MODULE_CODE = '22',
+                  ERAF.UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  ERAF.UPDATE_USER = 'admin',
+                  ERAF.ORIGINAL_FILE_NAME = ERCA.FILE_NAME;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-10113-4
+        author: Adarsh
+        labels: 'DML'
+        comment: Migration EXT_REVIEW_ATTACHMENT_FILE from EXT_REVIEW_ATTACHMENTS 
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES=0;
+                UPDATE EXT_REVIEW_ATTACHMENT_FILE ERAF
+                JOIN EXT_REVIEW_ATTACHMENTS ERA
+                  ON ERAF.FILE_DATA_ID = ERA.FILE_DATA_ID
+                SET
+                  ERAF.MODULE_CODE = '22',
+                  ERAF.UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  ERAF.UPDATE_USER = 'admin',
+                  ERAF.ORIGINAL_FILE_NAME = ERA.FILE_NAME;
+                SET SQL_SAFE_UPDATES=1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-10113-5
+        author: Adarsh
+        labels: 'DML'
+        comment: Migration EXT_REVIEW_ATTACHMENT_FILE from EXT_REV_REVWR_SCORE_COMMNT_ATTCHMNT
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES=0;
+                UPDATE EXT_REVIEW_ATTACHMENT_FILE ERAF
+                JOIN EXT_REV_REVWR_SCORE_COMMNT_ATTCHMNT ERRSCA
+                  ON ERAF.FILE_DATA_ID = ERRSCA.FILE_DATA_ID
+                SET
+                  ERAF.MODULE_CODE = '22',
+                  ERAF.UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  ERAF.UPDATE_USER = 'admin',
+                  ERAF.ORIGINAL_FILE_NAME = ERRSCA.FILE_NAME;
+                SET SQL_SAFE_UPDATES=1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-9688-1
+        author: Adarsh
+        labels: 'DDL'
+        comment: Drop FK EXT_REVIEW_COMMENTS_FK_01 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                   WHERE CONSTRAINT_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND CONSTRAINT_NAME = 'EXT_REVIEW_COMMENTS_FK_01') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP FOREIGN KEY EXT_REVIEW_COMMENTS_FK_01;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS
+                  ADD CONSTRAINT EXT_REVIEW_COMMENTS_FK_01
+                  FOREIGN KEY (REVIEW_REVIEWER_ID) REFERENCES EXT_REVIEW_REVIEWERS (REVIEW_REVIEWER_ID);
+
+  - changeSet:
+        id: FIBI-9688-2
+        author: Adarsh
+        labels: 'DDL'
+        comment: Drop FK EXT_REVIEW_COMMENTS_FK_03
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                   WHERE CONSTRAINT_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND CONSTRAINT_NAME = 'EXT_REVIEW_COMMENTS_FK_03') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP FOREIGN KEY EXT_REVIEW_COMMENTS_FK_03;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS
+                  ADD CONSTRAINT EXT_REVIEW_COMMENTS_FK_03
+                  FOREIGN KEY (EXT_REV_COMMENT_ATTACHMENT_ID) REFERENCES EXT_REV_COMMENT_ATTACHMENT (EXT_REV_COMMENT_ATTACHMENT_ID);
+
+  - changeSet:
+        id: FIBI-9688-3
+        author: Adarsh
+        labels: 'DDL'
+        comment: Drop FK EXT_REVIEW_COMMENTS_FK_04
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                   WHERE CONSTRAINT_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND CONSTRAINT_NAME = 'EXT_REVIEW_COMMENTS_FK_04') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP FOREIGN KEY EXT_REVIEW_COMMENTS_FK_04;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS
+                  ADD CONSTRAINT EXT_REVIEW_COMMENTS_FK_04
+                  FOREIGN KEY (COMMENT_TYPE_CODE) REFERENCES EXT_REVIEW_COMMENT_TYPE (EXT_REVIEW_COMMENT_TYPE_CODE);
+
+  - changeSet:
+        id: FIBI-9688-4
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Drop FK EXT_REVIEW_COMMENTS_FK5 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                   WHERE CONSTRAINT_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND CONSTRAINT_NAME = 'EXT_REVIEW_COMMENTS_FK5') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP FOREIGN KEY EXT_REVIEW_COMMENTS_FK5;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS
+                  ADD CONSTRAINT EXT_REVIEW_COMMENTS_FK5
+                  FOREIGN KEY (EXT_REVIEW_ACTION_TYPE_CODE) REFERENCES EXT_REVIEW_ACTION_TYPE (EXT_REVIEW_ACTION_TYPE_CODE);
+
+  - changeSet:
+        id: FIBI-9688-5
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Create EXT_REVIEW_COMMENT_TAGS 
+        changes:
+          - sql:
+              sql: |
+                CREATE TABLE IF NOT EXISTS EXT_REVIEW_COMMENT_TAGS (
+                  COMMENT_TAG_ID INT NOT NULL AUTO_INCREMENT,
+                  EXT_REVIEW_COMMENT_ID INT NOT NULL,
+                  REVIEW_REVIEWER_ID INT NOT NULL,
+                  PRIMARY KEY (COMMENT_TAG_ID),
+                  CONSTRAINT EXT_REVIEW_COMMENT_TAGS_FK1
+                    FOREIGN KEY (EXT_REVIEW_COMMENT_ID)
+                    REFERENCES EXT_REVIEW_COMMENTS (EXT_REVIEW_COMMENT_ID),
+                  CONSTRAINT EXT_REVIEW_COMMENT_TAGS_FK2
+                    FOREIGN KEY (REVIEW_REVIEWER_ID)
+                    REFERENCES EXT_REVIEW_REVIEWERS (REVIEW_REVIEWER_ID),
+                  CONSTRAINT EXT_REVIEW_COMMENT_TAGS_UK1
+                    UNIQUE (EXT_REVIEW_COMMENT_ID, REVIEW_REVIEWER_ID)
+                ) ENGINE=InnoDB;
+        rollback:
+          - sql:
+              sql: |
+                DROP TABLE IF EXISTS EXT_REVIEW_COMMENT_TAGS;
+
+  - changeSet:
+        id: FIBI-9688-6
+        author: Adarsh
+        labels: 'DML'
+        comment:  Backfill EXT_REVIEW_COMMENT_TAGS from EXT_REVIEW_COMMENTS (idempotent via INSERT IGNORE)
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO EXT_REVIEW_COMMENT_TAGS (EXT_REVIEW_COMMENT_ID, REVIEW_REVIEWER_ID)
+                SELECT EXT_REVIEW_COMMENT_ID, REVIEW_REVIEWER_ID
+                FROM EXT_REVIEW_COMMENTS
+                WHERE REVIEW_REVIEWER_ID IS NOT NULL;
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM EXT_REVIEW_COMMENT_TAGS;
+
+  - changeSet:
+        id: FIBI-9688-7
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Drop column REVIEW_REVIEWER_ID from EXT_REVIEW_COMMENTS 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND COLUMN_NAME = 'REVIEW_REVIEWER_ID') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP COLUMN REVIEW_REVIEWER_ID;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS ADD COLUMN REVIEW_REVIEWER_ID INT NULL;
+
+  - changeSet:
+        id: FIBI-9688-8
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Drop column COMMENT_TYPE_CODE from EXT_REVIEW_COMMENTS 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND COLUMN_NAME = 'COMMENT_TYPE_CODE') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP COLUMN COMMENT_TYPE_CODE;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS ADD COLUMN COMMENT_TYPE_CODE VARCHAR(3) NULL;
+
+  - changeSet:
+        id: FIBI-9688-9
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Drop column EXT_REV_COMMENT_ATTACHMENT_ID from EXT_REVIEW_COMMENTS 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND COLUMN_NAME = 'EXT_REV_COMMENT_ATTACHMENT_ID') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP COLUMN EXT_REV_COMMENT_ATTACHMENT_ID;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS ADD COLUMN EXT_REV_COMMENT_ATTACHMENT_ID INT NULL;
+
+  - changeSet:
+        id: FIBI-9688-10
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Drop column EXT_REVIEW_ACTION_TYPE_CODE from EXT_REVIEW_COMMENTS 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND COLUMN_NAME = 'EXT_REVIEW_ACTION_TYPE_CODE') > 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS DROP COLUMN EXT_REVIEW_ACTION_TYPE_CODE;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS ADD COLUMN EXT_REVIEW_ACTION_TYPE_CODE INT NULL;
+
+  - changeSet:
+        id: FIBI-9688-11
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Add PARENT_COMMENT_ID to EXT_REVIEW_COMMENTS 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND COLUMN_NAME = 'PARENT_COMMENT_ID') = 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS ADD COLUMN PARENT_COMMENT_ID INT NULL;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS DROP COLUMN PARENT_COMMENT_ID;
+
+  - changeSet:
+        id: FIBI-9688-12
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Add self-FK EXT_REVIEW_COMMENTS_FK1 on PARENT_COMMENT_ID 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                   WHERE CONSTRAINT_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_COMMENTS'
+                     AND CONSTRAINT_NAME = 'EXT_REVIEW_COMMENTS_FK1') = 0,
+                  'ALTER TABLE EXT_REVIEW_COMMENTS ADD CONSTRAINT EXT_REVIEW_COMMENTS_FK1 FOREIGN KEY (PARENT_COMMENT_ID) REFERENCES EXT_REVIEW_COMMENTS (EXT_REVIEW_COMMENT_ID);',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_COMMENTS DROP FOREIGN KEY EXT_REVIEW_COMMENTS_FK1;
+
+
+  - changeSet:
+        id: FIBI-9688-15
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Drop FK EXT_REVIEW_REVIEWERS_FK_04 before dropping EXT_REVIEW_COMMENT_ID 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                   WHERE CONSTRAINT_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_REVIEWERS'
+                     AND CONSTRAINT_NAME = 'EXT_REVIEW_REVIEWERS_FK_04') > 0,
+                  'ALTER TABLE EXT_REVIEW_REVIEWERS DROP FOREIGN KEY EXT_REVIEW_REVIEWERS_FK_04;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_REVIEWERS
+                  ADD CONSTRAINT EXT_REVIEW_REVIEWERS_FK_04
+                  FOREIGN KEY (EXT_REVIEW_COMMENT_ID) REFERENCES EXT_REVIEW_COMMENTS (EXT_REVIEW_COMMENT_ID);
+
+  - changeSet:
+        id: FIBI-9688-16
+        author: Adarsh
+        labels: 'DDL'
+        comment:  Drop column EXT_REVIEW_COMMENT_ID from EXT_REVIEW_REVIEWERS 
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'EXT_REVIEW_REVIEWERS'
+                     AND COLUMN_NAME = 'EXT_REVIEW_COMMENT_ID') > 0,
+                  'ALTER TABLE EXT_REVIEW_REVIEWERS DROP COLUMN EXT_REVIEW_COMMENT_ID;',
+                  'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                ALTER TABLE EXT_REVIEW_REVIEWERS ADD COLUMN EXT_REVIEW_COMMENT_ID INT NULL;
+
+  - changeSet:
+      id: FIBI-9688-17
+      author: Shiva
+      labels: 'DDL'
+      comment:  Update in EXT_REVIEW_ACTION_TYPE
+      changes:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEW_ACTION_TYPE 
+              SET 
+                  MESSAGE = '<b>{REVIEWER NAME}</b> reviewer has been added by <b>{ACTION OWNER}</b>.<br/><strong>Deadline Date:</strong> {CHANGED DEADLINE DATE}',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = NOW()
+              WHERE EXT_REVIEW_ACTION_TYPE_CODE = '3';
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9688-17
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create EXT_REVIEW_ACTION_LOG
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS EXT_REVIEW_ACTION_LOG (
+                ACTION_LOG_ID INT NOT NULL AUTO_INCREMENT,
+                EXT_REVIEW_ID INT NOT NULL,
+                REVIEW_REVIEWER_ID INT DEFAULT NULL,
+                EXT_REVIEW_ACTION_TYPE_CODE INT NOT NULL,
+                COMMENT VARCHAR(4000) DEFAULT NULL,
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (ACTION_LOG_ID),
+                KEY EXT_REVIEW_ACTION_LOG_FK1 (EXT_REVIEW_ID),
+                KEY EXT_REVIEW_ACTION_LOG_FK2 (EXT_REVIEW_ACTION_TYPE_CODE),
+                KEY EXT_REVIEW_ACTION_LOG_FK3 (REVIEW_REVIEWER_ID),
+                CONSTRAINT EXT_REVIEW_ACTION_LOG_FK1 FOREIGN KEY (EXT_REVIEW_ID) REFERENCES EXT_REVIEW (EXT_REVIEW_ID),
+                CONSTRAINT EXT_REVIEW_ACTION_LOG_FK2 FOREIGN KEY (EXT_REVIEW_ACTION_TYPE_CODE) REFERENCES EXT_REVIEW_ACTION_TYPE (EXT_REVIEW_ACTION_TYPE_CODE),
+                CONSTRAINT EXT_REVIEW_ACTION_LOG_FK3 FOREIGN KEY (REVIEW_REVIEWER_ID) REFERENCES EXT_REVIEW_REVIEWERS (REVIEW_REVIEWER_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS EXT_REVIEW_ACTION_LOG;
+
+  - changeSet:
+      id: FIBI-9688-18
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create EXT_REVIEW_CHANGE_HISTORY
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS EXT_REVIEW_CHANGE_HISTORY (
+                CHANGE_HISTORY_ID INT NOT NULL AUTO_INCREMENT,
+                ACTION_LOG_ID INT NOT NULL,
+                FIELD_NAME VARCHAR(100) NOT NULL,
+                OLD_VALUE VARCHAR(2000) DEFAULT NULL,
+                NEW_VALUE VARCHAR(2000) DEFAULT NULL,
+                PRIMARY KEY (CHANGE_HISTORY_ID),
+                KEY EXT_REVIEW_CHANGE_HISTORY_FK1 (ACTION_LOG_ID),
+                CONSTRAINT EXT_REVIEW_CHANGE_HISTORY_FK1 FOREIGN KEY (ACTION_LOG_ID) REFERENCES EXT_REVIEW_ACTION_LOG (ACTION_LOG_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS EXT_REVIEW_CHANGE_HISTORY;
+
+  - changeSet:
+      id: FIBI-9688-19
+      author: Shiva
+      labels: 'DML'
+      comment:  Update in EXT_REVIEW_ACTION_TYPE
+      changes:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEW_ACTION_TYPE 
+              SET 
+                  MESSAGE = '<b>{REVIEWER NAME}</b> reviewer has been added by <b>{ACTION OWNER}</b>.<br/>',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE EXT_REVIEW_ACTION_TYPE_CODE = '3';
+      rollback: empty            
+
+  - changeSet:
+      id: FIBI-9688-20
+      author: Adarsh
+      labels: 'DDL'
+      comment: Alter in EXT_REV_COMMENT_ATTACHMENT
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                              (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                              WHERE CONSTRAINT_SCHEMA = DATABASE()
+                                AND TABLE_NAME = 'EXT_REV_COMMENT_ATTACHMENT'
+                                AND CONSTRAINT_NAME = 'EXT_REV_COMMENT_ATTACHMENT_FK3') = 0,
+                              'ALTER TABLE EXT_REV_COMMENT_ATTACHMENT ADD CONSTRAINT EXT_REV_COMMENT_ATTACHMENT_FK3 FOREIGN KEY (EXT_REVIEW_COMMENT_ID) REFERENCES EXT_REVIEW_COMMENTS (EXT_REVIEW_COMMENT_ID);',
+                              'SELECT 1'
+                            );
+                            PREPARE stmt FROM @sql;
+                            EXECUTE stmt;
+                            DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'EXT_REV_COMMENT_ATTACHMENT'
+                   AND CONSTRAINT_NAME = 'EXT_REV_COMMENT_ATTACHMENT_FK3') > 0,
+                'ALTER TABLE EXT_REV_COMMENT_ATTACHMENT DROP FOREIGN KEY EXT_REV_COMMENT_ATTACHMENT_FK3;',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-9416-3
+      author: Adarsh 
+      labels: 'DML'
+      comment:  Update in EXT_REVIEW_ACTION_TYPE
+      changes:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEW_ACTION_TYPE SET MESSAGE = '<b>{ACTION OWNER}</b> has deleted a document.' WHERE (EXT_REVIEW_ACTION_TYPE_CODE = '24');
+      rollback: empty   

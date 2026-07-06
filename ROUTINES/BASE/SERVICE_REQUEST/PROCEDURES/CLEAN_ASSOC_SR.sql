@@ -1,0 +1,115 @@
+CREATE PROCEDURE CLEAN_ASSOC_SR()
+BEGIN
+    
+    DECLARE LI_SR_HEADER_ID INT;
+    DECLARE DONE INT DEFAULT 0;
+    DECLARE LI_COUNT INT DEFAULT 0;
+    DECLARE LI_ACTIVE_AWARD_ID INT;
+    DECLARE LS_ACTIVE_AWARD_NUMBER VARCHAR(12);
+    DECLARE LI_ASSOC_COUNT INT;
+    DECLARE LI_ROW_COUNTER INT DEFAULT 0;
+    DECLARE LI_CURSOR_COUNT INT DEFAULT 0;
+    DECLARE LS_ORIGINATING_MODULE_ITEM_KEY VARCHAR(12);
+    DECLARE LI_MODULE_ITEM_ID INT DEFAULT NULL;
+
+    DECLARE CUR CURSOR FOR
+        SELECT SR_HEADER_ID, ORIGINATING_MODULE_ITEM_KEY
+        FROM SR_HEADER SH
+        JOIN AWARD A ON SH.ORIGINATING_MODULE_ITEM_KEY = A.AWARD_ID           
+        WHERE SH.IS_SYSTEM_GENERATED = 'Y'
+          AND A.SEQUENCE_NUMBER <> 0;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET DONE = 1;
+    SET SQL_SAFE_UPDATES = 0;
+    OPEN CUR;
+    READ_LOOP: loop 
+
+    FETCH CUR INTO LI_SR_HEADER_ID, LS_ORIGINATING_MODULE_ITEM_KEY;
+ 
+        IF DONE = 1 THEN
+            LEAVE READ_LOOP;
+        END IF;
+
+       SET LI_CURSOR_COUNT = LI_CURSOR_COUNT + 1;
+
+        SELECT A2.AWARD_ID, A2.AWARD_NUMBER 
+        INTO LI_ACTIVE_AWARD_ID, LS_ACTIVE_AWARD_NUMBER 
+        FROM AWARD A1
+        JOIN AWARD A2 ON A1.AWARD_NUMBER = A2.AWARD_NUMBER
+        WHERE A1.AWARD_ID = LS_ORIGINATING_MODULE_ITEM_KEY
+          AND A2.SEQUENCE_NUMBER = 0;
+
+    
+        IF LI_ACTIVE_AWARD_ID IS NOT NULL THEN
+            UPDATE SR_HEADER
+            SET ORIGINATING_MODULE_ITEM_KEY = LI_ACTIVE_AWARD_ID
+            WHERE SR_HEADER_ID = LI_SR_HEADER_ID;
+
+        END IF;
+   
+        SELECT COUNT(1) INTO LI_COUNT
+        FROM ASSOC_SR
+        WHERE SR_HEADER_ID = LI_SR_HEADER_ID
+          AND IS_IMPORTED IS NULL;
+          
+        IF LI_COUNT > 0 THEN
+     
+        SELECT MODULE_ITEM_ID INTO LI_MODULE_ITEM_ID
+        FROM ASSOC_SR
+        WHERE SR_HEADER_ID = LI_SR_HEADER_ID
+          AND IS_IMPORTED IS NULL
+          AND ASSOC_TYPE = 'DIRECT' ;
+      
+        IF LI_MODULE_ITEM_ID IS NOT NULL THEN
+  
+        SELECT COUNT(*) INTO LI_ROW_COUNTER
+            FROM AWARD 
+            WHERE AWARD_ID = LI_MODULE_ITEM_ID 
+              AND SEQUENCE_NUMBER = 0;           
+            IF LI_ROW_COUNTER > 0 THEN
+                DELETE FROM ASSOC_SR 
+                WHERE SR_HEADER_ID = LI_SR_HEADER_ID
+                  AND MODULE_ITEM_ID = LI_MODULE_ITEM_ID;
+            END IF;
+        END IF;
+    END IF;
+        SELECT COUNT(*) INTO LI_ASSOC_COUNT
+        FROM ASSOC_SR
+        WHERE SR_HEADER_ID = LI_SR_HEADER_ID;
+
+
+        IF LI_ASSOC_COUNT = 0 THEN
+
+            INSERT INTO ASSOC_SR (
+              SR_HEADER_ID,
+              RELATION_TYPE_CODE,
+              ASSOC_CONFIG_CODE,
+              ASSOC_TYPE,
+              MODULE_CODE,
+              MODULE_ITEM_KEY,
+              MODULE_ITEM_ID,
+              UPDATE_USER,
+              UPDATE_TIMESTAMP,
+              IS_IMPORTED
+            )
+            VALUES (
+              LI_SR_HEADER_ID,                -- SR_HEADER_ID
+              '1',                            -- RELATION_TYPE_CODE
+              '1',                            -- ASSOC_CONFIG_CODE
+              'DIRECT',                       -- ASSOC_TYPE
+              1,                              -- MODULE_CODE
+              LS_ACTIVE_AWARD_NUMBER,         -- MODULE_ITEM_KEY (award number)
+              LS_ORIGINATING_MODULE_ITEM_KEY, -- MODULE_ITEM_ID (award ID)
+              'Admin',                        -- UPDATE_USER
+              UTC_TIMESTAMP(),                -- UPDATE_TIMESTAMP
+              'N'                             -- IS_IMPORTED
+            );
+
+
+        END IF;
+        
+        END LOOP;
+    CLOSE CUR;
+   SET SQL_SAFE_UPDATES = 1;
+   SELECT LI_CURSOR_COUNT AS TOTALPROCESSED;
+END

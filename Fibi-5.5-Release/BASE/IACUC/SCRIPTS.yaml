@@ -1,0 +1,20 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-8678-1
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Unit number IACUC changes.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'ac_protocol' 
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE ac_protocol MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback: empty

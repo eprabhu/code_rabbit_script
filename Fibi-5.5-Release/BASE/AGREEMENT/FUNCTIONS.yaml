@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8307-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_CHK_AGREEMENT_PERSON_CERT
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/FUNCTIONS/FN_CHK_AGREEMENT_PERSON_CERT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

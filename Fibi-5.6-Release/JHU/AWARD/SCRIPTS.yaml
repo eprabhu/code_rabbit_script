@@ -1,0 +1,37 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8343-1
+      author: Shyla
+      labels: 'DML'
+      comment: Update in DASHBOARD_CRITERIA_LOOKUP
+      changes:
+        - sql:
+            sql: |
+                UPDATE DASHBOARD_CRITERIA_LOOKUP 
+                SET IS_ACTIVE = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' 
+                WHERE CRITERIA_KEY = 'CRT_AWD_FUNDING_SCHEME';
+      rollback: 
+        - sql:
+            sql: |    
+                UPDATE DASHBOARD_CRITERIA_LOOKUP 
+                SET IS_ACTIVE = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' 
+                WHERE CRITERIA_KEY = 'CRT_AWD_FUNDING_SCHEME';
+
+  - changeSet:
+      id: FIBI-8343-2
+      author: Shyla
+      labels: 'DML'
+      comment: Update in DASHBOARD_COLUMN_LOOKUP
+      changes:
+        - sql:
+            sql: |
+                UPDATE DASHBOARD_COLUMN_LOOKUP 
+                SET IS_ACTIVE = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' 
+                WHERE COLUMN_KEY = 'COL_AWD_FUNDING_SCHEME';
+      rollback: 
+        - sql:
+            sql: |    
+                UPDATE DASHBOARD_COLUMN_LOOKUP 
+                SET IS_ACTIVE = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' 
+                WHERE COLUMN_KEY = 'COL_AWD_FUNDING_SCHEME';

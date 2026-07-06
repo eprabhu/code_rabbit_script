@@ -1,0 +1,44 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9151-1
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Delete Workday Cost Allocation Notif job from scheduler and Quartz tables
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              
+              DELETE FROM qrtz_cron_triggers WHERE TRIGGER_NAME = 'Workday Cost Allocation Notif';
+              DELETE FROM qrtz_triggers WHERE TRIGGER_NAME = 'Workday Cost Allocation Notif';
+              DELETE FROM qrtz_job_details WHERE JOB_NAME = 'Workday Cost Allocation Notif';
+              DELETE FROM scheduler_job_info_history WHERE JOB_ID = 28;
+              DELETE FROM scheduler_job_info WHERE JOB_ID = 28;
+              
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9151-2
+      author: Arun Ramesh
+      labels: 'DDL'
+      comment: Drop WORKDAY_PARTIAL_ALLOC_REPORT procedure
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS WORKDAY_PARTIAL_ALLOC_REPORT;
+      rollback: empty
+
+  - changeSet:
+        id: FIBI-9979
+        author: Sasikumar Chandran
+        labels: 'DML'
+        comment: Insert Agreement module into LOOKUP_WINDOW.
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO `LOOKUP_WINDOW` (`LOOKUP_WINDOW_NAME`, `DESCRIPTION`, `TABLE_NAME`, `COLUMN_NAME`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `DATA_TYPE_CODE`) VALUES ('Agreement', 'Agreement', 'agreementfibi', 'agreementfibi', UTC_TIMESTAMP(), 'admin', '6');
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM `LOOKUP_WINDOW` WHERE `LOOKUP_WINDOW_NAME` = 'Agreement';

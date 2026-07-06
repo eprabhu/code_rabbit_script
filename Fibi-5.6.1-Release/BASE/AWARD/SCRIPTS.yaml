@@ -1,0 +1,183 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7562-2
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert lookup_window Claim Type (idempotent)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO scheduler_job_info (
+                  CRON_EXPRESSION,
+                  IS_CRON_JOB,
+                  JOB_CLASS,
+                  JOB_GROUP,
+                  JOB_NAME,
+                  REPEAT_TIME,
+                  DESCRIPTION,
+                  CRON_STATUS,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  PREVIOUS_FIRE_TIME,
+                  LAST_FIRE_END_TIME,
+                  IS_ACTIVE
+              )
+              SELECT
+                  '0 0 22 * * ?',
+                  'Y',
+                  'com.polus.fibicomp.quartzscheduler.scheduler.award.AwardMasterPersonDataSync',
+                  'fibi-base',
+                  'Award Master Person data Sync',
+                  NULL,
+                  'The job synchronizes person data to the Award Master Dataset RT table.',
+                  'SCHEDULED',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  NULL,
+                  NULL,
+                  'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM scheduler_job_info
+                  WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME = 'Award Master Person data Sync'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.award.AwardMasterPersonDataSync'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM scheduler_job_info
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'Award Master Person data Sync'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.award.AwardMasterPersonDataSync';
+
+  - changeSet:
+      id: FIBI-10065-1
+      author: Suganya.S
+      labels: 'DDL'
+      comment: New index on TASK for Awards pending my action tab performance issue
+      changes:
+        - sql:
+            sql: |
+              SELECT COUNT(*) INTO @idx_exists
+              FROM information_schema.statistics
+              WHERE table_schema = DATABASE()
+                AND table_name = 'TASK'
+                AND index_name = 'TASK_IDX4';
+
+              SET @sql = IF(@idx_exists = 0,
+                            'CREATE INDEX TASK_IDX4
+                            ON TASK (ASSIGNEE_PERSON_ID, TASK_STATUS_CODE, MODULE_ITEM_ID)',
+                            'SELECT NULL');
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql:
+              DROP INDEX TASK_IDX4 ON TASK;                         
+
+  - changeSet:
+      id: FIBI-10065-2
+      author: Suganya.S
+      labels: 'DDL'
+      comment: New index on WORKFLOW for Awards pending my action tab performance issue
+      changes:
+        - sql:
+            sql: |
+              SELECT COUNT(*) INTO @idx_exists
+              FROM information_schema.statistics
+              WHERE table_schema = DATABASE()
+                AND table_name = 'WORKFLOW'
+                AND index_name = 'WORKFLOW_IDX2';
+
+              SET @sql = IF(@idx_exists = 0,
+                            'CREATE INDEX WORKFLOW_IDX2
+                            ON WORKFLOW (MODULE_CODE, IS_WORKFLOW_ACTIVE, (CAST(MODULE_ITEM_ID as unsigned)))',
+                            'SELECT NULL');
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: 
+              DROP INDEX WORKFLOW_IDX2 ON WORKFLOW;
+
+  - changeSet:
+      id: FIBI-10053-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Script to the DASHBOARD_CRITERIA_LOOKUP table for the Key Persons Role Filter
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DASHBOARD_CRITERIA_LOOKUP
+              (CRITERIA_KEY, DESCRIPTION, DISPLAY_NAME, MODULE_CODE, CRITERIA_CONF_ID, IS_ACTIVE, DEFAULT_SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT
+              'CRT_AWD_KEY_PERSON_ROLES',
+              'Key Personnel Role',
+              'Key Personnel Role',
+              '1',
+              '52',
+              'Y',
+              '31',
+              UTC_TIMESTAMP(),
+              'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM DASHBOARD_CRITERIA_LOOKUP
+                  WHERE CRITERIA_KEY = 'CRT_AWD_KEY_PERSON_ROLES'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DASHBOARD_CRITERIA_LOOKUP WHERE CRITERIA_KEY = 'CRT_AWD_KEY_PERSON_ROLES' AND MODULE_CODE = 1;
+
+  - changeSet:
+      id: FIBI-10058-1
+      author: Adarsh
+      labels: 'DML'
+      comment: Update in DASHBOARD_CRITERIA_LOOKUP
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_CRITERIA_LOOKUP SET DESCRIPTION = 'Key Personnel', DISPLAY_NAME = 'Key Personnel',UPDATE_TIMESTAMP = UTC_TIMESTAMP(),UPDATE_USER = 'admin' WHERE (CRITERIA_KEY = 'CRT_AWD_KEY_PERSON');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10065-3
+      author: Suganya.S
+      labels: 'DDL'
+      comment: Changing the existing index on WORKFLOW for Awards pending my action tab performance issue
+      changes:
+        - sql:
+            sql: |
+              SELECT COUNT(*) INTO @idx_exists
+              FROM information_schema.statistics
+              WHERE table_schema = DATABASE()
+                AND table_name = 'WORKFLOW'
+                AND index_name = 'WORKFLOW_IDX2';
+
+              SET @sql = IF(@idx_exists > 0,
+                            'ALTER TABLE WORKFLOW DROP INDEX WORKFLOW_IDX2',
+                            'SELECT "Index not present"');
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql = 'CREATE INDEX WORKFLOW_IDX2 ON WORKFLOW (MODULE_CODE, IS_WORKFLOW_ACTIVE, MODULE_ITEM_ID)';
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: 
+              DROP INDEX WORKFLOW_IDX2 ON WORKFLOW;

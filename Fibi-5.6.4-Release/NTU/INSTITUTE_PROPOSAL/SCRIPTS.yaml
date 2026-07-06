@@ -1,0 +1,16 @@
+﻿
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10725-1
+      author: Shyla
+      labels: 'DML'
+      comment: Renamed CFDA Number to Classification in institute proposal dashboard lookup tables.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `dashboard_criteria_lookup` SET `DESCRIPTION` = 'Classification', `DISPLAY_NAME` = 'Classification', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE `CRITERIA_KEY` = 'CRT_IP_CFDA_NUMBER';
+              UPDATE `dashboard_column_lookup` SET `DESCRIPTION` = 'Classification', `DISPLAY_NAME` = 'Classification', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE `COLUMN_KEY` = 'COL_IP_CFDA_NUMBER';
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

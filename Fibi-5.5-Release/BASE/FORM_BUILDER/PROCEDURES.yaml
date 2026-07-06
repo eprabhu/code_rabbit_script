@@ -1,0 +1,61 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7525-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS COPY_FORM_DATA_TO_NEW_VERSION
+        - sqlFile:
+            path: ROUTINES/BASE/FORM_BUILDER/PROCEDURES/COPY_FORM_DATA_TO_NEW_VERSION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7567-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS COPY_FORM_DATA_TO_NEW_VERSION
+        - sqlFile:
+            path: ROUTINES/BASE/FORM_BUILDER/PROCEDURES/COPY_FORM_DATA_TO_NEW_VERSION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7368-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS EVALUATE_FORM_MANDATORY_VALIDATION
+        - sqlFile:
+            path: ROUTINES/BASE/FORM_BUILDER/PROCEDURES/EVALUATE_FORM_MANDATORY_VALIDATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7368-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Created Procedure GET_COMPONENT_RULE_ID.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_COMPONENT_RULE_ID;
+        - sqlFile:
+            path: ROUTINES/BASE/FORM_BUILDER/PROCEDURES/GET_COMPONENT_RULE_ID.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

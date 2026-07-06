@@ -1,0 +1,126 @@
+databaseChangeLog:
+    - changeSet:
+        id: FIBI-8180
+        author: Arun Ramesh
+        labels: 'DML'
+        comment: Dynamic config for elastic sync for KKI instance.
+        changes:
+            - sql:
+                sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE integration_sync_config
+                    SET 
+                        IS_ACTIVE = 'Y',
+                        UPDATE_TIMESTAMP = utc_timestamp(),
+                        UPDATE_USER = 'admin'
+                    WHERE CONFIG_CATEGORY = 'elastic_sync';
+                    SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+    - changeSet:
+        id: FIBI-8181
+        author: Arun Ramesh
+        labels: 'DML'
+        comment: Dynamic config for integration sync for KKI instance.
+        changes:
+            - sql:
+                sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE integration_sync_config
+                    SET 
+                        IS_ACTIVE = CASE 
+                                        WHEN CONFIG_KEY IN ('attachment_data_migration', 'fi_expense_transaction_rt_processing', 'profit_center', 'fund_center', 'cost_center', 'grant_code', 'job_requisition', 'cost_allocation', 'cost_allocation_with_manual_date', 'update_feed_status', 'sync_medusa_relationship') THEN 'Y'
+                                        ELSE 'N'
+                                    END,
+                        UPDATE_TIMESTAMP = utc_timestamp(),
+                        UPDATE_USER = 'admin'
+                    WHERE CONFIG_CATEGORY = 'integration_sync';
+                    SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+    - changeSet:
+        id: FIBI-8845-1
+        author: Adarsh 
+        labels: 'DML'
+        comment: Insert a new value in person role type
+        changes:
+        - sql:
+            sql: |
+                INSERT IGNORE INTO person_role_type (ROLE_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, IS_ACTIVE) VALUES ('72', 'Program Manager', UTC_TIMESTAMP(), 'admin', 'Y');
+        rollback:
+        - sql:
+            sql: |
+                DELETE FROM person_role_type WHERE ROLE_TYPE_CODE = 72;
+
+    - changeSet:
+        id: FIBI-8845-2
+        author: Adarsh 
+        labels: 'DML'
+        comment: Insert in notification recipient
+        changes:
+        - sql:
+            sql: |
+                INSERT INTO notification_recipient (NOTIFICATION_TYPE_ID, ROLE_TYPE_CODE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP, RECIPIENT_TYPE, RECIPIENT_NAME) SELECT '714','72','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'TO','Program Manager' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM notification_recipient WHERE NOTIFICATION_TYPE_ID='714' AND ROLE_TYPE_CODE='72' AND RECIPIENT_TYPE='TO' AND RECIPIENT_NAME='Program Manager');
+        rollback:
+        - sql:
+            sql: |
+                DELETE FROM notification_recipient WHERE NOTIFICATION_TYPE_ID = '714'	AND ROLE_TYPE_CODE = '72'	AND RECIPIENT_TYPE = 'TO'	AND RECIPIENT_NAME = 'Program Manager';
+
+    - changeSet:
+        id: FIBI-8845-3
+        author: Adarsh 
+        labels: 'DML'
+        comment: Insert in notification recipient
+        changes:
+        - sql:
+            sql: |
+                INSERT INTO notification_recipient (NOTIFICATION_TYPE_ID, ROLE_TYPE_CODE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP, RECIPIENT_TYPE, RECIPIENT_NAME) SELECT '1414','72','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'TO','Program Manager' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM notification_recipient WHERE NOTIFICATION_TYPE_ID='1414' AND ROLE_TYPE_CODE='72' AND RECIPIENT_TYPE='TO' AND RECIPIENT_NAME='Program Manager');
+        rollback:
+        - sql:
+            sql: |
+                DELETE FROM notification_recipient WHERE NOTIFICATION_TYPE_ID = '1414' AND ROLE_TYPE_CODE = '72' AND RECIPIENT_TYPE = 'TO' AND RECIPIENT_NAME = 'Program Manager';
+
+    - changeSet:
+      id: FIBI-8178-1
+      author: Solih N
+      labels: 'DML'
+      comment: Update IS_ACTIVE and IS_MANDATORY for specified dynamic config rows
+      changes:
+        - sql:
+            sql: |
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE UI_REFERENCE_ID = 'prop-sub-date' AND SUB_SECTION_CODE = '301' AND SECTION_CODE = 'DP301';
+      rollback: empty
+
+    - changeSet:
+      id: FIBI-8178-1
+      author: Solih N
+      labels: 'DML'
+      comment: Update IS_ACTIVE and IS_MANDATORY for specified dynamic config rows
+      changes:
+        - sql:
+            sql: |
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE UI_REFERENCE_ID = 'prop-sub-date' AND SUB_SECTION_CODE = '301' AND SECTION_CODE = 'DP301';
+      rollback: empty
+
+    - changeSet:
+      id: FIBI-8179
+      author: Sreejith T
+      labels: 'DML'
+      comment: Elastic configurations for KKI instance.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `elasticsearch_index_config` SET `FORMAT_TEMPLATE` = 'full_name | prncpl_nm', `UPDATE_USER` = 'admin', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP() WHERE `ES_CONFIG_ID` = 'person';
+              UPDATE `elasticsearch_index_config` SET `FORMAT_TEMPLATE` = 'rolodex_id | full_name | organization | email_address', `UPDATE_USER` = 'admin', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP() WHERE `ES_CONFIG_ID` = 'rolodex';
+              UPDATE `elasticsearch_index_config` SET `FORMAT_TEMPLATE` = 'rolodex_id | full_name | organization | email_address | address', `UPDATE_USER` = 'admin', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP() WHERE `ES_CONFIG_ID` = 'organization';
+              UPDATE `elasticsearch_index_config` SET `FORMAT_TEMPLATE` = 'rolodex_id | full_name | organization | email_address', `UPDATE_USER` = 'admin', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP() WHERE `ES_CONFIG_ID` = 'rolodex_organization';
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `elasticsearch_index_config` WHERE `ES_CONFIG_ID` IN ('person', 'rolodex', 'organization', 'rolodex_organization');
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('organization','fibirolodex','organization','Configuration for searching organizations','rolodex_id - full_name | organization | email_address | address',NULL,NULL,'{\"address\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"organization\": {}, \"email_address\": {}}','{\"address\": {}, \"full_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"organization\": {}, \"email_address\": {}}','{}','{\"full_name\": \"<i aria-hidden=\\\"true\\\" class=\\\"fa fa-user-circle text-danger mr-2\\\"></i>\", \"organization\": \"<span><img src=\\\"DEPLOY_MAPassets/images/org-icon-6.svg\\\" class=\\\"mr-2\\\"></span>\"}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"last_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"first_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"rolodex_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"designation\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"middle_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"organization\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"phone_number\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"email_address\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{rolodex_id}\", \"queryString\": \"SELECT cast(T1.rolodex_id as char(10)) as rolodex_id,IFNULL(T2.organization_name,T1.organization_name) AS organization,T1.last_name,T1.first_name,T1.middle_name,T1.email_address,T1.phone_number,T1.FULL_NAME,T1.designation,T3.full_name AS create_user, concat(coalesce(T1.ADDRESS_LINE_1,\'\') , if (T1.ADDRESS_LINE_1 IS NULL OR T1.ADDRESS_LINE_2 IS NULL ,\'\',\', \'), (coalesce(T1.ADDRESS_LINE_2,\'\')),if (T1.ADDRESS_LINE_3 IS NULL OR T1.ADDRESS_LINE_2 IS NULL,\'\',\', \'),coalesce(T1.ADDRESS_LINE_3,\'\')) as address,T1.city,T4.country_name as country FROM ROLODEX T1 LEFT OUTER JOIN ORGANIZATION T2 ON T1.ORGANIZATION = T2.ORGANIZATION_ID LEFT OUTER JOIN PERSON T3 ON T1.create_user = T3.user_name LEFT OUTER JOIN COUNTRY T4 ON T1.COUNTRY_CODE=T4.COUNTRY_CODE WHERE T1.IS_ACTIVE = \'Y\'\", \"extraCondition\": \" and t1.rolodex_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('person','fibiperson','full_name','Configuration for searching persons','prncpl_id - full_name | prncpl_nm | unit_display_name | email_addr',NULL,NULL,'{\"full_name\": {}, \"phone_nbr\": {}, \"prncpl_id\": {}, \"prncpl_nm\": {}, \"email_addr\": {}, \"is_faculty\": {}, \"addr_line_1\": {}, \"is_research_staff\": {}, \"unit_display_name\": {}}',NULL,'{\"full_name\": 5}','{}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"phone_nbr\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"prncpl_id\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"prncpl_nm\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"name_search\"}, \"unit_name\": {\"type\": \"text\", \"index\": \"false\"}, \"email_addr\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"addr_line_1\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"unit_number\": {\"type\": \"text\", \"index\": \"false\"}, \"primary_title\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"unit_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{prncpl_id}\", \"queryString\": \"SELECT t1.person_id as prncpl_id,t1.full_name,t1.user_name as prncpl_nm,t1.email_address as email_addr,t1.home_unit as unit_number,t2.unit_name,t1.address_line_1 as addr_line_1 ,t1.mobile_phone_number as phone_nbr,t1.directory_title,t1.primary_title, t1.IS_EXTERNAL_USER as external, t2.DISPLAY_NAME as unit_display_name FROM PERSON t1 LEFT OUTER JOIN UNIT t2 ON t1.HOME_UNIT = t2.UNIT_NUMBER WHERE t1.STATUS =\'A\'\", \"extraCondition\": \" and t1.person_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('rolodex','fibirolodex','full_name','Configuration for searching rolodex','rolodex_id - full_name | organization | email_address',NULL,NULL,'{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": 5}','{\"organization\": \"<span><img src=\\\"DEPLOY_MAPassets/images/org-icon-6.svg\\\" class=\\\"mr-2\\\"></span>\"}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"last_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"first_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"rolodex_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"designation\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"middle_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"organization\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"phone_number\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"email_address\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{rolodex_id}\", \"queryString\": \"SELECT cast(T1.rolodex_id as char(10)) as rolodex_id,IFNULL(T2.organization_name,T1.organization_name) AS organization,T1.last_name,T1.first_name,T1.middle_name,T1.email_address,T1.phone_number,T1.FULL_NAME,T1.designation,T3.full_name AS create_user, concat(coalesce(T1.ADDRESS_LINE_1,\'\') , if (T1.ADDRESS_LINE_1 IS NULL OR T1.ADDRESS_LINE_2 IS NULL ,\'\',\', \'), (coalesce(T1.ADDRESS_LINE_2,\'\')),if (T1.ADDRESS_LINE_3 IS NULL OR T1.ADDRESS_LINE_2 IS NULL,\'\',\', \'),coalesce(T1.ADDRESS_LINE_3,\'\')) as address,T1.city,T4.country_name as country FROM ROLODEX T1 LEFT OUTER JOIN ORGANIZATION T2 ON T1.ORGANIZATION = T2.ORGANIZATION_ID LEFT OUTER JOIN PERSON T3 ON T1.create_user = T3.user_name LEFT OUTER JOIN COUNTRY T4 ON T1.COUNTRY_CODE=T4.COUNTRY_CODE WHERE T1.IS_ACTIVE = \'Y\'\", \"extraCondition\": \" and t1.rolodex_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('rolodex_organization','fibirolodex','full_name','Configuration for searching rolodex organization','rolodex_id - full_name | organization | email_address',NULL,NULL,'{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": 5}','{\"organization\": \"<span><img src=\\\"DEPLOY_MAPassets/images/org-icon-6.svg\\\" class=\\\"mr-2\\\"></span>\"}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"last_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"first_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"rolodex_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"designation\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"middle_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"organization\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"phone_number\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"email_address\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{rolodex_id}\", \"queryString\": \"SELECT cast(T1.rolodex_id as char(10)) as rolodex_id,IFNULL(T2.organization_name,T1.organization_name) AS organization,T1.last_name,T1.first_name,T1.middle_name,T1.email_address,T1.phone_number,T1.FULL_NAME,T1.designation,T3.full_name AS create_user, concat(coalesce(T1.ADDRESS_LINE_1,\'\') , if (T1.ADDRESS_LINE_1 IS NULL OR T1.ADDRESS_LINE_2 IS NULL ,\'\',\', \'), (coalesce(T1.ADDRESS_LINE_2,\'\')),if (T1.ADDRESS_LINE_3 IS NULL OR T1.ADDRESS_LINE_2 IS NULL,\'\',\', \'),coalesce(T1.ADDRESS_LINE_3,\'\')) as address,T1.city,T4.country_name as country FROM ROLODEX T1 LEFT OUTER JOIN ORGANIZATION T2 ON T1.ORGANIZATION = T2.ORGANIZATION_ID LEFT OUTER JOIN PERSON T3 ON T1.create_user = T3.user_name LEFT OUTER JOIN COUNTRY T4 ON T1.COUNTRY_CODE=T4.COUNTRY_CODE WHERE T1.IS_ACTIVE = \'Y\'\", \"extraCondition\": \" and t1.rolodex_id = ?\"}','admin',utc_timestamp());

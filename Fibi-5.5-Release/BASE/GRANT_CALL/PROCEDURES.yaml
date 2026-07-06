@@ -1,0 +1,22 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_GRANTCALL_ELIGIBLITY_STATUS;
+                DROP PROCEDURE IF EXISTS NOTIFY_GRANT_ELIGIBLE_PERSONS;
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/PROCEDURES/GET_GRANTCALL_ELIGIBLITY_STATUS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/PROCEDURES/NOTIFY_GRANT_ELIGIBLE_PERSONS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

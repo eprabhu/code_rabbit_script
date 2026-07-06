@@ -1,0 +1,12 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.1-Release/KU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6.1-Release/KU/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'
+

@@ -1,0 +1,18 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10912-2
+      author: Vishnu BH
+      labels: 'DML'
+      comment: Enable Award subsection configuration.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `dyn_subsection_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SUB_SECTION_CODE` = '122');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

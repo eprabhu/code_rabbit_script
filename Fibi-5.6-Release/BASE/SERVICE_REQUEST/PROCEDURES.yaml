@@ -1,0 +1,167 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-8877-1
+        author: Sasikumar Chandran
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS DELETE_SERVICE_REQUEST_BY_ID;
+          - sqlFile:
+              path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/DELETE_SERVICE_REQUEST_BY_ID.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-8333-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_HISTORY
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_HISTORY.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+        id: FIBI-9155-1
+        author: Vishnu B H
+        labels: 'PROCEDURES'
+        comment: Modified GET_SERVICE_REQUEST_DASHBOARD_V1
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+          - sqlFile:
+              path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-8854-1
+        author: Nabeel Ahamed m
+        labels: 'PROCEDURES'
+        comment: Created procedure SR_CONTRACT_ADMIN_UPDATION
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS SR_CONTRACT_ADMIN_UPDATION;
+          - sqlFile:
+              path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/SR_CONTRACT_ADMIN_UPDATION.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-9389
+        author: Robin
+        labels: 'PROCEDURES'
+        comment: Modified GET_ALL_RIGHTS_FOR_A_MODULE
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE;
+          - sqlFile:
+              path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-9472-1
+      author: Prabhu e
+      labels: 'PROCEDURES'
+      comment: Optimized GET_SERVICE_REQUEST_DASHBOARD_V1 procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9032-1
+      author: Prabhu e
+      labels: 'PROCEDURES'
+      comment: condition changed for All Pending Reviews Tab.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+
+  - changeSet:
+      id: FIBI-9929
+      author: Adarsh S M
+      labels: 'PROCEDURES'
+      comment: Perfomance upgrade for Servcie Request
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9032-2
+      author: Suganya S
+      labels: 'PROCEDURES'
+      comment: Added correct status for 'ALL Pending Reviews'.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9933-1
+      author: Solih
+      labels: 'PROCEDURES'
+      comment: Update procedure COPY_SERVICE_REQUEST
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS COPY_SERVICE_REQUEST;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/COPY_SERVICE_REQUEST.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10143-4
+      author: Suganya.S
+      labels: 'PROCEDURES'
+      comment: Update procedure 
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

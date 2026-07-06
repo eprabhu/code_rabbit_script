@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+    #RESEARCHER_PROFILE
+    - include:
+        file: Fibi-5.5.1-Release/JHU/RESEARCHER_PROFILE/PROCEDURES.yaml
+        labels: 'RESEARCHER_PROFILE'
+    
+    #FORM_BUILDER
+    - include:
+        file: Fibi-5.5.1-Release/JHU/FORM_BUILDER/SCRIPTS.yaml
+        labels: 'FORM_BUILDER'

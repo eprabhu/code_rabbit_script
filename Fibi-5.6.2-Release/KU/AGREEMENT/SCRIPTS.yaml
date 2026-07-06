@@ -1,0 +1,38 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10516-1
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Deactivate dyn section config for Agreement (AG1309)
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SECTION_CODE` = 'AG1309');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SECTION_CODE` = 'AG1309');
+
+  - changeSet:
+      id: FIBI-10541-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update Script for code_table_configuration table
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              update AGREEMENT_ACTION_TYPE set MESSAGE = 'Agreement review has been set to Sign in Phase' where ACTION_TYPE_CODE = 15;
+              update AGREEMENT_ACTION_TYPE set MESSAGE = 'Agreement review has been set to Sign on' where ACTION_TYPE_CODE = 25;
+              update AGREEMENT_ACTION_TYPE set MESSAGE = 'Agreement review has been set to Negotiation' where ACTION_TYPE_CODE = 34;
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

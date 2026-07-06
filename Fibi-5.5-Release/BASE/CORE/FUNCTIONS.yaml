@@ -1,0 +1,203 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7647-1
+      author: Prabhu.E
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_CHK_ALL_MANDT_CUST_DTA_IS_ANS
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_CHK_ALL_MANDT_CUST_DTA_IS_ANS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7832-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_PERSON_HAS_AUTHORIZATION
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PERSON_HAS_AUTHORIZATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7368-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Created Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_EVALUATE_RULE
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_EVALUATE_RULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7852-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_FEED_INST_PROPOSAL
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_FEED_INST_PROPOSAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7865-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_PERSON_HAS_AUTHORIZATION
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PERSON_HAS_AUTHORIZATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_PREPARE_DASHBOARD_CRITERIA
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PREPARE_DASHBOARD_CRITERIA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-2
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_PREPARE_DASHBOARD_JOINS
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PREPARE_DASHBOARD_JOINS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-3
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_PREPARE_DASHBOARD_JSON
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PREPARE_DASHBOARD_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-4
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_PREPARE_DASHBOARD_SELECT
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PREPARE_DASHBOARD_SELECT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+              DROP FUNCTION IF EXISTS FN_CAMPUS_FOR_UNIT;
+              DROP FUNCTION IF EXISTS FN_CHECK_USER_HAS_RIGHT_IN_DOC;
+              DROP FUNCTION IF EXISTS FN_CHK_BZ_GRANTCALL_ELGLTY_COI;
+              DROP FUNCTION IF EXISTS FN_CHK_BZ_GRANTCALL_ELGLTY_KP;
+              DROP FUNCTION IF EXISTS FN_CHK_BZ_GRANTCALL_ELGLTY_PI;
+              DROP FUNCTION IF EXISTS FN_GET_UNIT_HIERARCHY_LEVEL;
+              DROP FUNCTION IF EXISTS FN_PERSON_HAS_AUTHORIZATION;
+              DROP FUNCTION IF EXISTS FN_PERSON_HAS_RIGHTS;
+              DROP FUNCTION IF EXISTS FN_RULE_BUILD_WORKFLOW;
+              DROP FUNCTION IF EXISTS FN_RULE_OH_WAIVER_EXCEED_VAL;
+              DROP FUNCTION IF EXISTS FN_RULE_OH_WAIVER_LESS_VAL;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_CAMPUS_FOR_UNIT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_CHECK_USER_HAS_RIGHT_IN_DOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_CHK_BZ_GRANTCALL_ELGLTY_COI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_CHK_BZ_GRANTCALL_ELGLTY_KP.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_CHK_BZ_GRANTCALL_ELGLTY_PI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_GET_UNIT_HIERARCHY_LEVEL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PERSON_HAS_AUTHORIZATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PERSON_HAS_RIGHTS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_RULE_BUILD_WORKFLOW.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_RULE_OH_WAIVER_EXCEED_VAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_RULE_OH_WAIVER_LESS_VAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,22 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.4.6P1-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.4.6P1-Release/BASE/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.4.6P1-Release/BASE/CORE/FUNCTIONS.yaml
+        labels: 'CORE'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.4.6P1-Release/BASE/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #AWARD
+    - include:
+        file: Fibi-5.4.6P1-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'

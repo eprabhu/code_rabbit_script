@@ -1,0 +1,22 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8868-1
+      author: Solih.N
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS AWARD_MASTER_DATASET_SYNC;
+                DROP PROCEDURE IF EXISTS CUSTOM_DATA_SYNC;
+        - sqlFile:
+            path: ROUTINES/JHU/REPORT/PROCEDURES/AWARD_MASTER_DATASET_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/REPORT/PROCEDURES/CUSTOM_DATA_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

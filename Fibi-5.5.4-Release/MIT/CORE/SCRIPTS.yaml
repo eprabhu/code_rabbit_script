@@ -1,0 +1,127 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9727-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Updated the search config for Award Indexes.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `assoc_config` SET `SEARCH_CONFIG` = '{\"contextField\":\"award_number - title\",\"index\":\"activeawardfibi\",\"type\":\"award\",\"formatString\":\"award_number | account_number | title | sponsor | lead_unit_number - lead_unit_name | pi_name\",\"fields\":{\"award_id\":{},\"award_number\":{},\"pi_name\":{},\"sponsor\":{},\"account_number\":{},\"lead_unit_number\":{},\"lead_unit_name\":{},\"title\":{}},\"size\":50} ' WHERE (`ASSOC_CONFIG_CODE` = '1');
+              UPDATE `assoc_config` SET `SEARCH_CONFIG` = '{\"contextField\":\"award_number - title\",\"index\":\"awardfibi\",\"type\":\"award\",\"formatString\":\"award_number | account_number | title | sponsor | lead_unit_number - lead_unit_name | pi_name\",\"fields\":{\"award_id\":{},\"award_number\":{},\"pi_name\":{},\"sponsor\":{},\"account_number\":{},\"lead_unit_number\":{},\"lead_unit_name\":{},\"title\":{}},\"size\":50} ' WHERE (`ASSOC_CONFIG_CODE` = '3');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `assoc_config` SET `SEARCH_CONFIG` = '{\"contextField\":\"award_number - title\",\"index\":\"activeawardfibi\",\"type\":\"award\",\"formatString\":\"award_id | award_number | account_number | title | sponsor | lead_unit_number - lead_unit_name | pi_name\",\"fields\":{\"award_id\":{},\"award_number\":{},\"pi_name\":{},\"sponsor\":{},\"account_number\":{},\"lead_unit_number\":{},\"lead_unit_name\":{},\"title\":{}},\"size\":50} ' WHERE (`ASSOC_CONFIG_CODE` = '1');
+              UPDATE `assoc_config` SET `SEARCH_CONFIG` = '{\"contextField\":\"award_number - title\",\"index\":\"awardfibi\",\"type\":\"award\",\"formatString\":\"award_id | award_number | account_number | title | sponsor | lead_unit_number - lead_unit_name | pi_name\",\"fields\":{\"award_id\":{},\"award_number\":{},\"pi_name\":{},\"sponsor\":{},\"account_number\":{},\"lead_unit_number\":{},\"lead_unit_name\":{},\"title\":{}},\"size\":50} ' WHERE (`ASSOC_CONFIG_CODE` = '3');
+
+  - changeSet:
+      id: FIBI-9157-1
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: ALTER SR_INT_STAGE_ELASTIC_INDEX table
+      changes:
+        - sql:
+            sql: |
+              -- ANTICIPATED_TOTAL_AMOUNT
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SR_INT_STAGE_ELASTIC_INDEX' AND COLUMN_NAME = 'ANTICIPATED_TOTAL_AMOUNT') = 0,
+                  'ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX ADD COLUMN ANTICIPATED_TOTAL_AMOUNT DECIMAL(15,2);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX DROP COLUMN ANTICIPATED_TOTAL_AMOUNT;
+
+  - changeSet:
+      id: FIBI-9157-2
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: ALTER SR_INT_STAGE_ELASTIC_INDEX table
+      changes:
+        - sql:
+            sql: |
+              -- OBLIGATED_TOTAL
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SR_INT_STAGE_ELASTIC_INDEX' AND COLUMN_NAME = 'OBLIGATED_TOTAL') = 0,
+                  'ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX ADD COLUMN OBLIGATED_TOTAL DECIMAL(15,2);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX DROP COLUMN OBLIGATED_TOTAL;       
+
+  - changeSet:
+      id: FIBI-9157-3
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: ALTER SR_INT_STAGE_ELASTIC_INDEX table
+      changes:
+        - sql:
+            sql: |
+              -- OBLIGATION_START_DATE
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SR_INT_STAGE_ELASTIC_INDEX' AND COLUMN_NAME = 'OBLIGATION_START_DATE') = 0,
+                  'ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX ADD COLUMN OBLIGATION_START_DATE DATE;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX DROP COLUMN OBLIGATION_START_DATE;
+
+  - changeSet:
+      id: FIBI-9157-4
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: ALTER SR_INT_STAGE_ELASTIC_INDEX table
+      changes:
+        - sql:
+            sql: |
+              -- OBLIGATION_EXPIRATION_DATE
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SR_INT_STAGE_ELASTIC_INDEX' AND COLUMN_NAME = 'OBLIGATION_EXPIRATION_DATE') = 0,
+                  'ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX ADD COLUMN OBLIGATION_EXPIRATION_DATE DATE;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX DROP COLUMN OBLIGATION_EXPIRATION_DATE;     
+
+  - changeSet:
+      id: FIBI-9157-5
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: ALTER SR_INT_STAGE_ELASTIC_INDEX table
+      changes:
+        - sql:
+            sql: |
+              -- IP_TOT_PROJ_COST
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SR_INT_STAGE_ELASTIC_INDEX' AND COLUMN_NAME = 'IP_TOT_PROJ_COST') = 0,
+                  'ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX ADD COLUMN IP_TOT_PROJ_COST DECIMAL(15,2);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX DROP COLUMN IP_TOT_PROJ_COST;

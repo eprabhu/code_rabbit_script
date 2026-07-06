@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: FIBI-9070-1
+        author: Suganya.S
+        labels: 'PROCEDURES'
+        comment: Modified Procedure.
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP PROCEDURE IF EXISTS GET_RESEARCHER_PROFILE_DASHBOARD;
+            - sqlFile:
+                path: ROUTINES/JHU/RESEARCHER_PROFILE/PROCEDURES/GET_RESEARCHER_PROFILE_DASHBOARD.sql
+                relativeToChangeLogFile: false
+                splitStatements: false
+        rollback: empty

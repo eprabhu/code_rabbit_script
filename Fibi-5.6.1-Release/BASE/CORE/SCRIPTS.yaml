@@ -1,0 +1,339 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9576-3
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert scheduler_job_info
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO scheduler_job_info (
+                  CRON_EXPRESSION,
+                  IS_CRON_JOB,
+                  JOB_CLASS,
+                  JOB_GROUP,
+                  JOB_NAME,
+                  REPEAT_TIME,
+                  DESCRIPTION,
+                  CRON_STATUS,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  PREVIOUS_FIRE_TIME,
+                  LAST_FIRE_END_TIME,
+                  IS_ACTIVE
+              )
+              SELECT
+                  '0 0 21 10 * ?',
+                  'Y',
+                  'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler',
+                  'fibi-base',
+                  'Excelity Scheduler - 10th Day',
+                  NULL,
+                  'This job retrieves the RISE EOM Payroll file from SFTP, processes it, and moves the file to OutboundArchive/Excelity (SFTP & Staff3). Runs on the 10th day of every month at 9:00 PM.',
+                  'SCHEDULED',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  NULL,
+                  NULL,
+                  'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM scheduler_job_info
+                  WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME = 'Excelity Scheduler - 10th Day'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM scheduler_job_info
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'Excelity Scheduler - 10th Day'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler';
+
+  - changeSet:
+      id: FIBI-9576-4
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert scheduler_job_info
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO scheduler_job_info (
+                  CRON_EXPRESSION,
+                  IS_CRON_JOB,
+                  JOB_CLASS,
+                  JOB_GROUP,
+                  JOB_NAME,
+                  REPEAT_TIME,
+                  DESCRIPTION,
+                  CRON_STATUS,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  PREVIOUS_FIRE_TIME,
+                  LAST_FIRE_END_TIME,
+                  IS_ACTIVE
+              )
+              SELECT
+                  '0 0 21 L * ?',
+                  'Y',
+                  'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler',
+                  'fibi-base',
+                  'Excelity Scheduler - Last Day',
+                  NULL,
+                  'This job retrieves the RISE EOM Payroll file from SFTP, processes it, and moves the file to OutboundArchive/Excelity (SFTP & Staff3). Runs on the last day of every month at 9:00 PM.',
+                  'SCHEDULED',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  NULL,
+                  NULL,
+                  'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM scheduler_job_info
+                  WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME = 'Excelity Scheduler - Last Day'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM scheduler_job_info
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'Excelity Scheduler - 10th Day'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler';
+
+  - changeSet:
+      id: FIBI-9576-5
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert scheduler_job_info
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO scheduler_job_info (
+                  CRON_EXPRESSION,
+                  IS_CRON_JOB,
+                  JOB_CLASS,
+                  JOB_GROUP,
+                  JOB_NAME,
+                  REPEAT_TIME,
+                  DESCRIPTION,
+                  CRON_STATUS,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  PREVIOUS_FIRE_TIME,
+                  LAST_FIRE_END_TIME,
+                  IS_ACTIVE
+              )
+              SELECT
+                  '0 15 7 * * ?',
+                  'Y',
+                  'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastRevenueTransactionRTProcessingScheduler',
+                  'fibi-base',
+                  'Fast Revenue Transaction RT Processing Scheduler',
+                  NULL,
+                  'This job retrieves the Grab Revenue file from SFTP, processes it, and moves the file to OutboundArchive/Revenue (SFTP & Staff3).',
+                  'SCHEDULED',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  NULL,
+                  NULL,
+                  'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM scheduler_job_info
+                  WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME = 'Fast Revenue Transaction RT Processing Scheduler'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastRevenueTransactionRTProcessingScheduler'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM scheduler_job_info
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'Fast Revenue Transaction RT Processing Scheduler'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastRevenueTransactionRTProcessingScheduler';
+
+
+  - changeSet:
+      id: FIBI-9576-6
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Update Excelity Scheduler 10th Day job class
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE scheduler_job_info
+                SET JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityMonthlyTenthDayScheduler'
+                WHERE JOB_GROUP = 'fibi-base'
+                  AND JOB_NAME = 'Excelity Scheduler - 10th Day'
+                  AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler';
+              SET SQL_SAFE_UPDATES = 1;  
+      rollback:
+        - sql:
+            sql: |
+             UPDATE scheduler_job_info
+              SET JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler'
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'Excelity Scheduler - 10th Day'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityMonthlyTenthDayScheduler';
+
+
+  - changeSet:
+      id: FIBI-9576-7
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Update Excelity Scheduler - Last Day
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE scheduler_job_info
+                SET JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityMonthEndScheduler'
+                WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME  = 'Excelity Scheduler - Last Day'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler';
+              SET SQL_SAFE_UPDATES = 1;  
+      rollback:
+        - sql:
+            sql: |
+             UPDATE scheduler_job_info
+              SET JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityScheduler'
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME  = 'Excelity Scheduler - Last Day'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.ExcelityMonthEndScheduler';
+
+  - changeSet:
+      id: FIBI-10091-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update Width for Status field in IP, Dev Proposal and Award
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE dashboard_column_lookup SET WIDTH = '25' WHERE (COLUMN_KEY = 'COL_AWD_STATUS');
+              UPDATE dashboard_column_lookup SET WIDTH = '25' WHERE (COLUMN_KEY = 'COL_IP_STATUS');
+              UPDATE dashboard_column_lookup SET WIDTH = '25' WHERE (COLUMN_KEY = 'COL_DEV_PROP_STATUS');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty        
+
+  - changeSet:
+      id: FIBI-10030-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update in parameter name
+      changes:
+        - sql:
+            sql: |
+              UPDATE parameter SET PARAMETER_NAME = 'GLOBAL_SEARCH_ENABLED_MODULES' WHERE (PARAMETER_NAME = 'SR_GLOBAL_SEARCH_ENABLED_MODULES');
+      rollback: empty       
+
+  - changeSet:
+      id: FIBI-10161-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update in MESSAGE
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE notification_type SET MESSAGE = '<p>Hello,<br> </p><p>The following comment has been added to {SECTION_NAME} of the Service Request detailed below: <br> </p><p><strong>Service Request Id :</strong>{SERVICE_REQUEST_ID} <br> </p><p> </p><p><strong>Service Requst Subject : </strong>{SUBJECT} <br> </p><p> </p><p><strong>Department :</strong> {DEPARTMENT} <br> </p><p><strong>Reporter : </strong>{REPORTER_USER_NAME}</p><p><br><strong>Comment:</strong>{SERVICE_REQUEST_COMMENT}</p><p>Please go to {SERVICE_REQUEST_APPLICATION_URL} to review the comment.</p><p>Thank you.</p><p><i><strong>Caution</strong></i>This is a system-generated email. Please do not reply to this email.</p>' WHERE (NOTIFICATION_TYPE_ID = '507');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty 
+
+  - changeSet:
+      id: FIBI-10094-1
+      author: Vishnu B H
+      labels: 'DDL'
+      comment: Add FILE_NAME column to envelope_document table
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                     FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'envelope_document'
+                      AND COLUMN_NAME = 'FILE_NAME') = 0,
+                  'ALTER TABLE envelope_document ADD COLUMN `FILE_NAME` VARCHAR(100) NULL DEFAULT NULL AFTER `ORIGINAL_FILE_NAME`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE envelope_document DROP COLUMN `FILE_NAME`;
+
+  - changeSet:
+      id: FIBI-10059-1
+      author: Solih N
+      labels: 'DML'
+      comment: Update FORMAT_STRING for dashboard_column_conf COLUMN_CONF_ID 25
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_COLUMN_CONF SET FORMAT_STRING = '${ORGANIZATION_TYPE} - ${ORGANIZATION_NAME}' WHERE (COLUMN_CONF_ID = '25');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE DASHBOARD_COLUMN_CONF SET FORMAT_STRING = '${ORGANIZATION_NAME}' WHERE (COLUMN_CONF_ID = '25');
+
+  - changeSet:
+      id: FIBI-10053-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert new entry to the dashboard_criteria_conf table for Key Key Personnel Role lookup
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `DASHBOARD_CRITERIA_CONF` (`CRITERIA_CONF_ID`, `DESCRIPTION`, `TYPE`, `CONFIG_JSON`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('52', 'For Key Personnel Role Lookup', 'LOOK_UP', '{\"option\": \"EPS_PROP_PERSON_ROLE#PROP_PERSON_ROLE_ID#true#true\"}', now(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `DASHBOARD_CRITERIA_CONF` WHERE `CRITERIA_CONF_ID` = 52;
+
+  - changeSet:
+      id: FIBI-9679-1
+      author: Shyla
+      labels: 'DML'
+      comment: Update code_table_configuration JSON to add IS_DEFAULT field for ACTIVITY_TYPE, EPS_PROPOSAL_TYPE, and AWARD_TYPE code tables.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `code_table_configuration` SET UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin',`CONTENT` = '{\n    \"group\": \"General\",\n    \"codeTableName\": \"Activity Type(Category)\",\n    \"description\": \"List of all activity types in Proposal & Award module\",\n    \"databaseTableName\": \"ACTIVITY_TYPE\",\n    \"fields\": [\n        {\n            \"columnName\": \"ACTIVITY_TYPE_CODE\",\n            \"displayName\": \"Activity Type Code\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"Update Timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"HIGHER_EDUCATION_FUNCTION_CODE\",\n            \"displayName\": \"Higher Education Function Code\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"GRANT_TYPE_CODE\",\n            \"displayName\": \"Grant Type Code\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"GRANT_CALL_TYPE#GRANT_TYPE_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_GRANT_TYPE_CODE\"\n        },\n        {\n            \"columnName\": \"DESCRIPTION_GRANT_TYPE_CODE\",\n            \"displayName\": \"Grant Type\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": \"GRANT_CALL_TYPE#GRANT_TYPE_CODE\",\n            \"isTransient\": \"true\",\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_ACTIVE\",\n            \"displayName\": \"Is Active\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_DEFAULT\",\n            \"displayName\": \"Is Default\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"ACTIVITY_TYPE_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Proposal Rates\",\n            \"table_name\": \"EPS_PROP_RATES\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Institute Rates\",\n            \"table_name\": \"INSTITUTE_RATES\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Proposal\",\n            \"table_name\": \"PROPOSAL\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Award Rates\",\n            \"table_name\": \"award_rates\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Grant Call Type\",\n            \"table_name\": \"GRANT_CALL_TYPE\",\n            \"columnName\": \"GRANT_TYPE_CODE\",\n            \"showTableName\": \"true\"\n        }\n    ],\n    \"actions\": null\n}' WHERE (`TABLE_NAME` = 'ACTIVITY_TYPE');
+              UPDATE `code_table_configuration` SET UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin',`CONTENT` = '{\n    \"group\": \"Proposal\",\n    \"codeTableName\": \"Proposal Type\",\n    \"description\": \"List of all development proposal types\",\n    \"databaseTableName\": \"EPS_PROPOSAL_TYPE\",\n    \"fields\": [\n        {\n            \"columnName\": \"TYPE_CODE\",\n            \"displayName\": \"Type Code\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"Update Timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_ACTIVE\",\n            \"displayName\": \"Is Active\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"CAN_MERGE_TO_IP\",\n            \"displayName\": \"Can merge to IP\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_DEFAULT\",\n            \"displayName\": \"Is Default\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"TYPE_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Proposal\",\n            \"table_name\": \"eps_proposal\",\n            \"columnName\": \"TYPE_CODE\"\n        }\n    ],\n    \"actions\": null\n}' WHERE (`TABLE_NAME` = 'EPS_PROPOSAL_TYPE');
+              UPDATE `code_table_configuration` SET UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin',`CONTENT` = '{\n    \"group\": \"Award\",\n    \"codeTableName\": \"Award Type\",\n    \"description\": \"List of all Award Types\",\n    \"databaseTableName\": \"AWARD_TYPE\",\n    \"fields\": [\n        {\n            \"columnName\": \"AWARD_TYPE_CODE\",\n            \"displayName\": \"Award Type Code\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"Update Timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_ACTIVE\",\n            \"displayName\": \"Is Active\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_DEFAULT\",\n            \"displayName\": \"Is Default\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"AWARD_TYPE_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Award\",\n            \"table_name\": \"award\",\n            \"columnName\": \"AWARD_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Proposal\",\n            \"table_name\": \"eps_proposal\",\n            \"columnName\": \"AWARD_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Institute Proposal\",\n            \"table_name\": \"proposal\",\n            \"columnName\": \"AWARD_TYPE_CODE\"\n        }\n    ],\n    \"actions\": null\n}' WHERE (`TABLE_NAME` = 'AWARD_TYPE');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+             UPDATE `code_table_configuration` SET UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin',`CONTENT` = '{\n    \"group\": \"General\",\n    \"codeTableName\": \"Activity Type(Category)\",\n    \"description\": \"List of all activity types in Proposal & Award module\",\n    \"databaseTableName\": \"ACTIVITY_TYPE\",\n    \"fields\": [\n        {\n            \"columnName\": \"ACTIVITY_TYPE_CODE\",\n            \"displayName\": \"Activity Type Code\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"Update Timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"HIGHER_EDUCATION_FUNCTION_CODE\",\n            \"displayName\": \"Higher Education Function Code\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"GRANT_TYPE_CODE\",\n            \"displayName\": \"Grant Type Code\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"GRANT_CALL_TYPE#GRANT_TYPE_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_GRANT_TYPE_CODE\"\n        },\n        {\n            \"columnName\": \"DESCRIPTION_GRANT_TYPE_CODE\",\n            \"displayName\": \"Grant Type\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": \"GRANT_CALL_TYPE#GRANT_TYPE_CODE\",\n            \"isTransient\": \"true\",\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_ACTIVE\",\n            \"displayName\": \"Is Active\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"ACTIVITY_TYPE_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Proposal Rates\",\n            \"table_name\": \"EPS_PROP_RATES\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Institute Rates\",\n            \"table_name\": \"INSTITUTE_RATES\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Proposal\",\n            \"table_name\": \"PROPOSAL\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Award Rates\",\n            \"table_name\": \"award_rates\",\n            \"columnName\": \"ACTIVITY_TYPE_CODE\"\n        },\n        {\n            \"displayName\": \"Grant Call Type\",\n            \"table_name\": \"GRANT_CALL_TYPE\",\n            \"columnName\": \"GRANT_TYPE_CODE\",\n            \"showTableName\": \"true\"\n        }\n    ],\n    \"actions\": null\n}' WHERE (`TABLE_NAME` = 'ACTIVITY_TYPE');
+             UPDATE `code_table_configuration` SET UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin',`CONTENT` = '{\"group\":\"Award\",\"codeTableName\":\"Award Type\",\"description\":\"List of all Award Types\",\"databaseTableName\":\"AWARD_TYPE\",\"fields\":[{\"columnName\":\"AWARD_TYPE_CODE\",\"displayName\":\"Award Type Code\",\"dataType\":\"String\",\"isEditable\":true,\"length\":3,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DESCRIPTION\",\"displayName\":\"Description\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update Timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null},{\"columnName\":\"IS_ACTIVE\",\"displayName\":\"Is Active\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null}],\"primaryKey\":[\"AWARD_TYPE_CODE\"],\"dependency\":[{\"displayName\":\"Award\",\"table_name\":\"award\",\"columnName\":\"AWARD_TYPE_CODE\"},{\"displayName\":\"Proposal\",\"table_name\":\"eps_proposal\",\"columnName\":\"AWARD_TYPE_CODE\"},{\"displayName\":\"Institute Proposal\",\"table_name\":\"proposal\",\"columnName\":\"AWARD_TYPE_CODE\"}],\"actions\":null}' WHERE (`TABLE_NAME` = 'AWARD_TYPE');
+             UPDATE `code_table_configuration` SET UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin',`CONTENT` = '{\"group\":\"Proposal\",\"codeTableName\":\"Proposal Type\",\"description\":\"List of all development proposal types\",\"databaseTableName\":\"EPS_PROPOSAL_TYPE\",\"fields\":[{\"columnName\":\"TYPE_CODE\",\"displayName\":\"Type Code\",\"dataType\":\"INTEGER\",\"isEditable\":true,\"length\":3,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DESCRIPTION\",\"displayName\":\"Description\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update Timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null},{\"columnName\":\"IS_ACTIVE\",\"displayName\":\"Is Active\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"CAN_MERGE_TO_IP\",\"displayName\":\"Can merge to IP\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null}],\"primaryKey\":[\"TYPE_CODE\"],\"dependency\":[{\"displayName\":\"Proposal\",\"table_name\":\"eps_proposal\",\"columnName\":\"TYPE_CODE\"}],\"actions\":null}' WHERE (`TABLE_NAME` = 'EPS_PROPOSAL_TYPE');
+  
+  - changeSet:
+      id: FIBI-9943-1
+      author: Arun Ramesh
+      labels: 'DDL'
+      comment: Modify DASHBOARD_TAB_TYPE.DISPLAY_NAME to VARCHAR(100)
+      changes:
+        - sql:
+            sql: |
+              SET @col_len = (SELECT CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'DASHBOARD_TAB_TYPE' AND COLUMN_NAME = 'DISPLAY_NAME' LIMIT 1);
+              SET @sql = IF(@col_len <=> 100, 'SELECT 1', 'ALTER TABLE DASHBOARD_TAB_TYPE MODIFY COLUMN DISPLAY_NAME VARCHAR(100)');
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE DASHBOARD_TAB_TYPE MODIFY COLUMN DISPLAY_NAME VARCHAR(50);

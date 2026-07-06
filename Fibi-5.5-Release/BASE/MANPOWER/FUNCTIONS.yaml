@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-6825-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_CREATE_SUPORG
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/FUNCTIONS/FN_CREATE_SUPORG.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

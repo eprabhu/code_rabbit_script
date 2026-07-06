@@ -1,0 +1,62 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/FUNCTIONS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/TRIGGERS.yaml
+        labels: 'CORE'
+
+    #REPORT
+    - include:
+        file: Fibi-5.6-Release/BASE/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6-Release/BASE/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.6-Release/BASE/INSTITUTE_PROPOSAL/SCRIPTS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+    - include:
+        file: Fibi-5.6-Release/BASE/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #AWARD
+    - include:
+        file: Fibi-5.6-Release/BASE/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.6-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.6-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+
+    #RESEARCHER_PROFILE
+    - include:
+        file: Fibi-5.6-Release/BASE/RESEARCHER_PROFILE/PROCEDURES.yaml
+        labels: 'RESEARCHER_PROFILE'
+        
+    #INTEGRATION
+    - include:
+        file: Fibi-5.6-Release/BASE/INTEGRATION/PROCEDURES.yaml
+        labels: 'INTEGRATION'
+

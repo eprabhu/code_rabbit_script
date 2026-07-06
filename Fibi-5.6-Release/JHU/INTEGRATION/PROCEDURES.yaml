@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9891-1
+      author: Chitra
+      labels: 'PROCEDURES'
+      comment: Drop and create jhu_sap_hr_upd_appointmnts_tb (SAP HR appointments).
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS jhu_sap_hr_upd_appointmnts_tb;
+        - sqlFile:
+            path: ROUTINES/JHU/INTEGRATION/PROCEDURES/jhu_sap_hr_upd_appointmnts_tb.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

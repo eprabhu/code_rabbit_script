@@ -1,0 +1,18 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10808-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Insert values into ASSOC_RELATION_TYPE_MODULE_MAPPING;
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO ASSOC_RELATION_TYPE_MODULE_MAPPING (`ASSOC_MAPPING_CODE`,`ASSOC_RELATION_TYPE_CODE`,`MODULE_CODE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES
+              ('7', '1', 13, 'admin', utc_timestamp(),'Y'), ('8', '2', 13, 'admin', utc_timestamp(), 'Y'), ('9', '3', 13, 'admin', utc_timestamp(),'Y'), ('10', '4', 13, 'admin', utc_timestamp(),'Y'), ('11', '5', 13, 'admin', utc_timestamp(),'Y'), ('12', '6', 13, 'admin', utc_timestamp(),'Y');
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM ASSOC_RELATION_TYPE_MODULE_MAPPING WHERE ASSOC_MAPPING_CODE IN ('7','8','9','10','11','12');

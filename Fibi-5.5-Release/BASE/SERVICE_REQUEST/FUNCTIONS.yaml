@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7764-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+      - sql:
+          DROP FUNCTION IF EXISTS FN_FETCH_DYN_SR_PLACEHOLDER;
+      - sqlFile:
+          path: ROUTINES/BASE/SERVICE_REQUEST/FUNCTIONS/FN_FETCH_DYN_SR_PLACEHOLDER.sql
+          relativeToChangelogFile: false
+          splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+              DROP FUNCTION IF EXISTS FN_CHK_SERVICE_REQUEST_LEAD_UNIT;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/FUNCTIONS/FN_CHK_SERVICE_REQUEST_LEAD_UNIT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

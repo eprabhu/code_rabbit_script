@@ -1,0 +1,49 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10881-1
+      author: Shyla
+      labels: 'DML'
+      comment: Add dyn element config for Proposal Key Personnel % of Effort.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO `dyn_element_config` (`UI_REFERENCE_ID`, `DESCRIPTION`, `SUB_SECTION_CODE`, `SECTION_CODE`, `HELP`, `UPDATE_USER`, `UPDATE_TIMESTAMP`, `IS_ACTIVE`)
+              SELECT 'proposal-project-%-effort', 'Proposal Key Personnel %of Effort', '301', 'DP301', 'Reflects the percentage of effort this person is expected to contribute to the project for its duration.', 'admin', UTC_TIMESTAMP(), 'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM `dyn_element_config`
+                  WHERE `UI_REFERENCE_ID` = 'proposal-project-%-effort'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `dyn_element_config`
+              WHERE `UI_REFERENCE_ID` = 'proposal-project-%-effort';
+
+  - changeSet:
+      id: FIBI-10881-2
+      author: Shyla
+      labels: 'DML'
+      comment: Update help text for dyn subsections.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dyn_subsection_config`
+              SET `HELP` = 'Select only the proposals or projects that have been directly generated as an outcome of this current project.',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `SUB_SECTION_CODE` = '115';
+
+              UPDATE `dyn_subsection_config`
+              SET `HELP` = 'Record any significant professional milestones, honors, or recognitions received by the individual that fall outside of standard publication or funding categories.',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `SUB_SECTION_CODE` = '157';
+
+              UPDATE `dyn_subsection_config`
+              SET `HELP` = 'Displays publications, citations, and research impact data retrieved from Scopus that were generated as a direct result of this project''s activities.',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `SUB_SECTION_CODE` = '195';
+      rollback: empty

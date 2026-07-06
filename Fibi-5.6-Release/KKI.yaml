@@ -1,0 +1,18 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6-Release/KKI/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/KKI/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6-Release/KKI/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.6-Release/KKI/AGREEMENT/FUNCTIONS.yaml
+        labels: 'AGREEMENT'
+

@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9943-1
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Update DISPLAY_NAME of dashboard_tab_type to 'Service Request Search' for ALL_REQUEST tab (MODULE_CODE=20)
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_TAB_TYPE SET DISPLAY_NAME = 'Service Request Search', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (MODULE_CODE = 20 AND TAB_KEY = 'ALL_REQUEST');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

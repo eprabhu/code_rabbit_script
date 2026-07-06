@@ -1,0 +1,57 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Unit number dev proposal changes.
+      changes:
+        - sql:
+            sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'eps_prop_person_units'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE eps_prop_person_units MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'eps_proposal'
+                      AND COLUMN_NAME = 'HOME_UNIT_NUMBER') > 0,
+                    'ALTER TABLE eps_proposal MODIFY COLUMN HOME_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'eps_proposal_persons'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE eps_proposal_persons MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+      rollback: empty
+
+  - changeSet:
+      id: AI-149-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert new Sub Sections in DYN_SUBSECTION_CONFIG table for Proposal Development.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `DYN_SUBSECTION_CONFIG` (`SUB_SECTION_CODE`, `SECTION_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `HELP`, `INCLUDE_CUSTOM_DATA`) VALUES ('358', 'DP305', 'Action-Based Attachments', 'Y', UTC_TIMESTAMP(), 'admin', 'Includes attachments uploaded via Comments (excluding Private), Reviews, and Route Log', 'N');
+              INSERT IGNORE INTO `DYN_SUBSECTION_CONFIG` (`SUB_SECTION_CODE`, `SECTION_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `HELP`, `INCLUDE_CUSTOM_DATA`) VALUES ('359', 'DP305', 'Support Attachments', 'Y', UTC_TIMESTAMP(), 'admin', 'Includes attachments that were uploaded as part of support requests related to this proposal.', 'N');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `DYN_SUBSECTION_CONFIG` WHERE `SUB_SECTION_CODE` IN ('358', '359') AND `SECTION_CODE` = 'DP305';

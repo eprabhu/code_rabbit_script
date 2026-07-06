@@ -1,0 +1,34 @@
+databaseChangeLog:
+
+- changeSet:
+      id: FIBI-10812-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure GET_AGREEMENT_DASHBOARD_V1
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+- changeSet:
+      id: FIBI-10942-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure GET_AGRMENT_DASHBOARD_DYN_JSON
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_DYN_JSON;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_DYN_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+

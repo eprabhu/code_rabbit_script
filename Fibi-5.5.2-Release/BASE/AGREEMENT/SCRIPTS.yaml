@@ -1,0 +1,57 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9134-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert into DYN_ELEMENT_CONFIG for Agreement Project association.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP) 
+              SELECT 'agrmnt-prj-assoc-module', 'Agreement Project assoc Module', '529', 'AG1303', 'Select the module that most accurately matches the purpose of this record.', 'admin', UTC_TIMESTAMP() 
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agrmnt-prj-assoc-module');                      
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP) 
+              SELECT 'agrmnt-prj-assoc-relation-type', 'Agreement Project asscoc Relation type', '529', 'AG1303', 'Indicates the relationship between the current record and the selected linked record.', 'admin', UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agrmnt-prj-assoc-relation-type'
+              );
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'agrmnt-prj-assoc-link-to', 'Agreement Project asscoc Link to','529', 
+                  'AG1303', 'Search for and select the appropriate record to establish the association.', 'admin', UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agrmnt-prj-assoc-link-to'
+              );
+      rollback: 
+        - sql:
+            sql: |    
+              DELETE FROM `DYN_ELEMENT_CONFIG` WHERE UI_REFERENCE_ID = 'agrmnt-prj-assoc-link-to';         
+              DELETE FROM `DYN_ELEMENT_CONFIG` WHERE UI_REFERENCE_ID = 'grmnt-prj-assoc-relation-type';
+              DELETE FROM `DYN_ELEMENT_CONFIG` WHERE UI_REFERENCE_ID = 'agrmnt-prj-assoc-module';
+
+  - changeSet:
+      id: FIBI-9378-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Update DATE_TIME format and width for Agreement date columns
+      changes:
+        - sql:
+            sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE dashboard_column_lookup
+                SET COLUMN_CONF_ID = 18,
+                    WIDTH = 20,
+                    UPDATE_USER = 'admin',
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                WHERE COLUMN_KEY IN ('COL_AG_LAST_MOD_DATE', 'COL_AG_SUBMISSION_DATE');
+                SET SQL_SAFE_UPDATES = 1;
+      rollback: 
+        - sql:
+            sql: |    
+                UPDATE dashboard_column_lookup
+                SET COLUMN_CONF_ID = 3,
+                    WIDTH = 12,
+                    UPDATE_USER = 'admin',
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                WHERE COLUMN_KEY IN ('COL_AG_LAST_MOD_DATE', 'COL_AG_SUBMISSION_DATE');

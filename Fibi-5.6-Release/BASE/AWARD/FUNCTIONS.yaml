@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-7562-1
+        author: Mohamed Fazil
+        labels: 'FUNCTIONS'
+        comment: New function FN_AWARD_SPONSOR_TYPE
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP FUNCTION IF EXISTS FN_AWARD_SPONSOR_TYPE;
+          - sqlFile:
+              path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_AWARD_SPONSOR_TYPE.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+

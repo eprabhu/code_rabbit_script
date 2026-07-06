@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9468
+        author: Shyla
+        labels: 'DML'
+        comment: Update Award Tasks Summary Report Join in REPORT_TYPE_JOIN table.
+        changes:
+          - sql:
+              sql: |
+               UPDATE `REPORT_TYPE_JOIN` SET UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin',
+                `JOIN_QUERY` = ' INNER JOIN (\nSELECT\nt1.MODULE_ITEM_KEY,  \n CASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            DATE(t1.DUE_DATE),\n            DATE(UTC_TIMESTAMP())\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            DATE(t1.DUE_DATE),\n            DATE(UTC_TIMESTAMP())\n         )\nEND AS DUE_DAYS_PASSED_DIFF,\nCASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            DATE(UTC_TIMESTAMP()),\n            DATE(t1.DUE_DATE)\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            DATE(UTC_TIMESTAMP()),\n            DATE(t1.DUE_DATE)\n         )\nEND AS DAYS_LEFT_FOR_DUE_DATE,\np1.FULL_NAME AS TASK_ASIGNEE_PERSON,\nt3.DESCRIPTION AS TASK_NAME,\nt2.DESCRIPTION As TASK_STATUS,\nt1.DUE_DATE AS TASK_DUE_DATE,\nt3.DESCRIPTION AS Task_TYPE,\nt1.START_DATE AS TASK_ASSIGNED_DATE\nFROM TASK t1\nJOIN TASK_STATUS t2 ON t1.TASK_STATUS_CODE = t2.TASK_STATUS_CODE\nJOIN PERSON p1 ON t1.ASSIGNEE_PERSON_ID = p1.PERSON_ID\nJOIN TASK_TYPE t3 ON t3.TASK_TYPE_CODE = t1.TASK_TYPE_CODE\n where t1.MODULE_CODE = 1\n)TASK_DATA ON TASK_DATA.MODULE_ITEM_KEY =AWARD_MASTER_DATA.AWARD_NUMBER ' WHERE (`TYPE_CODE` = '142');
+        rollback: 
+         - sql:
+            sql: |            
+             UPDATE `REPORT_TYPE_JOIN` SET `JOIN_QUERY` = ' INNER JOIN (\nSELECT\nt1.MODULE_ITEM_KEY,  \n CASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            t1.DUE_DATE,\n            UTC_TIMESTAMP()\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            t1.DUE_DATE,\n            UTC_TIMESTAMP()\n         )\nEND AS DUE_DAYS_PASSED_DIFF,\nCASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            UTC_TIMESTAMP(),\n            t1.DUE_DATE\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            UTC_TIMESTAMP(),\n            t1.DUE_DATE\n         )\nEND AS DAYS_LEFT_FOR_DUE_DATE,\np1.FULL_NAME AS TASK_ASIGNEE_PERSON,\nt3.DESCRIPTION AS TASK_NAME,\nt2.DESCRIPTION As TASK_STATUS,\nt1.DUE_DATE AS TASK_DUE_DATE,\nt3.DESCRIPTION AS Task_TYPE,\nt1.START_DATE AS TASK_ASSIGNED_DATE\nFROM TASK t1\nJOIN TASK_STATUS t2 ON t1.TASK_STATUS_CODE = t2.TASK_STATUS_CODE\nJOIN PERSON p1 ON t1.ASSIGNEE_PERSON_ID = p1.PERSON_ID\nJOIN TASK_TYPE t3 ON t3.TASK_TYPE_CODE = t1.TASK_TYPE_CODE\n where t1.MODULE_CODE = 1\n)TASK_DATA ON TASK_DATA.MODULE_ITEM_KEY =AWARD_MASTER_DATA.AWARD_NUMBER ' WHERE (`TYPE_CODE` = '142');

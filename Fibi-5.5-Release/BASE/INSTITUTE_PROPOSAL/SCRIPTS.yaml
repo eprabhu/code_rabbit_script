@@ -1,0 +1,61 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7852-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update Submission Date in Proposal Table.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE PROPOSAL p
+              JOIN (
+                  SELECT PROPOSAL_NUMBER, CREATE_TIMESTAMP
+                  FROM PROPOSAL
+                  WHERE SEQUENCE_NUMBER = 1
+              ) base
+              ON p.PROPOSAL_NUMBER = base.PROPOSAL_NUMBER
+              SET p.SUBMISSION_DATE = base.CREATE_TIMESTAMP;
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Unit number ip changes.
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'prop_person_units'
+                    AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                  'ALTER TABLE prop_person_units MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'proposal'
+                    AND COLUMN_NAME = 'HOME_UNIT_NUMBER') > 0,
+                  'ALTER TABLE proposal MODIFY COLUMN HOME_UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'proposal_persons'
+                    AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                  'ALTER TABLE proposal_persons MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+      rollback: empty

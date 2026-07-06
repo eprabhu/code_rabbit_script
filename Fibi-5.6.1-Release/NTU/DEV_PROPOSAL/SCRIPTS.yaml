@@ -1,0 +1,47 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9679-1
+      author: Shyla
+      labels: 'DML'
+      comment: Update default flags for proposal type, activity type and award type
+      changes:
+        - sql:
+            sql: |
+              UPDATE `EPS_PROPOSAL_TYPE`
+              SET `IS_DEFAULT` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `TYPE_CODE` = '1';
+
+              UPDATE `ACTIVITY_TYPE`
+              SET `IS_DEFAULT` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `ACTIVITY_TYPE_CODE` = '1';
+
+              UPDATE `AWARD_TYPE`
+              SET `IS_DEFAULT` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `AWARD_TYPE_CODE` = '2';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `EPS_PROPOSAL_TYPE`
+              SET `IS_DEFAULT` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `TYPE_CODE` = '1';
+
+              UPDATE `ACTIVITY_TYPE`
+              SET `IS_DEFAULT` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `ACTIVITY_TYPE_CODE` = '1';
+
+              UPDATE `AWARD_TYPE`
+              SET `IS_DEFAULT` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `AWARD_TYPE_CODE` = '2';

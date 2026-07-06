@@ -1,0 +1,268 @@
+databaseChangeLog: 
+
+- changeSet:
+      id: FC-6991-1
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  added new action type for agreement upload
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO agreement_action_type (ACTION_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, IS_ACTIVE, message) VALUES ('113', 'Upload Generated Agreement', UTC_TIMESTAMP(), 'admin', 'Y', 'A new document has been uploaded');
+
+      rollback:
+        - sql:
+            sql: |
+              
+              DELETE FROM agreement_action_type WHERE ACTION_TYPE_CODE = '113';
+              
+- changeSet:
+      id: FIBI-7260-1
+      author: Prabhu.E
+      labels: 'DDL'
+      comment: Added Admin Person ID and Admin Assign Date in Agreement Header
+      changes:
+        - sql:
+            sql: |
+                Analyze table AGREEMENT_HEADER;
+                 SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.STATISTICS 
+                     WHERE TABLE_SCHEMA = DATABASE() 
+                       AND TABLE_NAME = 'AGREEMENT_HEADER' 
+                       AND INDEX_NAME = 'IDX_ADMIN_PERSON_ID') = 0,
+
+                    'CREATE INDEX IDX_ADMIN_PERSON_ID ON AGREEMENT_HEADER (ADMIN_PERSON_ID);',
+
+                    'DO 1'
+                 );
+
+                  PREPARE stmt FROM @sql;
+                  EXECUTE stmt;
+                  DEALLOCATE PREPARE stmt;
+
+      rollback:
+        - sql:
+            sql: |
+              DROP INDEX IDX_ADMIN_PERSON_ID ON AGREEMENT_HEADER;
+
+- changeSet:
+      id: FIBI-7260-2
+      author: Prabhu.E
+      labels: 'DDL'
+      comment:   Added Update Timestamp Index in Agreement Header
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AGREEMENT_HEADER;
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.STATISTICS 
+                   WHERE TABLE_SCHEMA = DATABASE() 
+                     AND TABLE_NAME = 'AGREEMENT_HEADER' 
+                     AND INDEX_NAME = 'IDX_AGT_HEADER_UPDATE_TIMESTAMP') = 0,
+
+                  'CREATE INDEX IDX_AGT_HEADER_UPDATE_TIMESTAMP ON AGREEMENT_HEADER (UPDATE_TIMESTAMP);',
+
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+      rollback:
+        - sql:
+            sql: |
+              DROP INDEX IDX_AGT_HEADER_UPDATE_TIMESTAMP ON AGREEMENT_HEADER;
+
+
+- changeSet:
+      id: FIBI-7260-3
+      author: Prabhu.E
+      labels: 'DDL'
+      comment:  Added Admin Assign Date in Agreement Header
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AGREEMENT_HEADER;
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                   FROM information_schema.COLUMNS 
+                   WHERE TABLE_SCHEMA = DATABASE() 
+                     AND TABLE_NAME = 'AGREEMENT_HEADER' 
+                     AND COLUMN_NAME = 'ADMIN_ASSIGN_DATE') = 0,
+
+                  'ALTER TABLE AGREEMENT_HEADER ADD COLUMN `ADMIN_ASSIGN_DATE` DATETIME NULL DEFAULT NULL AFTER `ADMIN_PERSON_ID`;',
+
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AGREEMENT_HEADER DROP COLUMN ADMIN_ASSIGN_DATE;
+
+- changeSet:
+      id: FIBI-7260-4
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Add Section Config for Agreement Admin & Assignee Tracker
+      changes:
+        - sql:
+            sql: |
+             INSERT IGNORE INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) 
+             VALUES ('RS5203', 'RS52', 'Agreement Admin & Assignee Tracker', 'Y', UTC_TIMESTAMP(), 'admin')
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SECTION_CONFIG WHERE SECTION_CODE = 'RS5203' AND MODULE_CODE = 'RS52';
+- changeSet:
+      id: FIBI-7260-5
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Add Widget for Agreement Admin & Assignee Tracker
+      changes:
+        - sql:
+            sql: |
+             INSERT IGNORE INTO WIDGET_LOOKUP (WIDGET_ID,DESCRIPTION,WIDGET_NAME,IS_ACTIVE,UPDATE_TIMESTAMP,UPDATE_USER,SIZE,IMAGE_PATH) VALUES (1304,'A widget to show centralized way to track agreements assigned to 
+             administrators and the assignees working under them','Agreement Admin & Assignee Tracker','Y',UTC_TIMESTAMP(),'admin','L','agreement-admin-assignee-tracker.png');
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM WIDGET_LOOKUP WHERE WIDGET_ID = 1304 AND DESCRIPTION = 'A widget to show centralized way to track agreements assigned to administrators and the assignees working under them' AND WIDGET_NAME = 'Agreement Admin & Assignee Tracker'
+- changeSet:
+      id: FIBI-7260-6
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Add Sub Section Config for Agreement Admin & Assignee Tracker widget
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '548', 'RS5203', 'Agreement Admin & Assignee Tracker widget', UTC_TIMESTAMP(), 'admin', 'N'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_SUBSECTION_CONFIG WHERE SUB_SECTION_CODE = '548' AND SECTION_CODE = 'RS5203'
+              );
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SUBSECTION_CONFIG WHERE SUB_SECTION_CODE = '548' AND SECTION_CODE = 'RS5203';
+
+- changeSet:
+      id: FIBI-7260-7
+      author: Prabhu.E
+      labels: 'DML'
+      comment: Add UI Reference for Agreement Admin & Assignee Tracker widget
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'agmt-active-agreement', 'Active Agreement', '548', 'RS5203', 'Represents agreements that are currently in the submitted state and have not yet reached a completed or terminal status.', 'admin', UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agmt-active-agreement'
+              );
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agmt-active-agreement' AND SUB_SECTION_CODE = '548' AND SECTION_CODE = 'RS5203';
+- changeSet:
+      id: FIBI-7260-8
+      author: Prabhu.E
+      labels: 'DML'
+      comment: Add UI Reference for Agreement Admin & Assignee Tracker widget
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'agmt-admin-chart', 'No.of Administrators', '548', 'RS5203', 'Displays the number of administrators currently working on active submitted agreements.', 'admin', UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agmt-admin-chart'
+              );
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agmt-admin-chart' AND SUB_SECTION_CODE = '548' AND SECTION_CODE = 'RS5203';
+
+- changeSet:
+      id: FIBI-7260-9
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Add UI Reference for Agreement Admin & Assignee Tracker widget  
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'agmt-assignee-chart', 'No.of Assignee', '548', 'RS5203', 'Displays the count of assignee working on active submitted agreements.', 'admin', UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agmt-assignee-chart'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'agmt-assignee-chart' AND SUB_SECTION_CODE = '548' AND SECTION_CODE = 'RS5203';
+
+- changeSet:
+      id: FIBI-7422-1
+      author: Prabhu.E
+      labels: 'DML'
+      comment: Update Admin Assign Date in Agreement Header  
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              WITH ActionLogParsed AS (
+                  SELECT 
+                      AGREEMENT_REQUEST_ID,
+                      UPDATE_TIMESTAMP
+                  FROM (
+                      SELECT 
+                          AGREEMENT_REQUEST_ID,
+                          UPDATE_TIMESTAMP,
+                          ACTION_TYPE_CODE,
+                          CASE 
+                              WHEN JSON_VALID(DESCRIPTION) 
+                                  THEN JSON_UNQUOTE(JSON_EXTRACT(DESCRIPTION, '$.Administrator'))
+                              ELSE DESCRIPTION
+                          END AS DESCRIPTION
+                      FROM agreement_action_log
+                  ) T
+                  WHERE 
+                      (
+                          T.ACTION_TYPE_CODE IN ('23', '24')
+                          OR 
+                          (T.ACTION_TYPE_CODE = '100' AND T.DESCRIPTION LIKE '%</b> admin')
+                          OR
+                          (T.DESCRIPTION LIKE 'New Admin%has been assigned')
+                      )
+                      AND EXISTS (
+                          SELECT 1 
+                          FROM AGREEMENT_HEADER AH 
+                          WHERE AH.AGREEMENT_REQUEST_ID = T.AGREEMENT_REQUEST_ID 
+                            AND AH.ADMIN_PERSON_ID IS NOT NULL
+                      )
+              ),
+              LatestUpdate AS (
+                  SELECT 
+                      AGREEMENT_REQUEST_ID, 
+                      MAX(UPDATE_TIMESTAMP) AS UPDATE_TIMESTAMP
+                  FROM ActionLogParsed
+                  GROUP BY AGREEMENT_REQUEST_ID
+              )
+              UPDATE AGREEMENT_HEADER AH
+              JOIN LatestUpdate LU ON AH.AGREEMENT_REQUEST_ID = LU.AGREEMENT_REQUEST_ID
+              SET AH.ADMIN_ASSIGN_DATE = LU.UPDATE_TIMESTAMP;
+              SET SQL_SAFE_UPDATES = 1;
+
+      rollback:
+        - sql:
+            sql: |
+              UPDATE AGREEMENT_HEADER 
+              SET ADMIN_ASSIGN_DATE = NULL 
+              WHERE ADMIN_PERSON_ID IS NOT NULL AND ADMIN_ASSIGN_DATE IS NOT NULL;

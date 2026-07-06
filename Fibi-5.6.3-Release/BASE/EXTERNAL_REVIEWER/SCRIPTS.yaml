@@ -1,0 +1,343 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9688-1
+      author: Solih N
+      labels: 'DML'
+      comment: Update remove reviewer action message in EXT_REVIEW_ACTION_TYPE
+      changes:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEW_ACTION_TYPE
+              SET
+                MESSAGE = '<b>{REVIEWER NAME}</b> reviewer has been removed by <b>{ACTION OWNER}</b>.',
+                UPDATE_USER = 'admin',
+                UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE EXT_REVIEW_ACTION_TYPE_CODE = '7';
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9413-1
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create EXT_REVIEWER_RATING_TYPE table
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS EXT_REVIEWER_RATING_TYPE (
+                RATING_TYPE_CODE INT NOT NULL,
+                DESCRIPTION VARCHAR(200) NOT NULL,
+                IS_ACTIVE CHAR(1) DEFAULT 'Y',
+                SORT_ORDER INT NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                PRIMARY KEY (RATING_TYPE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: | 
+              DROP TABLE IF EXISTS EXT_REVIEWER_RATING_TYPE;
+
+  - changeSet:
+      id: FIBI-9413-2
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create EXT_REVIEWER_RATING table
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS EXT_REVIEWER_RATING (
+                EXT_REVIEWER_RATING_ID INT NOT NULL AUTO_INCREMENT,
+                REVIEW_REVIEWER_ID INT NOT NULL,
+                RATING_TYPE_CODE INT NOT NULL,
+                SCORE INT NOT NULL,
+                CREATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CREATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                PRIMARY KEY (EXT_REVIEWER_RATING_ID),
+                UNIQUE KEY EXT_REVIEWER_RATING_UK1 (REVIEW_REVIEWER_ID, RATING_TYPE_CODE),
+                KEY EXT_REVIEWER_RATING_FK2 (RATING_TYPE_CODE),
+                CONSTRAINT EXT_REVIEWER_RATING_FK1 FOREIGN KEY (REVIEW_REVIEWER_ID) REFERENCES EXT_REVIEW_REVIEWERS (REVIEW_REVIEWER_ID),
+                CONSTRAINT EXT_REVIEWER_RATING_FK2 FOREIGN KEY (RATING_TYPE_CODE) REFERENCES EXT_REVIEWER_RATING_TYPE (RATING_TYPE_CODE),
+                CONSTRAINT CHK_SCORE CHECK ((SCORE BETWEEN 1 AND 5))
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS EXT_REVIEWER_RATING;
+
+  - changeSet:
+      id: FIBI-9413-3
+      author: Adarsh
+      labels: 'DML'
+      comment: EXT_REVIEWER_RATING_TYPE values
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO EXT_REVIEWER_RATING_TYPE
+                (RATING_TYPE_CODE, DESCRIPTION, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES
+                (1, 'Thorough', 'Y', 1, UTC_TIMESTAMP(), 'admin');
+
+              INSERT IGNORE INTO EXT_REVIEWER_RATING_TYPE
+                (RATING_TYPE_CODE, DESCRIPTION, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES
+                (2, 'On Time', 'Y', 2, UTC_TIMESTAMP(), 'admin');
+
+              INSERT IGNORE INTO EXT_REVIEWER_RATING_TYPE
+                (RATING_TYPE_CODE, DESCRIPTION, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES
+                (3, 'Harshness', 'Y', 3, UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM EXT_REVIEWER_RATING_TYPE
+              WHERE RATING_TYPE_CODE IN (1, 2, 3);
+
+  - changeSet:
+      id: FIBI-9413-4
+      author: Adarsh
+      labels: 'DML'
+      comment: EXT_REVIEW_ACTION_TYPE values for reviewer score actions
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO EXT_REVIEW_ACTION_TYPE
+                (EXT_REVIEW_ACTION_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, MESSAGE)
+              VALUES
+                (26, 'Reviewer Score', UTC_TIMESTAMP(), 'admin',
+                 'Rating submitted by <b>{ACTION OWNER}</b> for <b>{REVIEWER NAME}</b>');
+
+              INSERT IGNORE INTO EXT_REVIEW_ACTION_TYPE
+                (EXT_REVIEW_ACTION_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, MESSAGE)
+              VALUES
+                (27, 'Reviewer Score Update', UTC_TIMESTAMP(), 'admin',
+                 'Rating modified by <b>{ACTION OWNER}</b> for <b>{REVIEWER NAME}</b>');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM EXT_REVIEW_ACTION_TYPE
+              WHERE EXT_REVIEW_ACTION_TYPE_CODE IN (26, 27);
+
+  - changeSet:
+      id: FIBI-9685-1
+      author: Shiva krishnan R
+      labels: DML
+      comment: Notify Reviewer Upon Review Completion
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO NOTIFICATION_TYPE (
+                NOTIFICATION_TYPE_ID,
+                MODULE_CODE,
+                SUB_MODULE_CODE,
+                DESCRIPTION,
+                SUBJECT,
+                MESSAGE,
+                PROMPT_USER,
+                IS_ACTIVE,
+                CREATE_USER,
+                CREATE_TIMESTAMP,
+                UPDATE_USER,
+                UPDATE_TIMESTAMP,
+                IS_SYSTEM_SPECIFIC,
+                SHOW_TEMPLATE_IN_MODULE,
+                SENT_TO_INITIATOR
+              ) VALUES (
+                2003,
+                22,
+                0,
+                'Notification of Review Completion',
+                'Notification of Review Completion',
+                '<p>Dear {REVIEWER_NAME},</p>
+                <p>Your review in the External Review Module has been successfully completed.</p>
+                <p><strong>Details:</strong></p>
+                <p><strong>Proposal:</strong> {PROPOSAL_ID} - {PROPOSAL_TITLE}</p>
+                <p><strong>Review Completed On:</strong> {REVIEW_COMPLETED_DATETIME}</p>
+                <p><strong>Review Reference:</strong>
+                  <a href="{APPLICATION_URL}">Click here to view the review</a>
+                </p>
+                <p>Thank you for taking the time to complete the review. Your contribution is greatly appreciated.</p>
+                <p>No further action is required from your end at this time.</p>
+                <p>Best regards,<br>ERM System</p>
+                <p>
+                  <span style="background-color:rgb(255,255,255);color:rgb(0,0,0);">
+                    Note: This is a system-generated email. Please do not reply to this email.
+                  </span>
+                </p>',
+                'N',
+                'Y',
+                'quickstart',
+                UTC_TIMESTAMP(),
+                'quickstart',
+                UTC_TIMESTAMP(),
+                'N',
+                'N',
+                'Y');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM NOTIFICATION_TYPE
+              WHERE NOTIFICATION_TYPE_ID = 2003;
+
+  - changeSet:
+      id: FIBI-9421-1
+      author: Shiva krishnan R
+      labels: 'DML'
+      comment: Notification to be sent on deleting comments in the ERM communication tab
+      changes:
+        - sql:
+          sql: |
+            INSERT IGNORE INTO NOTIFICATION_TYPE (
+              NOTIFICATION_TYPE_ID,
+              MODULE_CODE,
+              SUB_MODULE_CODE,
+              DESCRIPTION,
+              SUBJECT,
+              MESSAGE,
+              PROMPT_USER,
+              IS_ACTIVE,
+              CREATE_USER,
+              CREATE_TIMESTAMP,
+              UPDATE_USER,
+              UPDATE_TIMESTAMP,
+              IS_SYSTEM_SPECIFIC,
+              SHOW_TEMPLATE_IN_MODULE,
+              SENT_TO_INITIATOR
+            ) VALUES (
+              2002,
+              22,
+              0,
+              'Comment Deleted in Communication Tab',
+              'Comment Deleted in Communication Tab',
+              '<p>Hi Team,</p>
+
+              <p>A comment that was previously added in the Communication tab has been deleted by the admin.</p>
+
+              <p>This notification is triggered to avoid any confusion if you are unable to view the comment after receiving the earlier notification for comment addition.</p>
+
+              <p><strong>Deleted Comment:</strong> {DELETED_COMMENT}</p>
+              <p><strong>Deleted by:</strong> {UPDATE_USER}</p>
+              <p><strong>Deleted on:</strong> {REMOVAL_DATETIME}</p>
+
+              <p>Thanks<br>ERM Team</p>
+
+              <p>
+              <span style="background-color:rgb(255,255,255);color:rgb(0,0,0);">
+              Note: This is a system-generated email. Please do not reply to this email.
+              </span>
+              </p>
+
+              <p> </p>',
+              'N',
+              'Y',
+              'quickstart',
+              UTC_TIMESTAMP(),
+              'quickstart',
+              UTC_TIMESTAMP(),
+              'N',
+              'N',
+              'Y'
+            );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM NOTIFICATION_TYPE
+              WHERE NOTIFICATION_TYPE_ID = 2002; 
+
+  - changeSet:
+      id: FIBI-9413-5
+      author: Adarsh
+      labels: 'DML'
+      comment: Update rating type description for code 3
+      changes:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEWER_RATING_TYPE
+              SET DESCRIPTION = 'Balanced Review',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE RATING_TYPE_CODE = 3;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE EXT_REVIEWER_RATING_TYPE
+              SET DESCRIPTION = 'Harshness',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE RATING_TYPE_CODE = 3;
+
+  - changeSet:
+      id: FIBI-9687-2
+      author: Shiva
+      labels: 'DML'
+      comment: Update in ExternalReviewReviewer table
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+              (SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'EXT_REVIEW_REVIEWERS'
+                AND COLUMN_NAME = 'IS_DELETED') = 0,
+              'ALTER TABLE EXT_REVIEW_REVIEWERS ADD COLUMN IS_DELETED VARCHAR(1) NOT NULL DEFAULT ''N'';',
+              'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE EXT_REVIEW_REVIEWERS
+              DROP COLUMN IS_DELETED;
+
+  - changeSet:
+      id: FIBI-9406-1
+      author: Sasikumar Chandran
+      labels: 'DDL'
+      comment: Add SORT_ORDER column to EXT_REVIEW_ATTACHMENTS if not exists
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE EXT_REVIEW_ATTACHMENTS;
+              SET @sql := IF(
+              (SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'EXT_REVIEW_ATTACHMENTS'
+              AND COLUMN_NAME = 'SORT_ORDER') = 0,
+              'ALTER TABLE EXT_REVIEW_ATTACHMENTS ADD COLUMN SORT_ORDER INT NULL DEFAULT NULL AFTER IS_ATTACHMENT_MANDATORY;',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql; 
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE EXT_REVIEW_ATTACHMENTS DROP COLUMN SORT_ORDER;
+
+  - changeSet:
+      id: FIBI-9408-1
+      author: Sasikumar Chandran
+      labels: 'DDL'
+      comment: Add OVERALL_REMARKS column to EXT_REVIEW_REVIEWERS if not exists
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+              (SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'EXT_REVIEW_REVIEWERS'
+              AND COLUMN_NAME = 'OVERALL_REMARKS') = 0,
+              'ALTER TABLE EXT_REVIEW_REVIEWERS ADD COLUMN OVERALL_REMARKS VARCHAR(2000) NULL;',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql; 
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE EXT_REVIEW_REVIEWERS DROP COLUMN OVERALL_REMARKS;

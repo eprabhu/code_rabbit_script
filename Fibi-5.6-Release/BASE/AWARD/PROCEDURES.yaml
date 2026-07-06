@@ -1,0 +1,147 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9314-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_DYNAMIC_JSON;
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_COUNT_DYNAMIC_JSON;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_DYNAMIC_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_COUNT_DYNAMIC_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+        id: FIBI-7848-1
+        author: Sajith Muhammed
+        labels: 'PROCEDURES'
+        comment: New Procedure
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS IMPORT_BUDGET_PERSON_LINE_ITEM_TO_AWARD_PROJECT_TEAM;
+          - sqlFile:
+              path: ROUTINES/BASE/AWARD/PROCEDURES/IMPORT_BUDGET_PERSON_LINE_ITEM_TO_AWARD_PROJECT_TEAM.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-9548-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment:  Update the procedure to insert the Grant Code and Profit Center fields, along with a migration script to update the affected data in the SAP_FEED_BUDGET_REPORT table.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SAP_FEED_BUDGET_REPORT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_BUDGET_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+      
+  - changeSet:
+        id: FIBI-9375-1
+        author: Reshma Antony
+        labels: 'PROCEDURES'
+        comment: New procedure for sending an award closure email notification on the day following the award expiration date.
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS AWARD_CLOSURE_REMAINDER;
+          - sqlFile:
+              path: ROUTINES/BASE/AWARD/PROCEDURES/AWARD_CLOSURE_REMAINDER.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-9652-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARDS_FOR_BUDGET_UTILIZATION;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARDS_FOR_BUDGET_UTILIZATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8343-1
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: New Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10025-1
+      author: Nabeel Ahamed M 
+      labels: 'PROCEDURES'
+      comment: Update procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10061-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Update procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10143-2
+      author: Suganya.S
+      labels: 'PROCEDURES'
+      comment: Advanced Search performance optimization
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

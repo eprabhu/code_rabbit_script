@@ -1,0 +1,53 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10412
+      author: vishnu BH
+      labels: 'DML'
+      comment: Add MODIFY_DOCUMENT_PERMISSION right.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO `rights` (`RIGHT_NAME`, `DESCRIPTION`, `UPDATE_USER`, `UPDATE_TIMESTAMP`, `RIGHTS_TYPE_CODE`)
+              SELECT 'MODIFY_DOCUMENT_PERMISSION', 'To Edit Permission Tab', 'admin', UTC_TIMESTAMP(), '2'
+              WHERE NOT EXISTS (
+                SELECT 1 FROM `rights` WHERE `RIGHT_NAME` = 'MODIFY_DOCUMENT_PERMISSION'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `rights` WHERE `RIGHT_NAME` = 'MODIFY_DOCUMENT_PERMISSION';
+
+  - changeSet:
+      id: FIBI-10532-1
+      author: Solih N
+      labels: 'DML'
+      comment: Update SCHEDULER_JOB_INFO IS_ACTIVE flags by JOB_ID
+      changes:
+        - sql:
+            sql: |
+              UPDATE `SCHEDULER_JOB_INFO`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (58, 59, 63, 69);
+
+              UPDATE `SCHEDULER_JOB_INFO`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (36, 37, 38, 56, 57, 64);
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `SCHEDULER_JOB_INFO`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (58, 59, 63, 69);
+
+              UPDATE `SCHEDULER_JOB_INFO`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (36, 37, 38, 56, 57, 64);

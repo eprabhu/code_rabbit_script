@@ -1,0 +1,77 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10249-1
+      author: Hridya E K
+      labels: 'DML'
+      comment: Updated the UNASSIGNED_REQUESTS dashboard tab to inactive
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_TAB_TYPE SET IS_ACTIVE = 'N', UPDATE_USER = 'admin', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (TAB_KEY = 'UNASSIGNED_REQUESTS');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_TAB_TYPE SET `IS_ACTIVE` = 'Y', UPDATE_USER = 'admin', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (TAB_KEY = 'UNASSIGNED_REQUESTS');
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-10218-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Removing closed status configuration
+      changes:
+        - sql:
+            sql: |
+              DELETE FROM sr_available_action WHERE ACTION_TYPE_CODE = 16;
+              DELETE FROM sr_available_action WHERE STATUS_CODE = 8;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10253-1
+      author: Suganya.S
+      labels: 'DML'
+      comment: SR MY Request tab - not to show Resolved SR in the dashboard, to be shown only when searched 
+      changes:
+        - sql:
+            sql: |
+              UPDATE DASHBOARD_FILTER_CRITERIA DFC
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP 
+                  ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT 
+                  ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              JOIN DASHBOARD_CRITERIA_LOOKUP DCL 
+                  ON DCL.CRITERIA_ID = DFC.CRITERIA_ID
+              SET 
+                  DFC.VALUE = '{\"values\":[\"2\",\"11\",\"8\",\"1\",\"13\",\"12\",\"21\",\"7\",\"22\",\"6\",\"16\",\"3\",\"15\",\"14\",\"4\",\"10\"]}',
+                  DFC.UPDATE_USER = 'admin',
+                  DFC.UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE 
+                  DTT.TAB_KEY = 'MY_REQUEST'
+                  AND DFP.FILTER_NAME = 'Default'
+                  AND DCL.CRITERIA_KEY = 'CRT_SR_STATUS'
+                  AND DTT.MODULE_CODE = 20
+                AND DFP.MODULE_CODE = 20;
+      rollback: 
+        - sql:
+            sql: |
+              UPDATE DASHBOARD_FILTER_CRITERIA DFC
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP 
+                  ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT 
+                  ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              JOIN DASHBOARD_CRITERIA_LOOKUP DCL 
+                  ON DCL.CRITERIA_ID = DFC.CRITERIA_ID
+              SET 
+                  DFC.VALUE = NULL,
+                  DFC.UPDATE_USER = 'admin',
+                  DFC.UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE 
+                  DTT.TAB_KEY = 'MY_REQUEST'
+                  AND DFP.FILTER_NAME = 'Default'
+                  AND DCL.CRITERIA_KEY = 'CRT_SR_STATUS'
+                  AND DTT.MODULE_CODE = 20
+                  AND DFP.MODULE_CODE = 20;

@@ -1,0 +1,182 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8588-1
+      author: Vishnu.BH
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AGREEMENT_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8588-2
+      author: Vishnu.BH
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AWARD_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8588-3
+      author: Vishnu.BH
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_IP_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_IP_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+      
+  - changeSet:
+      id: FIBI-8588-4
+      author: Vishnu.BH
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_HISTORY;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_SERVICE_REQUEST_HISTORY.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+      
+
+  - changeSet:
+      id: FIBI-6936-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AWARD_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9384-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_IP_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_IP_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9384-2
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AGREEMENT_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9500-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AWARD_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9500-2
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_IP_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_IP_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9500-3
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AGREEMENT_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+
+
+  - changeSet:
+      id: 1
+      author: shyla
+      labels: 'PROCEDURES'
+      comment: To call sync procedures
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                CALL REFRESH_UNIT_HIERARCHY_LEVEL();
+                CALL SYNC_UNIT_WITH_CHILDREN();
+                CALL AWARD_CUSTOM_DATA_RT_FULL_SYNC();
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AGREEMENT_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,121 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9687-1
+      author: Shiva
+      labels: 'PROCEDURES'
+      comment: Modify GET_EXT_REVIEW_DASHBOARD
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_EXT_REVIEW_DASHBOARD;
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXT_REVIEW_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9687-2
+      author: Shiva
+      labels: 'PROCEDURES'
+      comment: Modify GET_EXT_REVIEW_DASHBOARD_COUNT
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_EXT_REVIEW_DASHBOARD_COUNT
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXT_REVIEW_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9408-2
+      author: Adarsh
+      labels: 'PROCEDURES'
+      comment: Modify GET_EXTERNAL_REVIEW_SUMMARY_DETAILS
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_EXTERNAL_REVIEW_SUMMARY_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXTERNAL_REVIEW_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9408-3
+      author: Adarsh
+      labels: 'PROCEDURES'
+      comment: Modify GET_EXTERNAL_REVIEW_WIDGET_DATA_IN_DETAIL
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_EXTERNAL_REVIEW_WIDGET_DATA_IN_DETAIL
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXTERNAL_REVIEW_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10783-1
+      author: Sasikumar Chandran
+      labels: 'PROCEDURES'
+      comment: Created routine for migrate existing historical data to new ERM history
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS MIGRATE_EXT_REVIEW_HISTORY;
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/MIGRATE_EXT_REVIEW_HISTORY.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+      
+  - changeSet:
+      id: FIBI-9687-3
+      author: Shiva
+      labels: 'PROCEDURES'
+      comment: Modify GET_EXTERNAL_REVIEW_SUMMARY_DETAILS
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_EXTERNAL_REVIEW_SUMMARY_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXTERNAL_REVIEW_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty   
+
+  - changeSet:
+      id: FIBI-9687-4
+      author: Shiva
+      labels: 'PROCEDURES'
+      comment: Modify GET_EXTERNAL_REVIEW_WIDGET_DATA_IN_DETAIL
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_EXTERNAL_REVIEW_WIDGET_DATA_IN_DETAIL
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXTERNAL_REVIEW_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty      
+
+  - changeSet:
+      id: FIBI-9408-4
+      author: Adarsh
+      labels: 'PROCEDURES'
+      comment: Modify GET_EXTERNAL_REVIEW_SUMMARY_DETAILS
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_EXTERNAL_REVIEW_SUMMARY_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXTERNAL_REVIEW_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

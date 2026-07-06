@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: FIBI-8978-1
+        author: Suganya.S
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP PROCEDURE IF EXISTS GET_EXTERNAL_REVIEW_SUMMARY_DETAILS;
+            - sqlFile:
+                path: ROUTINES/BASE/EXTERNAL_REVIEWER/PROCEDURES/GET_EXTERNAL_REVIEW_SUMMARY_DETAILS.sql
+                relativeToChangeLogFile: false
+                splitStatements: false
+        rollback: empty

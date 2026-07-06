@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10682-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update Grant Call Name
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES=0;
+              UPDATE GRANT_CALL_HEADER SET NAME = TRIM(NAME) WHERE NAME IS NOT NULL AND NAME <> TRIM(NAME);
+              SET SQL_SAFE_UPDATES=1;
+      rollback: empty

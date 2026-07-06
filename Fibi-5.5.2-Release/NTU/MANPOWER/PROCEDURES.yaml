@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9358-1
+        author: Arjun K R
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS DELETE_INACTIVE_PERSONS;
+          - sqlFile:
+              path: ROUTINES/NTU/MANPOWER/PROCEDURES/DELETE_INACTIVE_PERSONS.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty

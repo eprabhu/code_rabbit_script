@@ -1,0 +1,8 @@
+databaseChangeLog:
+
+    - include:
+        file: Fibi-5.6.1-Release/SMU/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.6.1-Release/SMU/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'

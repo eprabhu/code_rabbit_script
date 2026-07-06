@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7541-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROGRESS_REPORT_DASHBOARD_COUNT
+        - sqlFile:
+            path: ROUTINES/BASE/PROGRESS_REPORT/PROCEDURES/GET_PROGRESS_REPORT_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

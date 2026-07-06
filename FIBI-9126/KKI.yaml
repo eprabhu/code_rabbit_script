@@ -1,0 +1,6 @@
+databaseChangeLog:
+
+    #REPORT
+    - include:
+        file: FIBI-9126/KKI/REPORT/SCRIPTS.yaml  
+        labels: 'REPORT'

@@ -1,0 +1,70 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10350-1
+      author: vishnu
+      labels: 'DML'
+      comment: Activate elastic_sync for Service Request (servicerequest)
+      changes:
+        - sql:
+            sql: |
+              UPDATE `integration_sync_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `CONFIG_KEY` = 'servicerequest'
+                AND `CONFIG_CATEGORY` = 'elastic_sync';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `integration_sync_config`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `CONFIG_KEY` = 'servicerequest'
+                AND `CONFIG_CATEGORY` = 'elastic_sync';
+
+  - changeSet:
+      id: FIBI-10516-2
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Deactivate dyn section config for Service Request (SR2009)
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SECTION_CODE` = 'SR2009');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SECTION_CODE` = 'SR2009');
+
+  - changeSet:
+      id: FIBI-10549
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Deactivate dyn section config for Service Request (SR2010)
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SECTION_CODE` = 'SR2010');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SECTION_CODE` = 'SR2010');
+

@@ -1,0 +1,53 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.3-Release/KU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6.3-Release/KU/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+  
+    #GRANT_CALL
+    - include:
+        file: Fibi-5.6.3-Release/KU/GRANT_CALL/FUNCTIONS.yaml
+        labels: 'GRANT_CALL'
+    - include:
+        file: Fibi-5.6.3-Release/KU/GRANT_CALL/SCRIPTS.yaml
+        labels: 'GRANT_CALL'
+
+    #AWARD
+    - include:
+        file: Fibi-5.6.3-Release/KU/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6.3-Release/KU/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.6.3-Release/KU/INSTITUTE_PROPOSAL/SCRIPTS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #REPORT
+    - include:
+        file: Fibi-5.6.3-Release/KU/REPORT/SCRIPTS.yaml
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.6.3-Release/KU/REPORT/VIEWS.yaml
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.6.3-Release/KU/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.6.3-Release/KU/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6.3-Release/KU/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'

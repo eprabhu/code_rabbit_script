@@ -1,0 +1,1421 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7504-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO rights (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT
+                  (SELECT COALESCE(MAX(RIGHT_ID), 0) + 1 FROM rights),
+                  'MANAGE_SERVICE_REQUEST_COMMENTS',
+                  'To edit or delete service request comments added by other users',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '2'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM rights WHERE RIGHT_NAME = 'MANAGE_SERVICE_REQUEST_COMMENTS'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM rights WHERE RIGHT_NAME = 'MANAGE_SERVICE_REQUEST_COMMENTS';
+
+  - changeSet:
+      id: FIBI-7504-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO sr_action_type (ACTION_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, MESSAGE) VALUES ('37', 'Delete Comments', UTC_TIMESTAMP(), 'admin', 'Service Request comment has been deleted');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM sr_action_type WHERE ACTION_TYPE_CODE = '37';
+
+  - changeSet:
+      id: FIBI-7504-3
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO notification_type (NOTIFICATION_TYPE_ID, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, SUBJECT, MESSAGE, PROMPT_USER, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, IS_SYSTEM_SPECIFIC, SENT_TO_INITIATOR) VALUES ('2226', '20', '0', 'Notify the comment author that it has been edited or updated by an admin user', 'Comment {ACTION_TYPE} in Service Request {SERVICE_REQUEST_ID} – {REPORTER_USER_NAME} -- {SERVICE_REQUEST_TYPE}', '<p>Hello, </p><p>A comment you made in the <strong>{SECTION_NAME}</strong> section of the Service Request detailed below has been <strong>{ACTION_TYPE}</strong> by an authorized user: </p><p><strong>Service Request ID</strong>: {SERVICE_REQUEST_ID}<br><strong>Service Request Subject</strong>: {SUBJECT}<br><strong>Department</strong>: {DEPARTMENT}<br><strong>Reporter</strong>: {REPORTER_USER_NAME} </p><p><strong>Comment Author:</strong> {COMMENT_AUTHOR_NAME}</p><p><strong>Action Taken:</strong> {ACTION_TYPE}<br><strong>Action Author:</strong> {ACTIONED_BY_USER_NAME}<br><strong>Comment Last Updated:</strong> {UPDATED_DATE_TIME}</p><p>Please go to <strong>{SERVICE_REQUEST_APPLICATION_URL}</strong> to view the latest update on this request. </p><p>Thank you. </p><p><i>Caution: This is a system-generated email. Please do not reply to this email.</i> </p>', 'N', 'Y', 'admin', UTC_TIMESTAMP(), '', 'Y', 'Y');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM notification_type WHERE NOTIFICATION_TYPE_ID = '2226';
+
+  - changeSet:
+      id: FIBI-7545-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO dyn_subsection_config (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, HELP, INCLUDE_CUSTOM_DATA) VALUES ((SELECT SC.CODE FROM (SELECT MAX(SUB_SECTION_CODE) + 1 AS CODE FROM dyn_subsection_config) AS SC), 'SR2006', 'Service Request Supporting Documents', 'Y', UTC_TIMESTAMP(), 'admin', 'Please attach any relevant supporting documents required for this Service Request', 'N');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dyn_subsection_config WHERE DESCRIPTION = 'Service Request Supporting Documents' AND SECTION_CODE = 'SR2006';
+
+  - changeSet:
+      id: FIBI-7545-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO dyn_subsection_config (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, HELP, INCLUDE_CUSTOM_DATA) VALUES ((SELECT SC.CODE FROM (SELECT MAX(SUB_SECTION_CODE) + 1 AS CODE FROM dyn_subsection_config) AS SC), 'SR2006', 'Service Request Action Documents', 'Y', UTC_TIMESTAMP(), 'admin', 'These documents are uploaded as part of specific workflow actions and cannot be modified', 'N');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dyn_subsection_config WHERE DESCRIPTION = 'Service Request Action Documents' AND SECTION_CODE = 'SR2006';
+
+  - changeSet:
+      id: FIBI-7545-3
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO section_type (SECTION_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('2025', 'Action Comments', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM section_type WHERE SECTION_CODE = '2025' AND DESCRIPTION = 'Action Comments';
+
+  - changeSet:
+      id: FIBI-7545-4
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO section_module (MODULE_CODE, SECTION_CODE, SUB_MODULE_CODE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT
+                  '20', '2025', '0', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM section_module WHERE MODULE_CODE = '20' AND SECTION_CODE = '2025' AND SUB_MODULE_CODE = 0
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM section_module WHERE MODULE_CODE = '20' AND SECTION_CODE = '2025' AND SUB_MODULE_CODE = 0;
+
+  - changeSet:
+      id: FIBI-7561-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new section 'Other information' in DYN_SECTION_CONFIG table for Service Request module.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('SR2011', 'SR20', 'Other information', 'Y', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SECTION_CONFIG WHERE SECTION_CODE = 'SR2011' AND MODULE_CODE = 'SR20' AND DESCRIPTION = 'Other information';
+
+  - changeSet:
+      id: FIBI-7561-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new subsection 'Other Information' in DYN_SUBSECTION_CONFIG table for Service Request module.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, HELP, INSTRUCTION, INCLUDE_CUSTOM_DATA) VALUES ('2024', 'SR2011', 'Other Information', 'Y', utc_timestamp(), 'admin', 'Other Information', 'Other Information', 'N');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SUBSECTION_CONFIG WHERE SUB_SECTION_CODE = '2024' AND SECTION_CODE = 'SR2011' AND DESCRIPTION = 'Other Information';
+
+  - changeSet:
+      id: FIBI-7561-3
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new subsection 'Custom Data' in DYN_SUBSECTION_CONFIG table for Service Request module.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO PARAMETER (PARAMETER_NAME, VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('ENABLE_SECTIONWISE_CUSTOM_DATA_IN_SR', '2001', 'To add custom data into these sub sections.', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM PARAMETER WHERE PARAMETER_NAME = 'ENABLE_SECTIONWISE_CUSTOM_DATA_IN_SR' AND VALUE = '2001' AND DESCRIPTION = 'To add custom data into these sub sections.';
+
+  - changeSet:
+      id: FIBI-7561-4
+      author: Manesh.MS
+      labels: 'DML'
+      comment: New insert into MQ_ROUTER_ACTION_CONFIGURATION table for Service Request module.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO MQ_ROUTER_ACTION_CONFIGURATION (MODULE_CODE, SUB_MODULE_CODE, ACTION_TYPE, QUEUE_NAME, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT * FROM (
+                  SELECT '20', '0', 'CUSTOMDATA_SAVE', 'Q_SYNC', 'Y', utc_timestamp(), 'admin'
+              ) AS tmp
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM MQ_ROUTER_ACTION_CONFIGURATION WHERE MODULE_CODE = '20' AND SUB_MODULE_CODE = '0' AND ACTION_TYPE = 'CUSTOMDATA_SAVE' AND QUEUE_NAME = 'Q_SYNC' AND IS_ACTIVE = 'Y'
+              );
+
+              INSERT INTO MQ_ROUTER_ACTION_CONFIGURATION (MODULE_CODE, SUB_MODULE_CODE, ACTION_TYPE, QUEUE_NAME, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT * FROM (
+                  SELECT '20', '0', 'CUSTOMDATA_ADD', 'Q_SYNC', 'Y', utc_timestamp(), 'admin'
+              ) AS tmp
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM MQ_ROUTER_ACTION_CONFIGURATION WHERE MODULE_CODE = '20' AND SUB_MODULE_CODE = '0' AND ACTION_TYPE = 'CUSTOMDATA_ADD' AND QUEUE_NAME = 'Q_SYNC' AND IS_ACTIVE = 'Y'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM MQ_ROUTER_ACTION_CONFIGURATION WHERE MODULE_CODE = '20' AND SUB_MODULE_CODE = '0' AND ACTION_TYPE IN ('CUSTOMDATA_SAVE', 'CUSTOMDATA_ADD') AND QUEUE_NAME = 'Q_SYNC' AND IS_ACTIVE = 'Y';
+
+  - changeSet:
+      id: FIBI-7561-5
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new section type 'Other Information' in SECTION_TYPE table for Service Request module.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO SECTION_TYPE (SECTION_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER) VALUES('2024', 'Other Information', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM SECTION_TYPE WHERE SECTION_CODE = '2024' AND DESCRIPTION = 'Other Information';
+
+  - changeSet:
+      id: FIBI-7561-6
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new section 'Other Information' in SECTION_MODULE table for Service Request module.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO SECTION_MODULE (MODULE_CODE, SECTION_CODE, SUB_MODULE_CODE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('20', '2024', '0', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM SECTION_MODULE WHERE MODULE_CODE = '20' AND SECTION_CODE = '2024' AND SUB_MODULE_CODE = '0';
+
+  - changeSet:
+      id: FIBI-8282-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert initial data into DYN_SECTION_CONFIG table for Service Request Form Builder feature.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('SR2012', 'SR20', 'Form Builder', 'Y', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SECTION_CONFIG WHERE SECTION_CODE = 'SR2012' AND MODULE_CODE = 'SR20';
+
+  - changeSet:
+      id: FIBI-8239-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update UI_REFERENCE_ID in DYN_ELEMENT_CONFIG table for Service Request Form Builder feature.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DYN_ELEMENT_CONFIG SET UI_REFERENCE_ID = 'srvc-reqst-request-subject' WHERE UI_REFERENCE_ID = 'request-subject';
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DYN_ELEMENT_CONFIG SET UI_REFERENCE_ID = 'request-subject' WHERE UI_REFERENCE_ID = 'srvc-reqst-request-subject';
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-8237-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert 'Review in Progress' data into SR_STATUS table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO SR_STATUS (STATUS_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('15', 'Review in Progress', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM SR_STATUS WHERE STATUS_CODE = '15' AND DESCRIPTION = 'Review in Progress';
+
+  - changeSet:
+      id: FIBI-7934-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Create SR_AVAILABLE_ACTION table and add foreign key constraints for Service Request.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS SR_AVAILABLE_ACTION 
+                ( 
+                AVAILABLE_ACTION_ID INT AUTO_INCREMENT PRIMARY KEY, 
+                STATUS_CODE INT, 
+                ACTION_TYPE_CODE INT,
+                UPDATE_USER VARCHAR(60),
+                UPDATE_TIMESTAMP DATETIME, 
+                SORT_ORDER INT, 
+                  CONSTRAINT SR_AVAILABLE_ACTION_FK1 FOREIGN KEY (STATUS_CODE) REFERENCES SR_STATUS(STATUS_CODE), 
+                  CONSTRAINT SR_AVAILABLE_ACTION_FK2 FOREIGN KEY (ACTION_TYPE_CODE) REFERENCES SR_ACTION_TYPE(ACTION_TYPE_CODE) 
+                  );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS SR_AVAILABLE_ACTION;
+
+  - changeSet:
+      id: FIBI-7934-2
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Add IS_TERMINAL column to SR_STATUS table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              Analyze table SR_STATUS;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'SR_STATUS'
+                    AND COLUMN_NAME = 'IS_TERMINAL') = 0,
+                  'ALTER TABLE SR_STATUS ADD COLUMN IS_TERMINAL VARCHAR(1);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              ALTER TABLE SR_STATUS DROP COLUMN IF EXISTS IS_TERMINAL;
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-7934-3
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Add IS_TERMINAL column to SR_STATUS table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              Analyze table SR_ACTION_TYPE;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'SR_ACTION_TYPE'
+                    AND COLUMN_NAME = 'STATUS_CODE') = 0,
+                  'ALTER TABLE SR_ACTION_TYPE ADD COLUMN STATUS_CODE INT;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              Analyze table SR_ACTION_TYPE;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'SR_ACTION_TYPE'
+                    AND COLUMN_NAME = 'IS_ATTACHMENT_REQUIRED') = 0,
+                  'ALTER TABLE SR_ACTION_TYPE ADD COLUMN IS_ATTACHMENT_REQUIRED ENUM(''NONE'',''OPTIONAL'',''MANDATORY'') DEFAULT ''NONE'';',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              Analyze table SR_ACTION_TYPE;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                  FROM information_schema.REFERENTIAL_CONSTRAINTS
+                  WHERE CONSTRAINT_SCHEMA = DATABASE()
+                    AND CONSTRAINT_NAME = 'SR_ACTION_TYPE_FK1') = 0,
+                  'ALTER TABLE SR_ACTION_TYPE ADD CONSTRAINT SR_ACTION_TYPE_FK1 FOREIGN KEY (STATUS_CODE) REFERENCES SR_STATUS(STATUS_CODE);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              ALTER TABLE SR_ACTION_TYPE DROP FOREIGN KEY IF EXISTS SR_ACTION_TYPE_FK1;
+              ALTER TABLE SR_ACTION_TYPE DROP COLUMN IF EXISTS STATUS_CODE;
+              ALTER TABLE SR_ACTION_TYPE DROP COLUMN IF EXISTS IS_ATTACHMENT_REQUIRED;
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-7934-4
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update code_table_configuration for SR_ACTION_TYPE table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              UPDATE
+                code_table_configuration
+              SET
+                CONTENT = '{\n  \"group\": \"Service Request\",\n  \"codeTableName\": \"Service Request Action Type\",\n  \"description\": \"List of all service request action types\",\n  \"databaseTableName\": \"SR_ACTION_TYPE\",\n  \"fields\": [\n    {\n      \"columnName\": \"ACTION_TYPE_CODE\",\n      \"displayName\": \"Action Type Code\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 11,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"DESCRIPTION\",\n      \"displayName\": \"Description\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 200,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"MESSAGE\",\n      \"displayName\": \"Message\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1000,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n  {\n      \"columnName\": \"STATUS_CODE\",\n      \"displayName\": \"Resulting Status\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": true,\n      \"visible\": false,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"SR_STATUS#STATUS_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n    },\n    {\n      \"visible\": \"true\",\n      \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n      \"dataType\": \"String\",\n      \"isEditable\": \"false\",\n      \"canEmpty\": \"true\",\n      \"displayName\": \"Resulting status\",\n      \"isTransient\": \"true\"\n    },\n  {\n      \"columnName\": \"IS_ATTACHMENT_REQUIRED\",\n      \"displayName\": \"Attachment Required\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 100,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"systemDropdown\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": [\n        {\n          \"code\": \"NONE\",\n          \"description\": \"None\"\n        },\n        {\n          \"code\": \"OPTIONAL\",\n          \"description\": \"Optional\"\n        },\n        {\n          \"code\": \"MANDATORY\",\n          \"description\": \"Mandatory\"\n        }\n      ],\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_TIMESTAMP\",\n      \"displayName\": \"update timestamp\",\n      \"dataType\": \"Date\",\n      \"isEditable\": false,\n      \"length\": null,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_USER\",\n      \"displayName\": \"Update User\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"length\": 60,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": \"PERSON#USER_NAME\",\n      \"defaultValue\": null\n    }\n  ],\n  \"primaryKey\": [\n    \"ACTION_TYPE_CODE\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"Service Request Action Log\",\n      \"table_name\": \"sr_action_log\",\n      \"columnName\": \"ACTION_LOG_ID\"\n    },\n    {\n      \"displayName\": \"Service Request Status\",\n      \"table_name\": \"sr_status\",\n      \"columnName\": \"STATUS_CODE\"\n    }\n  ],\n  \"actions\": null\n}' 
+                ,UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin'
+              WHERE
+                TABLE_NAME = 'SR_ACTION_TYPE';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE
+                code_table_configuration
+              SET
+                CONTENT = '{"group":"Service Request","codeTableName":"Service Request Action Type","description":"List of all service request action types","databaseTableName":"SR_ACTION_TYPE","fields":[{"columnName":"ACTION_TYPE_CODE","displayName":"Action Type Code","dataType":"INTEGER","isEditable":true,"length":11,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"DESCRIPTION","displayName":"Description","dataType":"String","isEditable":true,"length":200,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"MESSAGE","displayName":"Message","dataType":"String","isEditable":true,"length":1000,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_TIMESTAMP","displayName":"update timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#USER_NAME","defaultValue":null}],"primaryKey":["ACTION_TYPE_CODE"],"dependency":[{"displayName":"Service Request Action Log","table_name":"sr_action_log","columnName":"ACTION_TYPE_CODE"}],"actions":null}'
+                ,UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin'
+              WHERE
+                TABLE_NAME = 'SR_ACTION_TYPE';
+
+  - changeSet:
+      id: FIBI-7934-5
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Add IS_TERMINAL column to SR_STATUS table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '1',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '1');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '4',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '2');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '15',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '3');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '15',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '4');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '3',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '6');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '6',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '7');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '8',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '16');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '5',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '17');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '10',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '18');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '12',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '22');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '13',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '23');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '7',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '24');
+              UPDATE SR_ACTION_TYPE SET STATUS_CODE = '14',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (ACTION_TYPE_CODE = '25');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7934-6
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert code_table_configuration for SR_AVAILABLE_ACTION table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO CODE_TABLE_CONFIGURATION (
+                TABLE_NAME, DISPLAY_NAME, CONTENT, 
+                GROUP_NAME, DESCRIPTION, UPDATE_USER, 
+                UPDATE_TIMESTAMP, IS_LOG_ENABLED
+              ) 
+              VALUES 
+                (
+                  'SR_AVAILABLE_ACTION', 'Service Request Available Action', 
+                  '{\n  \"group\": \"Service Request\",\n  \"codeTableName\": \"Service Request Available Action\",\n  \"description\": \"List of all service available action\",\n  \"databaseTableName\": \"SR_AVAILABLE_ACTION\",\n  \"fields\": [\n    {\n      \"columnName\": \"AVAILABLE_ACTION_ID\",\n      \"displayName\": \"Available action Id\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 11,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"STATUS_CODE\",\n      \"displayName\": \"Current Service Request Status\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 20,\n      \"canEmpty\": false,\n      \"visible\": false,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"SR_STATUS#STATUS_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n    },\n    {\n      \"visible\": true,\n      \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"canEmpty\": true,\n      \"displayName\": \"Current ServiceRequest Status\",\n      \"isTransient\": true\n    },\n    {\n      \"columnName\": \"ACTION_TYPE_CODE\",\n      \"displayName\": \"Next Action\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 20,\n      \"canEmpty\": false,\n      \"visible\": false,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"SR_ACTION_TYPE#ACTION_TYPE_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"visible\": true,\n      \"columnName\": \"DESCRIPTION_ACTION_TYPE_CODE\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"canEmpty\": true,\n      \"displayName\": \"Next Workflow Actions\",\n      \"isTransient\": true\n    },\n{\n      \"columnName\": \"SORT_ORDER\",\n      \"displayName\": \"Sort Order\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 20,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    }\n  ],\n  \"primaryKey\": [\n    \"AVAILABLE_ACTION_ID\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"Service Request Status\",\n      \"table_name\": \"SR_STATUS\",\n      \"columnName\": \"STATUS_CODE\"\n    },\n    {\n      \"displayName\": \"Service Request Available Actions\",\n      \"table_name\": \"SR_ACTION_TYPE\",\n      \"columnName\": \"ACTION_TYPE_CODE\"\n    }\n  ],\n  \"actions\": null\n}\n', 
+                  'Service Request', 'List of all Service request review types. To add a new entry, please ensure that data is already added/available in the following code table(s) and/or in the database table(s):. To add a new entry, please ensure that data is already added/available in the following code table(s) and/or in the database table(s):', 
+                  'admin', UTC_TIMESTAMP(), 'N'
+                );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM CODE_TABLE_CONFIGURATION WHERE TABLE_NAME = 'SR_AVAILABLE_ACTION' AND DISPLAY_NAME = 'Service Request Available Action';
+
+  - changeSet:
+      id: FIBI-7934-7
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert initial data into SR_ACTION_TYPE table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO SR_ACTION_TYPE (ACTION_TYPE_CODE,DESCRIPTION,UPDATE_TIMESTAMP,UPDATE_USER,MESSAGE,STATUS_CODE,IS_ATTACHMENT_REQUIRED) VALUES (43,'Assign Group',UTC_TIMESTAMP(),'admin','Service Request has been assigned',15,'NONE');
+              INSERT IGNORE INTO SR_ACTION_TYPE (ACTION_TYPE_CODE,DESCRIPTION,UPDATE_TIMESTAMP,UPDATE_USER,MESSAGE,STATUS_CODE,IS_ATTACHMENT_REQUIRED) VALUES (44,'Assign Both',UTC_TIMESTAMP(),'admin','Service Request has been assigned',15,'NONE');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM SR_ACTION_TYPE WHERE ACTION_TYPE_CODE IN (43,44) AND DESCRIPTION IN ('Assign Group','Assign Both');
+
+  - changeSet:
+      id: FIBI-7934-8
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert initial data into SR_AVAILABLE_ACTION table for Service Request.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 4, 24, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 4 AND ACTION_TYPE_CODE = 24
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 4, 25, 'admin', UTC_TIMESTAMP(), 2
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 4 AND ACTION_TYPE_CODE = 25
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 4, 17, 'admin', UTC_TIMESTAMP(), 3
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 4 AND ACTION_TYPE_CODE = 17
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 4, 22, 'admin', UTC_TIMESTAMP(), 4
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 4 AND ACTION_TYPE_CODE = 22
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 5, 16, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 5 AND ACTION_TYPE_CODE = 16
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 5, 7, 'admin', UTC_TIMESTAMP(), 2
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 5 AND ACTION_TYPE_CODE = 7
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 1, 23, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 1 AND ACTION_TYPE_CODE = 23
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 6, 24, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 6 AND ACTION_TYPE_CODE = 24
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 6, 25, 'admin', UTC_TIMESTAMP(), 2
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 6 AND ACTION_TYPE_CODE = 25
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 6, 17, 'admin', UTC_TIMESTAMP(), 3
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 6 AND ACTION_TYPE_CODE = 17
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 6, 23, 'admin', UTC_TIMESTAMP(), 4
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 6 AND ACTION_TYPE_CODE = 23
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 14, 23, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 14 AND ACTION_TYPE_CODE = 23
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 7, 7, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 7 AND ACTION_TYPE_CODE = 7
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 7, 23, 'admin', UTC_TIMESTAMP(), 2
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 7 AND ACTION_TYPE_CODE = 23
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 12, 23, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 12 AND ACTION_TYPE_CODE = 23
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 8, 7, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 8 AND ACTION_TYPE_CODE = 7
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 15, 24, 'admin', UTC_TIMESTAMP(), 1
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 15 AND ACTION_TYPE_CODE = 24
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 15, 25, 'admin', UTC_TIMESTAMP(), 2
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 15 AND ACTION_TYPE_CODE = 25
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 15, 17, 'admin', UTC_TIMESTAMP(), 3
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 15 AND ACTION_TYPE_CODE = 17
+              );
+
+              INSERT INTO sr_available_action (STATUS_CODE, ACTION_TYPE_CODE, UPDATE_USER, UPDATE_TIMESTAMP, SORT_ORDER)
+              SELECT 15, 22, 'admin', UTC_TIMESTAMP(), 4
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM sr_available_action WHERE STATUS_CODE = 15 AND ACTION_TYPE_CODE = 22
+              );
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM sr_available_action WHERE (STATUS_CODE = 4 AND ACTION_TYPE_CODE IN (24,25,17,22))
+              OR (STATUS_CODE = 5 AND ACTION_TYPE_CODE IN (16,7))
+              OR (STATUS_CODE = 1 AND ACTION_TYPE_CODE = 23)
+              OR (STATUS_CODE = 6 AND ACTION_TYPE_CODE IN (24,25,17,23))
+              OR (STATUS_CODE = 14 AND ACTION_TYPE_CODE = 23)
+              OR (STATUS_CODE = 7 AND ACTION_TYPE_CODE IN (7,23))
+              OR (STATUS_CODE = 12 AND ACTION_TYPE_CODE = 23)
+              OR (STATUS_CODE = 8 AND ACTION_TYPE_CODE = 7)
+              OR (STATUS_CODE = 15 AND ACTION_TYPE_CODE IN (24,25,17,22));
+
+  - changeSet:
+      id: FIBI-7259-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Add new attachment type for NOA attachment'
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO SR_ATTACHMENT_TYPE (`ATTACHMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `IS_ACTIVE`, `IS_PRIVATE`) VALUES ('10', 'NOA Attachment', UTC_TIMESTAMP(), 'admin', 'Y', 'N');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM SR_ATTACHMENT_TYPE WHERE ATTACHMENT_TYPE_CODE = '10';
+
+  - changeSet:
+      id: FIBI-7865-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Create new tables for Service Request Task Management
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS `SR_TASK_STATUS` (
+                `TASK_STATUS_CODE` VARCHAR(3) NOT NULL,
+                `DESCRIPTION` VARCHAR(200) NOT NULL,
+                `UPDATE_TIMESTAMP` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `UPDATE_USER` VARCHAR(60) NOT NULL,
+                `IS_ACTIVE` CHAR(1) NOT NULL DEFAULT 'Y',
+                PRIMARY KEY (`TASK_STATUS_CODE`)
+              );
+
+              CREATE TABLE IF NOT EXISTS `SR_TASK_TYPE` (
+                `TASK_TYPE_CODE` VARCHAR(3) NOT NULL,
+                `DESCRIPTION` VARCHAR(200) NOT NULL,
+                `UPDATE_TIMESTAMP` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `UPDATE_USER` VARCHAR(60) NOT NULL,
+                `IS_ACTIVE` CHAR(1) NOT NULL DEFAULT 'Y',
+                PRIMARY KEY (`TASK_TYPE_CODE`)
+              );
+
+              CREATE TABLE IF NOT EXISTS `SR_TASK` (
+                `TASK_ID` INT NOT NULL AUTO_INCREMENT,
+                `TASK_TYPE_CODE` VARCHAR(3) NOT NULL,
+                `TASK_STATUS_CODE` VARCHAR(3) NOT NULL,
+                `ASSIGNEE_PERSON_ID` VARCHAR(40) DEFAULT NULL,
+                `CREATE_TIMESTAMP` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `CREATE_USER` VARCHAR(60) NOT NULL,
+                `UPDATE_TIMESTAMP` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `UPDATE_USER` VARCHAR(60) NOT NULL,
+                `DESCRIPTION` VARCHAR(2000) DEFAULT NULL,
+                `DUE_DATE` DATETIME DEFAULT NULL,
+                `SR_HEADER_ID` INT NOT NULL,
+                `ASSIGNED_ON` DATETIME DEFAULT NULL,
+                PRIMARY KEY (`TASK_ID`),
+                KEY `SR_TASK_FK1` (`TASK_TYPE_CODE`),
+                KEY `SR_TASK_FK2` (`TASK_STATUS_CODE`),
+                KEY `SR_TASK_FK3` (`SR_HEADER_ID`),
+                CONSTRAINT `SR_TASK_FK1` FOREIGN KEY (`TASK_TYPE_CODE`) REFERENCES `SR_TASK_TYPE` (`TASK_TYPE_CODE`),
+                CONSTRAINT `SR_TASK_FK2` FOREIGN KEY (`TASK_STATUS_CODE`) REFERENCES `SR_TASK_STATUS` (`TASK_STATUS_CODE`),
+                CONSTRAINT `SR_TASK_FK3` FOREIGN KEY (`SR_HEADER_ID`) REFERENCES `SR_HEADER` (`SR_HEADER_ID`)
+              );
+
+              CREATE TABLE IF NOT EXISTS `SR_TASK_ATTACHMENT` (
+                `ATTACHMENT_ID` INT NOT NULL AUTO_INCREMENT,
+                `SR_TASK_ID` INT DEFAULT NULL,
+                `ACTION_LOG_ID` INT DEFAULT NULL,
+                `FILE_NAME` VARCHAR(500) DEFAULT NULL,
+                `CONTENT_TYPE` VARCHAR(255) DEFAULT NULL,
+                `UPDATE_TIMESTAMP` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `UPDATE_USER` VARCHAR(60) DEFAULT NULL,
+                `FILE_DATA_ID` VARCHAR(100) DEFAULT NULL,
+                `VERSION_NUMBER` INT DEFAULT NULL,
+                `DESCRIPTION` VARCHAR(1000) DEFAULT NULL,
+                `DOCUMENT_ID` INT DEFAULT NULL,
+                `CREATE_USER` VARCHAR(60) DEFAULT NULL,
+                PRIMARY KEY (`ATTACHMENT_ID`),
+                KEY `SR_TASK_ATTACHMENT_FK1` (`SR_TASK_ID`),
+                CONSTRAINT `SR_TASK_ATTACHMENT_FK1` FOREIGN KEY (`SR_TASK_ID`) REFERENCES `SR_TASK` (`TASK_ID`)
+              );
+
+              CREATE TABLE IF NOT EXISTS `SR_TASK_HISTORY` (
+                `SR_TASK_HISTORY_ID` INT NOT NULL AUTO_INCREMENT,
+                `ACTION_LOG_ID` INT DEFAULT NULL,
+                `TASK_ID` INT DEFAULT NULL,
+                `TASK_TYPE_CODE` VARCHAR(3) DEFAULT NULL,
+                `PREV_TASK_TYPE_CODE` VARCHAR(3) DEFAULT NULL,
+                `TASK_STATUS_CODE` VARCHAR(3) DEFAULT NULL,
+                `PREV_TASK_STATUS_CODE` VARCHAR(3) DEFAULT NULL,
+                `ASSIGNEE_PERSON_ID` VARCHAR(40) DEFAULT NULL,
+                `PREV_ASSIGNEE_PERSON_ID` VARCHAR(40) DEFAULT NULL,
+                `DESCRIPTION` VARCHAR(2000) DEFAULT NULL,
+                `PREV_DESCRIPTION` VARCHAR(2000) DEFAULT NULL,
+                `PREV_ATTACHMENT_NAME` VARCHAR(100) DEFAULT NULL,
+                `ATTACHMENT_NAME` VARCHAR(100) DEFAULT NULL,
+                `DUE_DATE` DATETIME DEFAULT NULL,
+                `PREV_DUE_DATE` DATETIME DEFAULT NULL,
+                `CREATE_TIMESTAMP` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `CREATE_USER` VARCHAR(60) NOT NULL,
+                `COMMENT` VARCHAR(2000) DEFAULT NULL,
+                PRIMARY KEY (`SR_TASK_HISTORY_ID`)
+              );
+
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS `SR_TASK_HISTORY`;
+              DROP TABLE IF EXISTS `SR_TASK_ATTACHMENT`;
+              DROP TABLE IF EXISTS `SR_TASK`;
+              DROP TABLE IF EXISTS `SR_TASK_TYPE`;
+              DROP TABLE IF EXISTS `SR_TASK_STATUS`;
+
+  - changeSet:
+      id: FIBI-7865-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert initial data into SR_TASK_STATUS, SR_TASK_TYPE, SR_ACTION_TYPE and NOTIFICATION_TYPE tables
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO SR_ACTION_TYPE (`ACTION_TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`MESSAGE`,`STATUS_CODE`,`IS_ATTACHMENT_REQUIRED`) VALUES (39,'Task Created',UTC_TIMESTAMP(),'admin','<b>Task Created:</b><br><b><TASK TYPE></b> task has been created by <b><CREATOR></b><br><b>Assignee:</b> <ASSIGNEE><br><b>Due Date:</b> <DUE_DATE><br><b>Attachments:</b> <ATTACHMENTS>',NULL,'OPTIONAL');
+
+              INSERT IGNORE INTO SR_ACTION_TYPE (`ACTION_TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`MESSAGE`,`STATUS_CODE`,`IS_ATTACHMENT_REQUIRED`) VALUES (40,'Task Started',UTC_TIMESTAMP(),'admin','<b>Task Started:</b><br> <b><TASK TYPE></b> task has been started by <b><ASSIGNEE></b>',NULL,'OPTIONAL');
+
+              INSERT IGNORE INTO SR_ACTION_TYPE (`ACTION_TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`MESSAGE`,`STATUS_CODE`,`IS_ATTACHMENT_REQUIRED`) VALUES (41,'Task On Hold',UTC_TIMESTAMP(),'admin','<b>Task On-hold:</b><br> <b><TASK TYPE></b> task has been put on hold by <b><ASSIGNEE></b><br><b>Comment:</b> <COMMENT><br><b>Attachments:</b> <ATTACHMENTS>',NULL,'OPTIONAL');
+
+              INSERT IGNORE INTO SR_ACTION_TYPE (`ACTION_TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`MESSAGE`,`STATUS_CODE`,`IS_ATTACHMENT_REQUIRED`) VALUES (42,'Task Completed',UTC_TIMESTAMP(),'admin','<b>Task Completed:</b><br><b><TASK TYPE><b> task has been completed by <b><ASSIGNEE></b><br><b>Comment:</b><COMMENT><br><b>Attachments:</b> <ATTACHMENTS>',NULL,'OPTIONAL');
+
+              INSERT IGNORE INTO SR_ACTION_TYPE (`ACTION_TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`MESSAGE`,`STATUS_CODE`,`IS_ATTACHMENT_REQUIRED`) VALUES (45,'Task Updated',UTC_TIMESTAMP(),'admin','<b>Task Updated:</b><br> <b><TASK TYPE></b> task has been updated by <b><ASSIGNEE></b>',NULL,'OPTIONAL');
+
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES (2228,20,0,'Notify assignee(s) that a task has been assigned','{TASK_NAME} has been assigned for {SUBJECT}','<p>Dear {ASSIGNEE_NAME},</p><p>The task \"<strong>{TASK_NAME}</strong>\" has been assigned to you by {TASK_UPDATE_USER} for Service Request <strong>{SUBJECT}</strong>.</p><p><strong>Due Date:</strong> {TASK_DUE_DATE}</p><p>Please go to {APPLICATION_URL} to view and complete the task.</p><p>Thank you.</p><p><i>Note: This is a system-generated email. Please do not reply.</i></p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'Y','N','N');
+
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES (2229,20,0,'Notify old and new assignee when a task is reassigned','{TASK_NAME} has been reassigned for {SUBJECT}','<p>Hello,</p><p>The task \"<strong>{TASK_NAME}</strong>\" for Service Request <strong>{SUBJECT}</strong> has been reassigned.</p><p><strong>Previous Assignee:</strong> {OLD_ASSIGNEE_NAME}<br><strong>New Assignee:</strong> {ASSIGNEE_NAME}</p><p>Reassigned by: {TASK_UPDATE_USER}</p><p>Please go to {APPLICATION_URL} to view the latest details.</p><p><i>Note: This is a system-generated email. Please do not reply.</i></p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'Y','N','N');
+
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES (2230,20,0,'Notify assignee and task creator when a task is deleted','{TASK_NAME} has been deleted from {SUBJECT}','<p>Hello,</p><p>The task \"<strong>{TASK_NAME}</strong>\" in Service Request <strong>{SUBJECT}</strong> has been deleted.</p><p><strong>Deleted By:</strong> {TASK_UPDATE_USER}</p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'Y','N','N');
+
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES (2231,20,0,'Notify task creator when assignee starts the task','{TASK_NAME} has been started in {SUBJECT}','<p>Dear {TASK_CREATOR_NAME},</p><p>The task \"<strong>{TASK_NAME}</strong>\" in Service Request <strong>{SUBJECT}</strong> has been started by {ASSIGNEE_NAME}.</p><p>Start Date: {UPDATED_AT}</p><p>Please go to {APPLICATION_URL} for details.</p><p><i>Note: This is a system-generated email. Please do not reply.</i></p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'Y','N','N');
+
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES (2232,20,0,'Notify task creator and assignee when task is put on hold','{TASK_NAME} is on hold in {SUBJECT}','<p>Hello,</p><p>The task \"<strong>{TASK_NAME}</strong>\" in Service Request <strong>{SUBJECT}</strong> has been put <strong>On Hold</strong> by {TASK_UPDATE_USER}.</p><p><strong>Reason:</strong> {ON_HOLD_REASON}</p><p>Task Creator: {TASK_CREATOR_NAME}<br>Assignee: {ASSIGNEE_NAME}</p><p><i>Note: This is a system-generated email. Please do not reply.</i></p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'Y','N','N');
+
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES (2233,20,0,'Notify task creator when a task is completed','{TASK_NAME} has been completed in {SUBJECT}','<p>Dear {TASK_CREATOR_NAME},</p><p>The task \"<strong>{TASK_NAME}</strong>\" in Service Request <strong>{SUBJECT}</strong> has been marked as <strong>Completed</strong> by {TASK_UPDATE_USER}.</p><p>Completed Date: {UPDATED_AT}</p><p>Please go to {APPLICATION_URL} for details.</p><p><i>Note: This is a system-generated email. Please do not reply.</i></p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'Y','N','N');
+
+              INSERT IGNORE INTO `MESSAGE` (`MESSAGE_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('2001', 'Task has been assigned to you', UTC_TIMESTAMP(), 'admin');
+
+              INSERT IGNORE INTO SR_TASK_STATUS (`task_status_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('1','Assigned',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_STATUS (`task_status_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('2','Completed',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_STATUS (`task_status_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('3','On Hold',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_STATUS (`task_status_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('4','In Progress',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('1','Activation',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('10','Large Structure Maintenance',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('11','Miscellaneous',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('12','New Child',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('13','New Entity',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('14','Other Award Setups',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('15','Payment/Invoice/Billing Info',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('16','Rates Update',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('2','Award Budget',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('3','Closeouts',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('4','Consortium',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('5','Federal UG Grant Setups',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('6','Federal UG Grant Mods',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('7','Forensics',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('8','Input Form',UTC_TIMESTAMP(),'admin','Y');
+
+              INSERT IGNORE INTO SR_TASK_TYPE (`task_type_code`,`description`,`update_timestamp`,`update_user`,`is_active`) VALUES ('9','IP edits',UTC_TIMESTAMP(),'admin','Y');
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES=0;
+              DELETE FROM SR_TASK_TYPE WHERE TASK_TYPE_CODE IN ('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16');
+              DELETE FROM SR_TASK_STATUS WHERE TASK_STATUS_CODE IN ('1','2','3','4');
+              DELETE FROM MESSAGE WHERE MESSAGE_TYPE_CODE = '2001';
+              DELETE FROM NOTIFICATION_TYPE WHERE NOTIFICATION_TYPE_ID IN (2228,2229,2230,2231,2232,2233);
+              DELETE FROM SR_ACTION_TYPE WHERE ACTION_TYPE_CODE IN (39,40,41,42,45);
+              SET SQL_SAFE_UPDATES=1;
+
+  - changeSet:
+      id: FIBI-7865-3
+      author: Prabhu.E
+      labels: 'DDL'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              Analyze table SR_ACTION_LOG;
+              
+              SET @sql1 := IF(
+              	(SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'SR_ACTION_LOG'
+                     AND COLUMN_NAME = 'SR_TASK_ID') = 1,
+                  'DO 1',
+                  'ALTER TABLE `SR_ACTION_LOG` ADD COLUMN `SR_TASK_ID` INT NULL DEFAULT NULL AFTER `SR_HEADER_ID`;'
+              );
+              
+              PREPARE stmt1 FROM @sql1;
+              EXECUTE stmt1;
+              DEALLOCATE PREPARE stmt1;
+      rollback:
+        - sql:
+            sql: |
+              Analyze table SR_ACTION_LOG;
+              
+              SET @sql1 := IF(
+              	(SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'SR_ACTION_LOG'
+                     AND COLUMN_NAME = 'SR_TASK_ID') = 0,
+                  'DO 1',
+                  'ALTER TABLE `SR_ACTION_LOG` DROP COLUMN `SR_TASK_ID`;'
+              );
+              
+              PREPARE stmt1 FROM @sql1;
+              EXECUTE stmt1;
+              DEALLOCATE PREPARE stmt1;
+
+  - changeSet:
+      id: FIBI-8587-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE CODE_TABLE_CONFIGURATION SET DESCRIPTION = 'This table defines all the actions that users can take on a Service Request (e.g., Submit, Reject, Delete). These actions are then mapped in the Service Request Available Action table to determine when and how they change a Service Request(s) status.
+
+                • Action Type Code: The unique, internal system ID for this action.
+                • Description: This is the label for the button or option that users click to advance the Service Request. This text should clearly indicate the action being taken to move the request to its next status.
+                • Message: The standard system message or notification text displayed when an action is performed. 
+                • Resulting Status: The new status the Service Request will enter immediately after an action is performed. 
+                • Attachment Required: Specifies if a supporting file or document is mandatory when a user executes an action. 
+              ' WHERE (TABLE_NAME = 'SR_ACTION_TYPE');
+
+              UPDATE CODE_TABLE_CONFIGURATION SET DESCRIPTION = 'This table manages the workflow by defining which actions are available to be taken on a Service Request depending on its current status, and what the resulting status (Next Workflow Action) will be. It maps the possible path a Service Request can follow. To add a new action mapping, ensure the statuses and actions involved are already defined in the Service Request Status and Service Request Action Type tables, respectively.
+
+                • Available Action Id: The unique ID for the action that can be performed. 
+                • Current Service Request Status: The status the Service Request must be in for the "Available Action" to be an option.
+                • Next Workflow Actions: The resulting status of the Service Request after the "Available Action" is performed. 
+                • Sort Order: The display order for the actions when presented to the user. 
+              ' WHERE (TABLE_NAME = 'SR_AVAILABLE_ACTION');
+
+              UPDATE CODE_TABLE_CONFIGURATION SET DESCRIPTION = 'This table defines every possible status a Service Request can hold throughout its lifecycle (e.g., Submitted, Resolved, Closed). These statuses are used in the Service Request Available Action table to map the workflow.
+
+                • Status Code: The unique, internal system ID for a status.
+                • Description: This displays the current state of the Service Request. This text appears on the Service Request to clearly communicate the request(s) position in the workflow.
+                • Action Type Code: The Action Type Code associated with a status.
+              ' WHERE (TABLE_NAME = 'SR_STATUS');
+
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{\n  \"group\": \"Service Request\",\n  \"codeTableName\": \"Service Request Action Type\",\n  \"description\": \"List of all service request action types\",\n  \"databaseTableName\": \"SR_ACTION_TYPE\",\n  \"fields\": [\n    {\n      \"columnName\": \"ACTION_TYPE_CODE\",\n      \"displayName\": \"Action Type Code\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 11,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"DESCRIPTION\",\n      \"displayName\": \"Description\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 200,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"MESSAGE\",\n      \"displayName\": \"Message\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1000,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n  {\n      \"columnName\": \"STATUS_CODE\",\n      \"displayName\": \"Resulting Status\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": true,\n      \"visible\": false,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"SR_STATUS#STATUS_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n    },\n    {\n      \"visible\": \"true\",\n      \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n      \"dataType\": \"String\",\n      \"isEditable\": \"false\",\n      \"canEmpty\": \"true\",\n      \"displayName\": \"Resulting Status\",\n      \"isTransient\": \"true\"\n    },\n  {\n      \"columnName\": \"IS_ATTACHMENT_REQUIRED\",\n      \"displayName\": \"Attachment Required\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 100,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"systemDropdown\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": [\n        {\n          \"code\": \"NONE\",\n          \"description\": \"None\"\n        },\n        {\n          \"code\": \"OPTIONAL\",\n          \"description\": \"Optional\"\n        },\n        {\n          \"code\": \"MANDATORY\",\n          \"description\": \"Mandatory\"\n        }\n      ],\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_TIMESTAMP\",\n      \"displayName\": \"update timestamp\",\n      \"dataType\": \"Date\",\n      \"isEditable\": false,\n      \"length\": null,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_USER\",\n      \"displayName\": \"Update User\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"length\": 60,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": \"PERSON#USER_NAME\",\n      \"defaultValue\": null\n    }\n  ],\n  \"primaryKey\": [\n    \"ACTION_TYPE_CODE\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"Service Request Action Log\",\n      \"table_name\": \"sr_action_log\",\n      \"columnName\": \"ACTION_LOG_ID\"\n    },\n    {\n      \"displayName\": \"Service Request Status\",\n      \"table_name\": \"sr_status\",\n      \"columnName\": \"STATUS_CODE\"\n    }\n  ],\n  \"actions\": null\n}' WHERE (TABLE_NAME = 'SR_ACTION_TYPE');
+
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{\n  \"group\": \"Service Request\",\n  \"codeTableName\": \"Service Request Available Action\",\n  \"description\": \"List of all service available action\",\n  \"databaseTableName\": \"SR_AVAILABLE_ACTION\",\n  \"fields\": [\n    {\n      \"columnName\": \"AVAILABLE_ACTION_ID\",\n      \"displayName\": \"Available Action Id\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 11,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"STATUS_CODE\",\n      \"displayName\": \"Current Service Request Status\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 20,\n      \"canEmpty\": false,\n      \"visible\": false,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"SR_STATUS#STATUS_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n    },\n    {\n      \"visible\": true,\n      \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"canEmpty\": true,\n      \"displayName\": \"Current Service Request Status\",\n      \"isTransient\": true\n    },\n    {\n      \"columnName\": \"ACTION_TYPE_CODE\",\n      \"displayName\": \"Next Action\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 20,\n      \"canEmpty\": false,\n      \"visible\": false,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"SR_ACTION_TYPE#ACTION_TYPE_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"visible\": true,\n      \"columnName\": \"DESCRIPTION_ACTION_TYPE_CODE\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"canEmpty\": true,\n      \"displayName\": \"Next Workflow Actions\",\n      \"isTransient\": true\n    },\n{\n      \"columnName\": \"SORT_ORDER\",\n      \"displayName\": \"Sort Order\",\n      \"dataType\": \"INTEGER\",\n      \"isEditable\": true,\n      \"length\": 20,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    }\n  ],\n  \"primaryKey\": [\n    \"AVAILABLE_ACTION_ID\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"Service Request Status\",\n      \"table_name\": \"SR_STATUS\",\n      \"columnName\": \"STATUS_CODE\"\n    },\n    {\n      \"displayName\": \"Service Request Available Actions\",\n      \"table_name\": \"SR_ACTION_TYPE\",\n      \"columnName\": \"ACTION_TYPE_CODE\"\n    }\n  ],\n  \"actions\": null\n}\n' WHERE (TABLE_NAME = 'SR_AVAILABLE_ACTION');
+
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{\"group\": \"Service Request\", \"codeTableName\": \"Service Request Status\", \"description\": \"List of all service request statuses\", \"databaseTableName\": \"SR_STATUS\", \"fields\": [{\"columnName\": \"STATUS_CODE\", \"displayName\": \"Status Code\", \"dataType\": \"INTEGER\", \"isEditable\": true, \"length\": 11, \"canEmpty\": false, \"visible\": true, \"valueChanged\": null, \"index\": null, \"filterType\": null, \"valueField\": null, \"isTransient\": null, \"values\": null, \"refColumnName\": null, \"defaultValue\": null}, {\"columnName\": \"DESCRIPTION\", \"displayName\": \"Description\", \"dataType\": \"String\", \"isEditable\": true, \"length\": 200, \"canEmpty\": false, \"visible\": true, \"valueChanged\": null, \"index\": null, \"filterType\": null, \"valueField\": null, \"isTransient\": null, \"values\": null, \"refColumnName\": null, \"defaultValue\": null}, {\"columnName\": \"ACTION_TYPE_CODE\", \"displayName\": \"Action Type Code\", \"dataType\": \"INTEGER\", \"isEditable\": true, \"length\": 3, \"canEmpty\": false, \"visible\": false, \"valueChanged\": null, \"index\": null, \"filterType\": \"lookUp\", \"valueField\": \"SR_ACTION_TYPE#ACTION_TYPE_CODE\", \"isTransient\": null, \"values\": null, \"refColumnName\": null, \"defaultValue\": \"DESCRIPTION_ACTION_TYPE_CODE\"}, {\"columnName\": \"DESCRIPTION_ACTION_TYPE_CODE\", \"displayName\": \"Action Type\", \"dataType\": \"String\", \"isEditable\": false, \"length\": null, \"canEmpty\": true, \"visible\": true, \"valueChanged\": null, \"index\": null, \"filterType\": null, \"valueField\": null, \"isTransient\": \"true\", \"values\": null, \"refColumnName\": null, \"defaultValue\": null}, {\"columnName\": \"UPDATE_TIMESTAMP\", \"displayName\": \"update timestamp\", \"dataType\": \"Date\", \"isEditable\": false, \"length\": null, \"canEmpty\": true, \"visible\": true, \"valueChanged\": null, \"index\": null, \"filterType\": null, \"valueField\": null, \"isTransient\": null, \"values\": null, \"refColumnName\": null, \"defaultValue\": null}, {\"columnName\": \"UPDATE_USER\", \"displayName\": \"Update User\", \"dataType\": \"String\", \"isEditable\": false, \"length\": 60, \"canEmpty\": true, \"visible\": true, \"valueChanged\": null, \"index\": null, \"filterType\": null, \"valueField\": null, \"isTransient\": null, \"values\": null, \"refColumnName\": \"PERSON#USER_NAME\", \"defaultValue\": null}], \"primaryKey\": [\"STATUS_CODE\"], \"dependency\": [{\"displayName\": \"Service Request Header\", \"table_name\": \"sr_header\", \"columnName\": \"STATUS_CODE\"}, {\"displayName\": \"Service Request Status History\", \"table_name\": \"sr_status_history\", \"columnName\": \"STATUS_CODE\"}, {\"displayName\": \"Service Request Action Log\", \"table_name\": \"sr_action_log\", \"columnName\": \"STATUS_CODE\"}, {\"displayName\": \"Service Request process Flow\", \"table_name\": \"sr_process_flow\", \"columnName\": \"STATUS_CODE\"}], \"actions\": null}' WHERE (TABLE_NAME = 'SR_STATUS');
+
+              UPDATE SR_STATUS SET DESCRIPTION = 'Review In Progress' WHERE (STATUS_CODE = '15');
+
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8587-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO SR_AVAILABLE_ACTION (
+                  STATUS_CODE,
+                  ACTION_TYPE_CODE,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  SORT_ORDER
+              )
+              SELECT
+                  '2',
+                  '22',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '1'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM SR_AVAILABLE_ACTION
+                  WHERE STATUS_CODE = '2'
+                    AND ACTION_TYPE_CODE = '22'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM SR_AVAILABLE_ACTION WHERE STATUS_CODE = '2' AND ACTION_TYPE_CODE = '22';
+
+  - changeSet:
+      id: FIBI-7865-4
+      author: Prabhu.E
+      labels: 'DML'
+      comment: Insert new right 'MANAGE_SERVICE_REQUEST_TASK' into rights table
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO rights (
+                  RIGHT_ID,
+                  RIGHT_NAME,
+                  DESCRIPTION,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  RIGHTS_TYPE_CODE
+              )
+              SELECT
+                  IFNULL(MAX(r.RIGHT_ID), 0) + 1,
+                  'MANAGE_SERVICE_REQUEST_TASK',
+                  'To access AI Document Analyzer',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '1'
+              FROM rights r
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM rights
+                  WHERE RIGHT_NAME = 'MANAGE_SERVICE_REQUEST_TASK'
+              );
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              DELETE FROM rights WHERE RIGHT_NAME = 'MANAGE_SERVICE_REQUEST_TASK';
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-7865-5
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO SR_ACTION_TYPE (ACTION_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, MESSAGE, IS_ATTACHMENT_REQUIRED) VALUES 
+              ('46', 'Task Deleted', UTC_TIMESTAMP(), 'admin', '<b>Task Deleted:</b><br><b><TASK TYPE></b> task has been deleted by <b><CREATOR></b><br><b>Assignee:</b> 
+              <ASSIGNEE><br><b>Due Date:</b> <DUE_DATE><br><b>Attachments:</b> <ATTACHMENTS>', 'OPTIONAL');
+
+              INSERT IGNORE INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('SR2013', 'SR20', 'Task', 'Y', UTC_TIMESTAMP(), 'admin');
+              UPDATE sr_action_type SET MESSAGE = '<b>Task Updated:</b><br> <b><TASK TYPE></b> task has been updated by <b><UPDATED BY></b> ' WHERE (ACTION_TYPE_CODE = '45');
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES=0;
+              DELETE FROM SR_ACTION_TYPE WHERE ACTION_TYPE_CODE = '46';
+              DELETE FROM DYN_SECTION_CONFIG WHERE SECTION_CODE = 'SR2013' AND MODULE_CODE = 'SR20';
+              SET SQL_SAFE_UPDATES=1;
+
+  - changeSet:
+      id: FIBI-8719-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert SR_TASK_TYPE code table configuration.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `CODE_TABLE_CONFIGURATION` (`TABLE_NAME`, `DISPLAY_NAME`, `CONTENT`, `GROUP_NAME`, `DESCRIPTION`, `UPDATE_USER`, `UPDATE_TIMESTAMP`, `IS_LOG_ENABLED`) VALUES ('SR_TASK_TYPE', 'Service Request Task Type', '{\"group\":\"Service Request\",\"codeTableName\":\"Service Request Task Type\",\"description\":\"List of all service request task types\",\"databaseTableName\":\"SR_TASK_TYPE\",\"fields\":[{\"columnName\":\"TASK_TYPE_CODE\",\"displayName\":\"Task Type Code\",\"dataType\":\"String\",\"isEditable\":true,\"length\":3,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DESCRIPTION\",\"displayName\":\"Description\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update Timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#PERSON_ID\",\"defaultValue\":null}],\"primaryKey\":[\"TASK_TYPE_CODE\"],\"dependency\":[{\"displayName\":\"Service Request Task\",\"table_name\":\"TASK_TYPE_CODE\",\"columnName\":\"TASK_ID\"}],\"actions\":null}', 'Service Request', 'List of all service request task types', 'admin', UTC_TIMESTAMP(), 'N');
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              DELETE FROM CODE_TABLE_CONFIGURATION WHERE TABLE_NAME = 'SR_TASK_TYPE';
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-8571-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update SR_AVAILABLE_ACTION code table configuration content
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{\n    \"group\": \"Service Request\",\n    \"codeTableName\": \"Service Request Available Action\",\n    \"description\": \"List of all service available action\",\n    \"databaseTableName\": \"SR_AVAILABLE_ACTION\",\n    \"fields\": [\n        {\n            \"columnName\": \"AVAILABLE_ACTION_ID\",\n            \"displayName\": \"Available Action Id\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 11,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"STATUS_CODE\",\n            \"displayName\": \"Current Service Request Status\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"SR_STATUS#STATUS_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n        },\n        {\n            \"visible\": true,\n            \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"canEmpty\": true,\n            \"displayName\": \"Current Service Request Status\",\n            \"isTransient\": true\n        },\n        {\n            \"columnName\": \"ACTION_TYPE_CODE\",\n            \"displayName\": \"Next Action\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"SR_ACTION_TYPE#ACTION_TYPE_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_ACTION_TYPE_CODE\"\n        },\n        {\n            \"visible\": true,\n            \"columnName\": \"DESCRIPTION_ACTION_TYPE_CODE\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"canEmpty\": true,\n            \"displayName\": \"Next Workflow Actions\",\n            \"isTransient\": true\n        },\n        {\n            \"columnName\": \"SORT_ORDER\",\n            \"displayName\": \"Sort Order\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"update timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"AVAILABLE_ACTION_ID\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Service Request Status\",\n            \"table_name\": \"SR_STATUS\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request Available Actions\",\n            \"table_name\": \"SR_ACTION_TYPE\",\n            \"columnName\": \"ACTION_TYPE_CODE\"\n        }\n    ],\n    \"actions\": null\n}',
+              UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE TABLE_NAME = 'SR_AVAILABLE_ACTION'
+              AND CONTENT <> '{\n    \"group\": \"Service Request\",\n    \"codeTableName\": \"Service Request Available Action\",\n    \"description\": \"List of all service available action\",\n    \"databaseTableName\": \"SR_AVAILABLE_ACTION\",\n    \"fields\": [\n        {\n            \"columnName\": \"AVAILABLE_ACTION_ID\",\n            \"displayName\": \"Available Action Id\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 11,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"STATUS_CODE\",\n            \"displayName\": \"Current Service Request Status\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"SR_STATUS#STATUS_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n        },\n        {\n            \"visible\": true,\n            \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"canEmpty\": true,\n            \"displayName\": \"Current Service Request Status\",\n            \"isTransient\": true\n        },\n        {\n            \"columnName\": \"ACTION_TYPE_CODE\",\n            \"displayName\": \"Next Action\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"SR_ACTION_TYPE#ACTION_TYPE_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_ACTION_TYPE_CODE\"\n        },\n        {\n            \"visible\": true,\n            \"columnName\": \"DESCRIPTION_ACTION_TYPE_CODE\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"canEmpty\": true,\n            \"displayName\": \"Next Workflow Actions\",\n            \"isTransient\": true\n        },\n        {\n            \"columnName\": \"SORT_ORDER\",\n            \"displayName\": \"Sort Order\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 20,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"update timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"AVAILABLE_ACTION_ID\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Service Request Status\",\n            \"table_name\": \"SR_STATUS\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request Available Actions\",\n            \"table_name\": \"SR_ACTION_TYPE\",\n            \"columnName\": \"ACTION_TYPE_CODE\"\n        }\n    ],\n    \"actions\": null\n}';
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8731-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update SR_ACTION_TYPE code table configuration content.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{\n    \"group\": \"Service Request\",\n    \"codeTableName\": \"Service Request Action Type\",\n    \"description\": \"List of all service request action types\",\n    \"databaseTableName\": \"SR_ACTION_TYPE\",\n    \"fields\": [\n        {\n            \"columnName\": \"ACTION_TYPE_CODE\",\n            \"displayName\": \"Action Type Code\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 11,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"MESSAGE\",\n            \"displayName\": \"Message\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1000,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"STATUS_CODE\",\n            \"displayName\": \"Resulting Status\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"SR_STATUS#STATUS_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n        },\n        {\n            \"visible\": \"true\",\n            \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n            \"dataType\": \"String\",\n            \"isEditable\": \"false\",\n            \"canEmpty\": \"true\",\n            \"displayName\": \"Resulting Status\",\n            \"isTransient\": \"true\"\n        },\n        {\n            \"columnName\": \"IS_ATTACHMENT_REQUIRED\",\n            \"displayName\": \"Attachment Required\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 100,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"systemDropdown\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": [\n                {\n                    \"code\": \"NONE\",\n                    \"description\": \"None\"\n                },\n                {\n                    \"code\": \"OPTIONAL\",\n                    \"description\": \"Optional\"\n                },\n                {\n                    \"code\": \"MANDATORY\",\n                    \"description\": \"Mandatory\"\n                }\n            ],\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"update timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"ACTION_TYPE_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Service Request Action Log\",\n            \"table_name\": \"sr_action_log\",\n            \"columnName\": \"ACTION_LOG_ID\"\n        },\n        {\n            \"displayName\": \"Service Request Status\",\n            \"table_name\": \"sr_status\",\n            \"columnName\": \"STATUS_CODE\"\n        }\n    ],\n    \"actions\": null\n}', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE TABLE_NAME = 'SR_ACTION_TYPE'
+              AND CONTENT <> '{\n    \"group\": \"Service Request\",\n    \"codeTableName\": \"Service Request Action Type\",\n    \"description\": \"List of all service request action types\",\n    \"databaseTableName\": \"SR_ACTION_TYPE\",\n    \"fields\": [\n        {\n            \"columnName\": \"ACTION_TYPE_CODE\",\n            \"displayName\": \"Action Type Code\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 11,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"MESSAGE\",\n            \"displayName\": \"Message\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1000,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"STATUS_CODE\",\n            \"displayName\": \"Resulting Status\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": false,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"SR_STATUS#STATUS_CODE\",\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": \"DESCRIPTION_STATUS_CODE\"\n        },\n        {\n            \"visible\": \"true\",\n            \"columnName\": \"DESCRIPTION_STATUS_CODE\",\n            \"dataType\": \"String\",\n            \"isEditable\": \"false\",\n            \"canEmpty\": \"true\",\n            \"displayName\": \"Resulting Status\",\n            \"isTransient\": \"true\"\n        },\n        {\n            \"columnName\": \"IS_ATTACHMENT_REQUIRED\",\n            \"displayName\": \"Attachment Required\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 100,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"systemDropdown\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": [\n                {\n                    \"code\": \"NONE\",\n                    \"description\": \"None\"\n                },\n                {\n                    \"code\": \"OPTIONAL\",\n                    \"description\": \"Optional\"\n                },\n                {\n                    \"code\": \"MANDATORY\",\n                    \"description\": \"Mandatory\"\n                }\n            ],\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"update timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"ACTION_TYPE_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Service Request Action Log\",\n            \"table_name\": \"sr_action_log\",\n            \"columnName\": \"ACTION_LOG_ID\"\n        },\n        {\n            \"displayName\": \"Service Request Status\",\n            \"table_name\": \"sr_status\",\n            \"columnName\": \"STATUS_CODE\"\n        }\n    ],\n    \"actions\": null\n}';
+
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{\n    \"group\": \"Service Request\",\n    \"codeTableName\": \"Service Request Status\",\n    \"description\": \"List of all service request statuses\",\n    \"databaseTableName\": \"SR_STATUS\",\n    \"fields\": [\n        {\n            \"columnName\": \"STATUS_CODE\",\n            \"displayName\": \"Status Code\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 11,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"update timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"STATUS_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Service Request Header\",\n            \"table_name\": \"sr_header\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request Status History\",\n            \"table_name\": \"sr_status_history\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request Action Log\",\n            \"table_name\": \"sr_action_log\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request process Flow\",\n            \"table_name\": \"sr_process_flow\",\n            \"columnName\": \"STATUS_CODE\"\n        }\n    ],\n    \"actions\": null\n}', DESCRIPTION = 'This table defines every possible status a Service Request can hold throughout its lifecycle (e.g., Submitted, Resolved, Closed). These statuses are used in the Service Request Available Action table to map the workflow.\n\n  • Status Code: The unique, internal system ID for a status.\n  • Description: This displays the current state of the Service Request. This text appears on the Service Request to clearly communicate the request(s) position in the workflow.\n ', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE TABLE_NAME = 'SR_STATUS'
+              AND (CONTENT <> '{\n    \"group\": \"Service Request\",\n    \"codeTableName\": \"Service Request Status\",\n    \"description\": \"List of all service request statuses\",\n    \"databaseTableName\": \"SR_STATUS\",\n    \"fields\": [\n        {\n            \"columnName\": \"STATUS_CODE\",\n            \"displayName\": \"Status Code\",\n            \"dataType\": \"INTEGER\",\n            \"isEditable\": true,\n            \"length\": 11,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"update timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": true,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"STATUS_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Service Request Header\",\n            \"table_name\": \"sr_header\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request Status History\",\n            \"table_name\": \"sr_status_history\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request Action Log\",\n            \"table_name\": \"sr_action_log\",\n            \"columnName\": \"STATUS_CODE\"\n        },\n        {\n            \"displayName\": \"Service Request process Flow\",\n            \"table_name\": \"sr_process_flow\",\n            \"columnName\": \"STATUS_CODE\"\n        }\n    ],\n    \"actions\": null\n}'
+              OR DESCRIPTION <> 'This table defines every possible status a Service Request can hold throughout its lifecycle (e.g., Submitted, Resolved, Closed). These statuses are used in the Service Request Available Action table to map the workflow.\n\n  • Status Code: The unique, internal system ID for a status.\n  • Description: This displays the current state of the Service Request. This text appears on the Service Request to clearly communicate the request(s) position in the workflow.\n ');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8731-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new right for managing service request status transitions.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO RIGHTS (
+                  RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE
+              )
+              SELECT 
+                  (SELECT MAX(RIGHT_ID) + 1 FROM RIGHTS),
+                  'MANAGE_SERVICE_REQUEST_STATUS_TRANSITION',
+                  'To manage and perform Service Request status transitions.',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '2'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM RIGHTS 
+                  WHERE RIGHT_NAME = 'MANAGE_SERVICE_REQUEST_STATUS_TRANSITION'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MANAGE_SERVICE_REQUEST_STATUS_TRANSITION';
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_ID','Service Request #','Service Request #',20,2,NULL,NULL,'Y',1,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_SUBJECT','Subject','Subject',20,1,NULL,NULL,'Y',2,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_CATEGORY','Category','Category',20,1,NULL,NULL,'Y',3,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_TYPE','Type','Type',20,1,NULL,NULL,'Y',4,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_PRIORITY','Priority','Priority',20,6,NULL,NULL,'Y',5,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_DEPARTMENT','Department','Department',20,1,NULL,NULL,'Y',6,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_STATUS','Status','Status',20,5,NULL,NULL,'Y',7,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_ADMIN_GROUP','Assignee – Admin Group','Assignee – Admin Group',20,1,NULL,NULL,'Y',8,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_ASSI_PERSON','Assignee – Person','Assignee – Person',20,1,NULL,NULL,'Y',9,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_CREATE_DATE','Created Date','Created Date',20,3,NULL,NULL,'Y',10,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_KEY_PERSONS','Key Personnel','Key Personnel',20,4,NULL,NULL,'Y',11,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_REPORTER','Reporter','Reporter',20,1,NULL,NULL,'Y',12,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_PI','Principal Investigator','Principal Investigator',20,1,NULL,NULL,'Y',13,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_ASSOC_SR_SPONSOR','Sponsor','Sponsor',20,8,NULL,'Y','Y',14,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_ASSOC_SR_LINKED_ID','Linked Record ID','Linked Record ID',20,9,NULL,'Y','Y',15,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_ASSOC_START_DATE','Start Date','Start Date',20,10,NULL,'Y','Y',16,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_ASSOC_END_DATE','End Date','End Date',20,11,NULL,'Y','Y',17,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_LINKED_RECORD_PI','Linked PI','Linked PI',20,7,NULL,'Y','Y',18,UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO dashboard_column_lookup (`COLUMN_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`COLUMN_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('COL_SR_ASSIGNEE','Assignee','Assignee',20,1,NULL,NULL,'Y',19,UTC_TIMESTAMP(),'admin');
+
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_ID','Service Request #','Service Request #',20,1,NULL,NULL,'Y',1,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_SUBJECT','Subject','Subject',20,1,NULL,NULL,'Y',2,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_CATEGORY','Category','Category',20,2,NULL,NULL,'Y',3,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_TYPE','Type','Type',20,3,NULL,NULL,'Y',4,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_PRIORITY','Priority','Priority',20,6,NULL,NULL,'Y',5,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_DEPARTMENT','Department','Department',20,5,NULL,NULL,'Y',6,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_STATUS','Status','Status',20,4,NULL,NULL,'Y',7,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_ASSI_PERSON','Assignee – Person','Assignee – Person',20,11,NULL,NULL,'Y',8,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_ADMIN_GROUP','Assignee – Admin Group','Assignee – Admin Group',20,21,NULL,NULL,'Y',9,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_CREATE_DATE','Created Date','Created Date',20,7,NULL,NULL,'Y',10,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_KEY_PERSONS','Key Personnel','Key Personnel',20,16,NULL,NULL,'Y',11,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_REPORTER','Reporter','Reporter',20,11,NULL,NULL,'Y',12,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_SR_PI','Principal Investigator','Principal Investigator',20,16,NULL,NULL,'Y',13,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_ASSOC_SR_SPONSOR','Sponsor','Sponsor',20,20,NULL,'Y','Y',14,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_ASSOC_SR_LINKED_ID','Linked Record ID','Linked Record ID',20,1,NULL,'Y','Y',15,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_ASSOC_START_DATE','Start Date','Start Date',20,7,NULL,'Y','Y',16,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_ASSOC_END_DATE','End Date','End Date',20,7,NULL,'Y','Y',17,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_criteria_lookup (`CRITERIA_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`CRITERIA_CONF_ID`,`CUSTOM_DATA_ELEMENTS_ID`,`IS_ASSOC`,`IS_ACTIVE`,`DEFAULT_SORT_ORDER`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES ('CRT_LINKED_RECORD_PI','Linked PI','Linked PI',20,16,NULL,'Y','Y',18,utc_timestamp(),'admin');
+
+              INSERT IGNORE INTO dashboard_tab_type (`TAB_TYPE_ID`,`TAB_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`SOURCE_TAB_ID`,`PERSON_ID`,`DEFAULT_SORT_ORDER`,`DEFAULT_IS_PRIMARY_TAB`,`IS_PRIMARY_TAB`,`IS_AUTO_SEARCH`,`IS_ACTIVE`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (1,'MY_REQUEST','My Requests','My Requests',20,NULL,NULL,1,'Y',NULL,'Y','Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_tab_type (`TAB_TYPE_ID`,`TAB_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`SOURCE_TAB_ID`,`PERSON_ID`,`DEFAULT_SORT_ORDER`,`DEFAULT_IS_PRIMARY_TAB`,`IS_PRIMARY_TAB`,`IS_AUTO_SEARCH`,`IS_ACTIVE`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (2,'ALL_REQUEST','All Service Requests','All Service Requests',20,NULL,NULL,2,'N',NULL,'N','Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_tab_type (`TAB_TYPE_ID`,`TAB_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`SOURCE_TAB_ID`,`PERSON_ID`,`DEFAULT_SORT_ORDER`,`DEFAULT_IS_PRIMARY_TAB`,`IS_PRIMARY_TAB`,`IS_AUTO_SEARCH`,`IS_ACTIVE`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (3,'UNASSIGNED_REQUESTS','Unassigned Requests','Unassigned Requests',20,NULL,NULL,3,'N',NULL,'Y','Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_tab_type (`TAB_TYPE_ID`,`TAB_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`SOURCE_TAB_ID`,`PERSON_ID`,`DEFAULT_SORT_ORDER`,`DEFAULT_IS_PRIMARY_TAB`,`IS_PRIMARY_TAB`,`IS_AUTO_SEARCH`,`IS_ACTIVE`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (4,'ALL_PENDING_SERVICE_REQUEST','All Pending Reviews','All Pending Reviews',20,NULL,NULL,4,'N',NULL,'Y','Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_tab_type (`TAB_TYPE_ID`,`TAB_KEY`,`DESCRIPTION`,`DISPLAY_NAME`,`MODULE_CODE`,`SOURCE_TAB_ID`,`PERSON_ID`,`DEFAULT_SORT_ORDER`,`DEFAULT_IS_PRIMARY_TAB`,`IS_PRIMARY_TAB`,`IS_AUTO_SEARCH`,`IS_ACTIVE`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (5,'MY_PENDING_SERVICE_REQUEST','My Pending Reviews','My Pending Reviews',20,NULL,NULL,5,'N',NULL,'Y','Y',utc_timestamp(),'admin');
+
+              INSERT IGNORE INTO dashboard_filter_preference (`FILTER_ID`,`FILTER_NAME`,`MODULE_CODE`,`TAB_TYPE_ID`,`PERSON_ID`,`SORT_ORDER`,`IS_CURRENT`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (1,'Default',20,1,NULL,1,'Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_preference (`FILTER_ID`,`FILTER_NAME`,`MODULE_CODE`,`TAB_TYPE_ID`,`PERSON_ID`,`SORT_ORDER`,`IS_CURRENT`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (2,'Default',20,2,NULL,1,'Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_preference (`FILTER_ID`,`FILTER_NAME`,`MODULE_CODE`,`TAB_TYPE_ID`,`PERSON_ID`,`SORT_ORDER`,`IS_CURRENT`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (3,'Default',20,3,NULL,1,'Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_preference (`FILTER_ID`,`FILTER_NAME`,`MODULE_CODE`,`TAB_TYPE_ID`,`PERSON_ID`,`SORT_ORDER`,`IS_CURRENT`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (4,'Default',20,4,NULL,1,'Y',utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_preference (`FILTER_ID`,`FILTER_NAME`,`MODULE_CODE`,`TAB_TYPE_ID`,`PERSON_ID`,`SORT_ORDER`,`IS_CURRENT`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) VALUES (5,'Default',20,5,NULL,1,'Y',utc_timestamp(),'admin');
+
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (1, 1, 1, 1, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (2, 1, 2, 2, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (3, 1, 3, 3, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (4, 1, 4, 4, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (5, 1, 5, 5, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (6, 1, 6, 6, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (7, 1, 7, 7, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (8, 1, 8, 8, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (9, 1, 9, 9, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (10, 1, 10, 10, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (11, 2, 1, 1, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (12, 2, 2, 2, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (13, 2, 3, 3, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (14, 2, 4, 4, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (15, 2, 5, 5, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (16, 2, 6, 6, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (17, 2, 7, 7, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (18, 2, 8, 8, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (19, 2, 9, 9, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (20, 2, 10, 10, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (21, 3, 1, 1, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (22, 3, 2, 2, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (23, 3, 3, 3, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (24, 3, 4, 4, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (25, 3, 5, 5, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (26, 3, 6, 6, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (27, 3, 7, 7, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (28, 3, 8, 8, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (29, 3, 9, 9, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (30, 3, 10, 10, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (31, 4, 1, 1, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (32, 4, 2, 2, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (33, 4, 3, 3, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (34, 4, 4, 4, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (35, 4, 5, 5, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (36, 4, 6, 6, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (37, 4, 7, 7, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (38, 4, 8, 8, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (39, 4, 9, 9, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (40, 4, 10, 10, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (41, 5, 1, 1, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (42, 5, 2, 2, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (43, 5, 3, 3, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (44, 5, 4, 4, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (45, 5, 5, 5, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (46, 5, 6, 6, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (47, 5, 7, 7, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (48, 5, 8, 8, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (49, 5, 9, 9, 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO dashboard_filter_column (FILTER_COLUMN_ID, FILTER_ID, COLUMN_ID, SORT_ORDER, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER) VALUES (50, 5, 10, 10, 'Y', utc_timestamp(), 'admin');
+
+
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (1,1,1,NULL,1,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (2,1,2,NULL,2,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (3,1,3,NULL,3,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (4,1,4,NULL,4,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (5,1,5,NULL,5,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (6,1,6,NULL,6,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (7,1,7,NULL,7,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (8,1,8,NULL,8,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (9,1,9,NULL,9,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (10,1,10,NULL,10,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (11,2,1,NULL,1,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (12,2,2,NULL,2,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (13,2,3,NULL,3,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (14,2,4,NULL,4,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (15,2,5,NULL,5,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (16,2,6,NULL,6,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (17,2,7,NULL,7,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (18,2,8,NULL,8,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (19,2,9,NULL,9,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (20,2,10,NULL,10,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (21,3,1,NULL,1,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (22,3,2,NULL,2,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (23,3,3,NULL,3,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (24,3,4,NULL,4,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (25,3,5,NULL,5,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (26,3,6,NULL,6,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (27,3,7,NULL,7,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (28,3,8,NULL,8,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (29,3,9,NULL,9,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (30,3,10,NULL,10,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (31,4,1,NULL,1,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (32,4,2,NULL,2,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (33,4,3,NULL,3,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (34,4,4,NULL,4,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (35,4,5,NULL,5,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (36,4,6,NULL,6,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (37,4,7,NULL,7,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (38,4,8,NULL,8,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (39,4,9,NULL,9,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (40,4,10,NULL,10,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (41,5,1,NULL,1,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (42,5,2,NULL,2,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (43,5,3,NULL,3,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (44,5,4,NULL,4,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (45,5,5,NULL,5,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (46,5,6,NULL,6,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (47,5,7,NULL,7,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (48,5,8,NULL,8,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (49,5,9,NULL,9,utc_timestamp(),'admin');
+              INSERT IGNORE INTO dashboard_filter_criteria (`FILTER_CRITERIA_ID`, `FILTER_ID`, `CRITERIA_ID`, `VALUE`, `SORT_ORDER`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES (50,5,10,NULL,10,utc_timestamp(),'admin');
+
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES=0;
+              DELETE FROM dashboard_filter_criteria WHERE FILTER_ID IN (1,2,3,4,5);
+              DELETE FROM dashboard_filter_column WHERE FILTER_ID IN (1,2,3,4,5);
+              DELETE FROM dashboard_filter_preference WHERE FILTER_ID IN (1,2,3,4,5);
+              DELETE FROM dashboard_tab_type WHERE TAB_TYPE_ID IN (1,2,3,4,5);
+              DELETE FROM dashboard_criteria_lookup WHERE CRITERIA_ID IN (1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,10 ,11 ,12 ,13 ,14 ,15 ,16 ,17 ,18);
+              DELETE FROM dashboard_column_lookup WHERE COLUMN_ID IN (1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,10, 11 ,12 ,13 ,14 ,15 ,16 ,17 ,18 ,19);
+              SET SQL_SAFE_UPDATES=1;
+
+  - changeSet:
+        id: FIBI-DynamicDashboard-2
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: 'Add index SR_PERSONS_IDX_1 on SR_PERSONS(PERSON_ROLE_ID, SR_HEADER_ID) if not exists'
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                              (SELECT COUNT(*)
+                              FROM information_schema.STATISTICS
+                              WHERE TABLE_SCHEMA = DATABASE()
+                                AND TABLE_NAME = 'SR_PERSONS'
+                                AND INDEX_NAME = 'SR_PERSONS_IDX_1') = 0,
+                              'CREATE INDEX SR_PERSONS_IDX_1 ON SR_PERSONS (PERSON_ROLE_ID, SR_HEADER_ID);',
+                              'DO 1'
+                                );
+                  PREPARE stmt FROM @sql;
+                  EXECUTE stmt;
+                  DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                              (SELECT COUNT(*)
+                              FROM information_schema.STATISTICS
+                              WHERE TABLE_SCHEMA = DATABASE()
+                                AND TABLE_NAME = 'SR_PERSONS'
+                                AND INDEX_NAME = 'SR_PERSONS_IDX_1') = 1,
+                              'DROP INDEX SR_PERSONS_IDX_1 ON SR_PERSONS;',
+                              'DO 1'
+                                );
+                  PREPARE stmt FROM @sql;
+                  EXECUTE stmt;
+                  DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-DynamicDashboard-3
+        author: Manesh.MS
+        labels: 'DML'
+        comment: 'Add new criteria and column for SR Task Type and Status'
+        changes:
+          - sql:
+              sql: |
+                UPDATE dashboard_criteria_conf 
+                SET 
+                  UPDATE_USER = 'admin', 
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  CONFIG_JSON = '{\"option\": \"EMPTY#EMPTY#true#true\", \"lookupType\": \"SrAdminGroup\"}' 
+                WHERE CRITERIA_CONF_ID = '21';
+
+                INSERT INTO dashboard_criteria_lookup
+                (CRITERIA_KEY, DESCRIPTION, DISPLAY_NAME, MODULE_CODE, CRITERIA_CONF_ID,
+                IS_ACTIVE, DEFAULT_SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER,IS_ASSOC)
+                SELECT 'CRT_SR_ASSOC_LINKED_MODULE', 'Linked Module', 'Linked Module',
+                      '20', '30', 'Y', '50', utc_timestamp(), 'admin','Y'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM dashboard_criteria_lookup
+                    WHERE CRITERIA_KEY = 'CRT_SR_ASSOC_LINKED_MODULE'
+                );
+                INSERT IGNORE INTO dashboard_criteria_conf (CRITERIA_CONF_ID,DESCRIPTION,TYPE,CONFIG_JSON,UPDATE_TIMESTAMP,UPDATE_USER) VALUES (29,'For SR task status lookup','LOOK_UP','{\"option\": \"sr_task_status#task_status_code#true#true\"}',UTC_TIMESTAMP(),'admin');
+                INSERT INTO dashboard_criteria_lookup
+                (CRITERIA_KEY,DESCRIPTION,DISPLAY_NAME,MODULE_CODE,CRITERIA_CONF_ID,CUSTOM_DATA_ELEMENTS_ID,IS_ASSOC,IS_ACTIVE,DEFAULT_SORT_ORDER,UPDATE_TIMESTAMP,UPDATE_USER)
+                SELECT 'CRT_SR_TASK_TYPE','Task Type','Task Type',20,28,NULL,NULL,'Y',47,UTC_TIMESTAMP(),'admin'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM dashboard_criteria_lookup
+                    WHERE CRITERIA_KEY = 'CRT_SR_TASK_TYPE'
+                );
+                INSERT INTO dashboard_criteria_lookup
+                (CRITERIA_KEY,DESCRIPTION,DISPLAY_NAME,MODULE_CODE,CRITERIA_CONF_ID,CUSTOM_DATA_ELEMENTS_ID,IS_ASSOC,IS_ACTIVE,DEFAULT_SORT_ORDER,UPDATE_TIMESTAMP,UPDATE_USER)
+                SELECT 'CRT_SR_TASK_STATUS','Task Status','Task Status',20,29,NULL,NULL,'Y',48,UTC_TIMESTAMP(),'admin'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM dashboard_criteria_lookup
+                    WHERE CRITERIA_KEY = 'CRT_SR_TASK_STATUS'
+                );
+                INSERT IGNORE INTO dashboard_column_conf (COLUMN_CONF_ID, FORMAT_TYPE, FORMAT_STRING, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('17', 'BULLET_LIST', '${TASK_TYPE} | ${TASK_STATUS}', UTC_TIMESTAMP(), 'admin');
+                SET SQL_SAFE_UPDATES = 0;
+                DELETE T1 FROM dashboard_filter_column T1
+                INNER JOIN dashboard_column_lookup T2 ON T2.COLUMN_ID = T1.COLUMN_ID
+                WHERE T2.COLUMN_KEY IN ('COL_SR_TASK_TYPE','COL_SR_TASK_STATUS');
+
+                DELETE FROM DASHBOARD_COLUMN_LOOKUP WHERE COLUMN_KEY IN ('COL_SR_TASK_TYPE','COL_SR_TASK_STATUS');
+                SET SQL_SAFE_UPDATES = 1;
+
+                INSERT INTO DASHBOARD_COLUMN_LOOKUP(COLUMN_KEY,DESCRIPTION,DISPLAY_NAME,MODULE_CODE,COLUMN_CONF_ID,CUSTOM_DATA_ELEMENTS_ID,IS_ASSOC,IS_ACTIVE,DEFAULT_SORT_ORDER,UPDATE_TIMESTAMP,UPDATE_USER)
+                SELECT 'COL_SR_TASK_DETAILS','Task Detail','Task Detail',20,17,NULL,NULL,'Y',38,UTC_TIMESTAMP(),'admin'
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM DASHBOARD_COLUMN_LOOKUP
+                    WHERE COLUMN_KEY = 'COL_SR_TASK_DETAILS'
+                );
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                DELETE FROM dashboard_criteria_lookup WHERE CRITERIA_KEY = 'CRT_SR_ASSOC_LINKED_MODULE';
+                DELETE FROM dashboard_criteria_conf WHERE CRITERIA_CONF_ID = 29;
+                DELETE FROM dashboard_criteria_lookup WHERE CRITERIA_KEY = 'CRT_SR_TASK_TYPE';
+                DELETE FROM dashboard_criteria_lookup WHERE CRITERIA_KEY = 'CRT_SR_TASK_STATUS';
+                DELETE FROM dashboard_column_conf WHERE COLUMN_CONF_ID = 17;
+                DELETE FROM DASHBOARD_COLUMN_LOOKUP WHERE COLUMN_KEY = 'COL_SR_TASK_DETAILS';
+                SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Unit number sr changes.
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'sr_header'
+                    AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                  'ALTER TABLE sr_header MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'sr_header_history'
+                    AND COLUMN_NAME = 'PREV_UNIT_NUMBER') > 0,
+                  'ALTER TABLE sr_header_history MODIFY COLUMN PREV_UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'sr_header_history'
+                    AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                  'ALTER TABLE sr_header_history MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'sr_person_units'
+                    AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                  'ALTER TABLE sr_person_units MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8831-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Add SORT_ORDER column to SR_TASK_TYPE table if not exists.
+      changes:
+        - sql:
+            sql: |
+              Analyze TABLE SR_TASK_TYPE;
+              SET @sql1 := IF(
+                (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'SR_TASK_TYPE'
+                    AND COLUMN_NAME = 'SORT_ORDER') = 0,
+                  'ALTER TABLE `SR_TASK_TYPE` ADD COLUMN `SORT_ORDER` INT NULL DEFAULT NULL AFTER `DESCRIPTION`;',
+                  'DO 1'
+              );
+              PREPARE stmt1 FROM @sql1;
+              EXECUTE stmt1;
+              DEALLOCATE PREPARE stmt1;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql1 := IF(
+                (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'SR_TASK_TYPE'
+                    AND COLUMN_NAME = 'SORT_ORDER') = 1,
+                  'ALTER TABLE `SR_TASK_TYPE` DROP COLUMN `SORT_ORDER`;',
+                  'DO 1'
+              );
+              PREPARE stmt1 FROM @sql1;
+              EXECUTE stmt1;
+              DEALLOCATE PREPARE stmt1;
+
+  - changeSet:
+      id: FIBI-8831-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update CODE_TABLE_CONFIGURATION for SR_TASK_TYPE table to include SORT_ORDER column.
+      changes:
+        - sql:
+            sql: |
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{\"group\":\"Service Request\",\"codeTableName\":\"Service Request Task Type\",\"description\":\"List of all service request task types\",\"databaseTableName\":\"SR_TASK_TYPE\",\"fields\":[{\"columnName\":\"TASK_TYPE_CODE\",\"displayName\":\"Task Type Code\",\"dataType\":\"String\",\"isEditable\":true,\"length\":3,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DESCRIPTION\",\"displayName\":\"Description\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"SORT_ORDER\",\"displayName\":\"Sort Order\",\"dataType\":\"INTEGER\",\"isEditable\":true,\"length\":3,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update Timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#PERSON_ID\",\"defaultValue\":null}],\"primaryKey\":[\"TASK_TYPE_CODE\"],\"dependency\":[{\"displayName\":\"Service Request Task\",\"table_name\":\"TASK_TYPE_CODE\",\"columnName\":\"TASK_ID\"}],\"actions\":null}', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (TABLE_NAME = 'SR_TASK_TYPE');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{"group":"Service Request","codeTableName":"Service Request Task Type","description":"List of all service request task types","databaseTableName":"SR_TASK_TYPE","fields":[{"columnName":"TASK_TYPE_CODE","displayName":"Task Type Code","dataType":"String","isEditable":true,"length":3,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"DESCRIPTION","displayName":"Description","dataType":"String","isEditable":true,"length":200,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_TIMESTAMP","displayName":"Update Timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#PERSON_ID","defaultValue":null}],"primaryKey":["TASK_TYPE_CODE"],"dependency":[{"displayName":"Service Request Task","table_name":"TASK_TYPE_CODE","columnName":"TASK_ID"}],"actions":null}', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (TABLE_NAME = 'SR_TASK_TYPE');

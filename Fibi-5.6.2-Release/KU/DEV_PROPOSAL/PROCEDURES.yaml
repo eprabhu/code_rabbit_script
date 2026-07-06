@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10352-1
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: Bring missing code in GET_PROPOSAL_DASHBOARD_V1 procedure for KU.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/KU/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

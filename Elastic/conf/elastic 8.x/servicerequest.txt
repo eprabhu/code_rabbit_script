@@ -1,0 +1,136 @@
+// These commands should be used in elastic server for various things
+ 
+1. To delete and index from the elastic server (update the IP as required a dummy IP for refernce is added)
+ 
+    curl -XDELETE http://172.21.44.97:9200/servicerequest/
+ 
+2. To create an Index in elastic server , the command will create an index in elastic server named "servicerequest".
+(update the IP as required a dummy IP for refernce is added).
+ 
+    curl -XPUT 'http://172.21.44.97:9200/servicerequest/' -H 'Content-Type: application/json' -d '{"settings":{"number_of_shards":5,"analysis":{"filter":{"ngram_filter":{"type":"edge_ngram","min_gram":2,"max_gram":60}},"analyzer":{"ngram_analyzer":{"type":"custom","tokenizer":"whitespace","filter":["lowercase","ngram_filter"]}}}},"mappings":{"properties":{"sr_header_id":{"type":"text","index":true},"assignee_full_name":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard","fields":{"sort":{"type":"keyword","index":true}}},"reporter_full_name":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"},"unit_name":{"type":"text","index":"false"},"unit_display_name":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"whitespace"},"sr_priority":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"whitespace"},"sr_status":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"whitespace"},"sr_status_code":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"whitespace"},"sr_priority_id":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"whitespace"},"sr_type":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"}}}}'
+ 
+    
+3. logstash configuration that need to used to sync elastic index from a Database
+	1.jdbc_driver_library = path to library for jar for mysqlconnector ( eg:/root/conf/mysql-connector.jar) 
+	2.jdbc_connection_string = The URL for the Database that need to be used.
+	3.hosts = the ip address of the elastic search sever thats used for data sync.
+	4.Other properties dont need to be changed. only add DB password and user details 
+
+	input {
+		jdbc {
+			jdbc_driver_library => ""
+			jdbc_driver_class => "Java::com.mysql.jdbc.Driver"
+			jdbc_connection_string => "jdbc:mysql://192.168.1.6:3306/fibi_base?useSSL=false&useTimezone=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+			jdbc_user => ""
+			jdbc_password =>"" 
+			jdbc_validate_connection => true 
+			statement => "SELECT t1.sr_header_id as sr_header_id,t1.subject as subject,t2.unit_name as unit_name,t2.display_name as unit_display_name,t3.full_name as assignee_full_name,t4.full_name as reporter_full_name,t5.description as sr_type,t6.description as sr_priority,t6.PRIORITY_ID as sr_priority_id,t7.STATUS_CODE as sr_status_code,t7.description as sr_status FROM sr_header t1 LEFT OUTER JOIN unit t2 ON t1.unit_number = t2.unit_number LEFT OUTER JOIN person t3 ON t1.assignee_person_id = t3.person_id LEFT OUTER JOIN person t4 ON t1.reporter_person_id = t4.person_id LEFT OUTER JOIN sr_type t5 ON t1.type_code = t5.type_code LEFT OUTER JOIN sr_priority t6 ON t1.priority_id = t6.priority_id LEFT OUTER JOIN sr_status t7 ON t1.status_code = t7.status_code"
+		}
+	}
+	output {
+		elasticsearch {
+			index => "servicerequest"
+			document_id => "%{sr_header_id}"
+			hosts => "192.168.1.242:9200" 
+		}
+	}
+ 
+4. The JSON object used for Developers and miantainers so that its easy to identify the propoerties used to create an index
+ {
+  "settings": {
+    "number_of_shards": 5,
+    "analysis": {
+      "filter": {
+        "ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 60
+        }
+      },
+      "analyzer": {
+        "ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": [
+            "lowercase",
+            "ngram_filter"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "sr_header_id": {
+        "type": "text",
+        "index": true
+      },
+      "assignee_full_name": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard",
+        "fields": {
+          "sort": {
+            "type": "keyword",
+            "index": true
+          }
+        }
+    },
+      "reporter_full_name": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      },
+      "unit_name": {
+        "type": "text",
+        "index": "false"
+      },
+      "unit_display_name": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace"
+      },
+      "sr_priority": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace"
+      },
+      "sr_status": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace"
+      },
+      "sr_status_code": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace"
+      },
+      "sr_priority_id": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace"
+      },
+      "sr_type": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      }
+    }
+  }
+}

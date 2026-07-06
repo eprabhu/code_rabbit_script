@@ -1,0 +1,129 @@
+databaseChangeLog:
+    - changeSet:
+        id: FIBI-8180
+        author: Arun Ramesh
+        labels: 'DML'
+        comment: Dynamic config for elastic sync for SMU instance.
+        changes:
+            - sql:
+                sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE integration_sync_config
+                    SET 
+                        IS_ACTIVE = 'N',
+                        UPDATE_TIMESTAMP = utc_timestamp(),
+                        UPDATE_USER = 'admin'
+                    WHERE CONFIG_CATEGORY = 'elastic_sync';
+                    SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+    - changeSet:
+        id: FIBI-8181
+        author: Arun Ramesh
+        labels: 'DML'
+        comment: Dynamic config for integration sync for SMU instance.
+        changes:
+            - sql:
+                sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE integration_sync_config
+                    SET 
+                        IS_ACTIVE = CASE 
+                                        WHEN CONFIG_KEY IN ('attachment_data_migration', 'fi_expense_transaction_rt_processing', 'fi_revenue_transaction_rt_processing', 'sync_orcid', 'workday_cost_allocation', 'workday_cost_reconciliation', 'workday_close_position', 'designation_change', 'student_ics_integration', 'update_claim_duration', 'sync_aderp_annual_budget', 'scopus_integration') THEN 'Y'
+                                        ELSE 'N'
+                                    END,
+                        UPDATE_TIMESTAMP = utc_timestamp(),
+                        UPDATE_USER = 'admin'
+                    WHERE CONFIG_CATEGORY = 'integration_sync';
+                    SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+    - changeSet:
+      id: FIBI-8178-2
+      author: Solih N
+      labels: 'DML'
+      comment: Update IS_ACTIVE and IS_MANDATORY for specified dynamic config rows
+      changes:
+        - sql:
+            sql: |
+              UPDATE dyn_element_config SET IS_ACTIVE        = 'N', IS_MANDATORY     = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER      = 'admin'
+              WHERE SUB_SECTION_CODE = '201' AND SECTION_CODE     = 'IP201' AND UI_REFERENCE_ID IN ( 'ip-master-proposal', 'prop-award-type', 'prop-funding-opp-number', 'prop-cfda-number', 'prop-sub-date', 'prop-internal-date');
+
+              UPDATE dyn_element_config SET IS_ACTIVE        = 'N', IS_MANDATORY     = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER      = 'admin' 
+              WHERE SUB_SECTION_CODE = '301'AND SECTION_CODE     = 'DP301'AND UI_REFERENCE_ID IN ( 'proposal-gnrl-master-proposal', 'proposal-gnrl-antd-award-type', 'prop-sub-date', 'prop-funding-opp-number', 'prop-cfda-number', 'prop-internal-date');
+
+              UPDATE dyn_element_config SET IS_ACTIVE        = 'N', IS_MANDATORY     = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER      = 'admin'
+              WHERE SUB_SECTION_CODE = '101' AND SECTION_CODE     = 'AW101' AND UI_REFERENCE_ID IN ( 'cfda-number', 'dfafs-number');
+
+              UPDATE dyn_element_config SET IS_ACTIVE        = 'N', IS_MANDATORY     = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER      = 'admin'
+              WHERE UI_REFERENCE_ID  = 'F&A-rate-type' AND SUB_SECTION_CODE = '102' AND SECTION_CODE     = 'AW104';
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE UI_REFERENCE_ID = 'grant-abbrevation' AND SUB_SECTION_CODE = '1501' AND SECTION_CODE = 'GC1501';
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE UI_REFERENCE_ID = 'ip-discipline-cluster' AND SUB_SECTION_CODE = '201' AND SECTION_CODE = 'IP201';
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE UI_REFERENCE_ID = 'prop-discipline-cluster' AND SUB_SECTION_CODE = '301' AND SECTION_CODE = 'DP301';
+      rollback: empty
+
+    - changeSet:
+      id: FIBI-8183-1
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Deactivate subsections for SMU instance
+      changes:
+        - sql:
+            sql: |
+              UPDATE DYN_SUBSECTION_CONFIG 
+              SET IS_ACTIVE = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE IN ('4003', '4006', '4009', '4010', '4011', '4012');
+      rollback: 
+        - sql:
+            sql: |
+              UPDATE DYN_SUBSECTION_CONFIG 
+              SET IS_ACTIVE = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE IN ('4003', '4006', '4009', '4010', '4011', '4012');
+
+    - changeSet:
+      id: FIBI-9305-1
+      author: Hridya E K
+      labels: 'DML'
+      comment: Update IS_ACTIVE 
+      changes:
+        - sql:
+            sql: |
+              UPDATE DYN_SUBSECTION_CONFIG 
+              SET IS_ACTIVE = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE IN ('4013', '4015'); 
+
+              UPDATE DYN_SUBSECTION_CONFIG 
+              SET IS_ACTIVE = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE IN ('4014'); 
+      rollback:
+        - sql:
+            sql: |
+              UPDATE DYN_SUBSECTION_CONFIG 
+              SET IS_ACTIVE = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE IN ('4013', '4015'); 
+
+              UPDATE DYN_SUBSECTION_CONFIG 
+              SET IS_ACTIVE = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE IN ('4014');
+
+    - changeSet:
+      id: FIBI-9035-2
+      author: Hridya E K
+      labels: 'DML'
+      comment: Update IS_ACTIVE for proposal training 
+      changes:
+        - sql:
+            sql: |
+              UPDATE dyn_element_config SET IS_ACTIVE = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE = '302' AND SECTION_CODE = 'DP301' AND UI_REFERENCE_ID = 'prop-key-person-training';
+      rollback:
+         - sql:
+            sql: |
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE = '302' AND SECTION_CODE = 'DP301' AND UI_REFERENCE_ID = 'prop-key-person-training';

@@ -1,0 +1,7 @@
+-- claim_type_v;
+
+CREATE VIEW `CLAIM_TYPE_V` AS 
+SELECT 'D' AS CLAIM_TYPE, 'Direct Claim' AS DESCRIPTION
+UNION ALL
+SELECT 'R' AS CLAIM_TYPE, 'Reimbursement / Advance Claim' AS DESCRIPTION;
+

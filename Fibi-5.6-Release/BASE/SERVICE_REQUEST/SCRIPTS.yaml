@@ -1,0 +1,619 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8877-1
+      author: Sasikumar Chandran
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO COEUS_SUB_MODULE (COEUS_SUB_MODULE_ID, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, REQUIRE_UNIQUE_QUESTIONNAIRE, IS_ACTIVE)
+                SELECT 
+                    (SELECT COALESCE(MAX(COEUS_SUB_MODULE_ID), 0) + 1 FROM COEUS_SUB_MODULE),
+                    20,
+                    2,
+                    'Service Request Task',
+                    UTC_DATE(),
+                    'admin',
+                    'N',
+                    'Y'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM COEUS_SUB_MODULE WHERE MODULE_CODE = 20 AND SUB_MODULE_CODE = 2
+                );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM COEUS_SUB_MODULE WHERE MODULE_CODE = 20 AND SUB_MODULE_CODE = 2;
+
+  - changeSet:
+      id: FIBI-8877-2
+      author: Sasikumar Chandran
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+              DELETE FROM INBOX where MODULE_CODE = 20 AND MODULE_ITEM_KEY NOT IN (SELECT SR_HEADER_ID FROM SR_HEADER);
+      rollback: empty
+      
+  - changeSet:
+      id: FIBI-8907-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment:
+      changes:
+        - sql:
+            sql: |
+             SET SQL_SAFE_UPDATES = 0;
+             UPDATE NOTIFICATION_TYPE
+             SET MESSAGE = REPLACE(MESSAGE, '{SERVICE_TYPE}', '{SERVICE_REQUEST_TYPE}'), UPDATE_USER ='admin',UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+             WHERE MESSAGE LIKE '%{SERVICE_TYPE}%';
+
+             UPDATE NOTIFICATION_TYPE
+             SET SUBJECT = REPLACE(SUBJECT, '{SERVICE_TYPE}', '{SERVICE_REQUEST_TYPE}'),UPDATE_USER ='admin',UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+             WHERE SUBJECT LIKE '%{SERVICE_TYPE}%';
+             SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE NOTIFICATION_TYPE
+              SET MESSAGE = REPLACE(MESSAGE, '{SERVICE_REQUEST_TYPE}', '{SERVICE_TYPE}'),
+              UPDATE_USER = 'admin',
+              UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE MESSAGE LIKE '%{SERVICE_REQUEST_TYPE}%';
+
+              UPDATE NOTIFICATION_TYPE
+              SET SUBJECT = REPLACE(SUBJECT, '{SERVICE_REQUEST_TYPE}', '{SERVICE_TYPE}'),
+              UPDATE_USER = 'admin',
+              UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE SUBJECT LIKE '%{SERVICE_REQUEST_TYPE}%';
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-8333-1
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: 'Script for adding new columns in SR_HEADER_HISTORY table'
+      changes:
+        - sql:
+            sql: |
+              SET @col := (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_NAME = 'SR_HEADER_HISTORY'
+                    AND TABLE_SCHEMA = DATABASE()
+                    AND COLUMN_NAME = 'PREV_CUSTOM_DATA'
+              );
+
+              SET @sql := IF(@col = 0,
+                            'ALTER TABLE SR_HEADER_HISTORY ADD COLUMN PREV_CUSTOM_DATA JSON NULL;',
+                            'SELECT "Column PREV_CUSTOM_DATA already exists";');
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @col := (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_NAME = 'SR_HEADER_HISTORY'
+                    AND TABLE_SCHEMA = DATABASE()
+                    AND COLUMN_NAME = 'CUSTOM_DATA'
+              );
+
+              SET @sql := IF(@col = 0,
+                            'ALTER TABLE SR_HEADER_HISTORY ADD COLUMN CUSTOM_DATA JSON NULL;',
+                            'SELECT "Column CUSTOM_DATA already exists";');
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SR_HEADER_HISTORY
+              DROP COLUMN PREV_CUSTOM_DATA,
+              DROP COLUMN CUSTOM_DATA;    
+
+  - changeSet:
+      id: FIBI-9132-1
+      author: Adarsh
+      labels: 'DML'
+      comment: Added a new column in SR_CATEGORY table
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE SR_CATEGORY;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                    FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'SR_CATEGORY'
+                      AND COLUMN_NAME = 'IS_DEFAULT') = 0,
+                  'ALTER TABLE SR_CATEGORY ADD COLUMN `IS_DEFAULT` VARCHAR(1) DEFAULT ''N'';',           
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt; 
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SR_CATEGORY DROP COLUMN IS_DEFAULT;
+
+  - changeSet:
+      id: FIBI-9132-2
+      author: Adarsh
+      labels: 'DML'
+      comment: Updated the code table configuration for SR_CATEGORY with new column
+      changes:
+        - sql:
+            sql: |
+              UPDATE CODE_TABLE_CONFIGURATION  
+              SET CONTENT = '{\n  \"group\": \"Service Request\",\n  \"codeTableName\": \"Service Request Category\",\n  \"description\": \"List of all service request Category\",\n  \"databaseTableName\": \"SR_CATEGORY\",\n  \"fields\": [\n    {\n      \"columnName\": \"CATEGORY_CODE\",\n      \"displayName\": \"Category Code\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"DESCRIPTION\",\n      \"displayName\": \"Description\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 500,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_TIMESTAMP\",\n      \"displayName\": \"update timestamp\",\n      \"dataType\": \"Date\",\n      \"isEditable\": false,\n      \"length\": null,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_USER\",\n      \"displayName\": \"Update User\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"length\": 60,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": \"PERSON#USER_NAME\",\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"IS_ACTIVE\",\n      \"displayName\": \"Is Active\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"switch\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n	{\n      \"columnName\": \"IS_DEFAULT\",\n      \"displayName\": \"Is Default\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"switch\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    }	\n  ],\n  \"primaryKey\": [\n    \"CATEGORY_CODE\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"Service Request Header\",\n      \"table_name\": \"sr_header\",\n      \"columnName\": \"CATEGORY_CODE\"\n    },\n    {\n      \"displayName\": \"Service Request Type\",\n      \"table_name\": \"sr_type\",\n      \"columnName\": \"CATEGORY_CODE\"\n    }\n  ],\n  \"actions\": null\n}' WHERE (TABLE_NAME = 'SR_CATEGORY'); 
+      rollback:
+        - sql:
+            sql: |
+              UPDATE CODE_TABLE_CONFIGURATION
+              SET CONTENT = '{\n  \"group\": \"Service Request\",\n  \"codeTableName\": \"Service Request Category\",\n  \"description\": \"List of all service request Category\",\n  \"databaseTableName\": \"SR_CATEGORY\",\n  \"fields\": [\n    {\n      \"columnName\": \"CATEGORY_CODE\",\n      \"displayName\": \"Category Code\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"DESCRIPTION\",\n      \"displayName\": \"Description\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 500,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_TIMESTAMP\",\n      \"displayName\": \"update timestamp\",\n      \"dataType\": \"Date\",\n      \"isEditable\": false,\n      \"length\": null,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_USER\",\n      \"displayName\": \"Update User\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"length\": 60,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": \"PERSON#USER_NAME\",\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"IS_ACTIVE\",\n      \"displayName\": \"Is Active\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"switch\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    }	\n  ],\n  \"primaryKey\": [\n    \"CATEGORY_CODE\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"Service Request Header\",\n      \"table_name\": \"sr_header\",\n      \"columnName\": \"CATEGORY_CODE\"\n    },\n    {\n      \"displayName\": \"Service Request Type\",\n      \"table_name\": \"sr_type\",\n      \"columnName\": \"CATEGORY_CODE\"\n    }\n  ],\n  \"actions\": null\n}' WHERE (TABLE_NAME = 'SR_CATEGORY');
+
+  - changeSet:
+      id: FIBI-9134-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert into DYN_ELEMENT_CONFIG for Service Request Project association.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP) 
+              SELECT 'sr-prj-assoc-module', 'Service Request Project assoc Module', '2018', 'SR2001', 'Select the module that most accurately matches the purpose of this record.', 'admin', UTC_TIMESTAMP() 
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'sr-prj-assoc-module');                      
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP) 
+              SELECT 'sr-prj-assoc-relation-type', 'Service Request Project asscoc Relation type', '2018', 'SR2001', 'Indicates the relationship between the current record and the selected linked record.', 'admin', UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'sr-prj-assoc-relation-type'
+              );
+              INSERT INTO DYN_ELEMENT_CONFIG (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'sr-prj-assoc-link-to', 'Service Request Project asscoc Link to','2018', 
+                  'SR2001', 'Search for and select the appropriate record to establish the association.', 'admin', UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG WHERE UI_REFERENCE_ID = 'sr-prj-assoc-link-to'
+              );
+      rollback: 
+        - sql:
+            sql: |    
+              DELETE FROM `DYN_ELEMENT_CONFIG` WHERE UI_REFERENCE_ID = 'sr-prj-assoc-link-to';         
+              DELETE FROM `DYN_ELEMENT_CONFIG` WHERE UI_REFERENCE_ID = 'sr-prj-assoc-relation-type';
+              DELETE FROM `DYN_ELEMENT_CONFIG` WHERE UI_REFERENCE_ID = 'sr-prj-assoc-module';
+
+  - changeSet:
+      id: FIBI-9378-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Update DATE_TIME format and width for Service Request created date
+      changes:
+        - sql:
+            sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE dashboard_column_lookup
+                SET COLUMN_CONF_ID = 18,
+                    WIDTH = 20,
+                    UPDATE_USER = 'admin',
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                WHERE COLUMN_KEY = 'COL_SR_CREATE_DATE';
+                SET SQL_SAFE_UPDATES = 1;
+      rollback: 
+        - sql:
+            sql: |    
+                UPDATE dashboard_column_lookup
+                SET COLUMN_CONF_ID = 3,
+                    WIDTH = 12,
+                    UPDATE_USER = 'admin',
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                WHERE COLUMN_KEY = 'COL_SR_CREATE_DATE';
+
+  - changeSet:
+      id: FIBI-8856-1
+      author: Moahmed Fazil K
+      labels: 'DDL'
+      comment: Create SR_TASK_CATEGORY table for Service Request Task Category
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS SR_TASK_CATEGORY (
+                CATEGORY_CODE VARCHAR(3) NOT NULL,
+                DESCRIPTION VARCHAR(500) DEFAULT NULL,
+                IS_ACTIVE VARCHAR(1) DEFAULT NULL,
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP DATETIME NOT NULL,
+                PRIMARY KEY (CATEGORY_CODE)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS SR_TASK_CATEGORY;
+
+  - changeSet:
+      id: FIBI-8856-2
+      author: Moahmed Fazil K
+      labels: 'DDL'
+      comment: Create SR_TASK_TYPE_CATEGORY_MAPPING table for Service Request Task Type Category Mapping
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS SR_TASK_TYPE_CATEGORY_MAPPING (
+                CATEGORY_CODE VARCHAR(3) NOT NULL,
+                TASK_TYPE_CODE VARCHAR(3) NOT NULL,
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP DATETIME NOT NULL,
+                PRIMARY KEY (CATEGORY_CODE, TASK_TYPE_CODE),
+                CONSTRAINT SR_TASK_TYPE_CATEGORY_MAPPING_FK1 FOREIGN KEY (CATEGORY_CODE) REFERENCES SR_TASK_CATEGORY (CATEGORY_CODE),
+                CONSTRAINT SR_TASK_TYPE_CATEGORY_MAPPING_FK2 FOREIGN KEY (TASK_TYPE_CODE) REFERENCES SR_TASK_TYPE (TASK_TYPE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS SR_TASK_TYPE_CATEGORY_MAPPING;
+
+  - changeSet:
+      id: FIBI-8856-3
+      author: Moahmed Fazil K
+      labels: 'DDL'
+      comment: Add CATEGORY_CODE column to SR_TASK table
+      changes:
+        - sql:
+            sql: |
+              Analyze table SR_TASK;
+              SET @sql := IF(
+                (SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'SR_TASK'
+                  AND COLUMN_NAME = 'CATEGORY_CODE') = 0,
+                'ALTER TABLE SR_TASK ADD COLUMN CATEGORY_CODE VARCHAR(3) AFTER TASK_STATUS_CODE;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'SR_TASK'
+                  AND COLUMN_NAME = 'CATEGORY_CODE') = 1,
+                'ALTER TABLE SR_TASK DROP COLUMN CATEGORY_CODE;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-8856-4
+      author: Moahmed Fazil K
+      labels: 'DDL'
+      comment: Add TASK_CATEGORY_CODE and PREV_TASK_CATEGORY_CODE columns to SR_TASK_HISTORY table
+      changes:
+        - sql:
+            sql: |
+              Analyze table SR_TASK_HISTORY;
+              SET @sql1 := IF(
+                (SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'SR_TASK_HISTORY'
+                  AND COLUMN_NAME = 'TASK_CATEGORY_CODE') = 0,
+                'ALTER TABLE SR_TASK_HISTORY ADD COLUMN TASK_CATEGORY_CODE VARCHAR(3) AFTER PREV_TASK_TYPE_CODE;',
+                'DO 1'
+              );
+              PREPARE stmt1 FROM @sql1;
+              EXECUTE stmt1;
+              DEALLOCATE PREPARE stmt1;
+              
+              SET @sql2 := IF(
+                (SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'SR_TASK_HISTORY'
+                  AND COLUMN_NAME = 'PREV_TASK_CATEGORY_CODE') = 0,
+                'ALTER TABLE SR_TASK_HISTORY ADD COLUMN PREV_TASK_CATEGORY_CODE VARCHAR(3) AFTER TASK_CATEGORY_CODE;',
+                'DO 1'
+              );
+              PREPARE stmt2 FROM @sql2;
+              EXECUTE stmt2;
+              DEALLOCATE PREPARE stmt2;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql1 := IF(
+                (SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'SR_TASK_HISTORY'
+                  AND COLUMN_NAME = 'PREV_TASK_CATEGORY_CODE') = 1,
+                'ALTER TABLE SR_TASK_HISTORY DROP COLUMN PREV_TASK_CATEGORY_CODE;',
+                'DO 1'
+              );
+              PREPARE stmt1 FROM @sql1;
+              EXECUTE stmt1;
+              DEALLOCATE PREPARE stmt1;
+              
+              SET @sql2 := IF(
+                (SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'SR_TASK_HISTORY'
+                  AND COLUMN_NAME = 'TASK_CATEGORY_CODE') = 1,
+                'ALTER TABLE SR_TASK_HISTORY DROP COLUMN TASK_CATEGORY_CODE;',
+                'DO 1'
+              );
+              PREPARE stmt2 FROM @sql2;
+              EXECUTE stmt2;
+              DEALLOCATE PREPARE stmt2;
+
+  - changeSet:
+      id: FIBI-8856-5
+      author: Moahmed Fazil K
+      labels: 'DML'
+      comment: Update SR_ACTION_TYPE message for Task Created action
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE SR_ACTION_TYPE 
+              SET MESSAGE = '<b>Task Created:</b><br><b><TASK TYPE></b> task has been created by <b><CREATOR></b><br><b>Task Category: </b> <TASK CATEGORY><br><b>Assignee:</b> <ASSIGNEE><br><b>Due Date:</b> <DUE_DATE><br><b>Attachments:</b> <ATTACHMENTS>' 
+              WHERE (ACTION_TYPE_CODE = '39');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE SR_ACTION_TYPE 
+              SET MESSAGE = NULL 
+              WHERE (ACTION_TYPE_CODE = '39');
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-8856-6
+      author: Moahmed Fazil K
+      labels: 'DML'
+      comment: Insert Service Request Task subsection configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_SUBSECTION_CONFIG (
+                SUB_SECTION_CODE, 
+                SECTION_CODE, 
+                DESCRIPTION, 
+                IS_ACTIVE, 
+                UPDATE_TIMESTAMP, 
+                UPDATE_USER, 
+                INCLUDE_CUSTOM_DATA
+              ) 
+              VALUES (
+                '6009', 
+                'SR2013', 
+                'Service Request Task', 
+                'Y', 
+                UTC_TIMESTAMP(), 
+                'admin', 
+                'N'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SUBSECTION_CONFIG 
+              WHERE SUB_SECTION_CODE = '6009' 
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-8856-7
+      author: Moahmed Fazil K
+      labels: 'DML'
+      comment: Insert Service Request Task Type element configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_ELEMENT_CONFIG (
+                UI_REFERENCE_ID, 
+                DESCRIPTION, 
+                SUB_SECTION_CODE, 
+                SECTION_CODE, 
+                UPDATE_USER, 
+                UPDATE_TIMESTAMP
+              ) 
+              VALUES (
+                'sr-task-type', 
+                'Service Request Task Type', 
+                '6009', 
+                'SR2013', 
+                'admin', 
+                UTC_TIMESTAMP()
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG 
+              WHERE UI_REFERENCE_ID = 'sr-task-type' 
+                AND SUB_SECTION_CODE = '6009' 
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-8856-8
+      author: Moahmed Fazil K
+      labels: 'DML'
+      comment: Insert Service Request Task Category element configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_ELEMENT_CONFIG (
+                UI_REFERENCE_ID, 
+                DESCRIPTION, 
+                SUB_SECTION_CODE, 
+                SECTION_CODE, 
+                UPDATE_USER, 
+                UPDATE_TIMESTAMP
+              ) 
+              VALUES (
+                'sr-task-category', 
+                'Service Request Task Category', 
+                '6009', 
+                'SR2013', 
+                'admin', 
+                UTC_TIMESTAMP()
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG 
+              WHERE UI_REFERENCE_ID = 'sr-task-category' 
+                AND SUB_SECTION_CODE = '6009' 
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-8856-9
+      author: Moahmed Fazil K
+      labels: 'DML'
+      comment: Insert code table configuration for SR_TASK_CATEGORY
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO CODE_TABLE_CONFIGURATION (
+                TABLE_NAME, 
+                DISPLAY_NAME, 
+                CONTENT, 
+                GROUP_NAME, 
+                DESCRIPTION, 
+                UPDATE_USER, 
+                UPDATE_TIMESTAMP, 
+                IS_LOG_ENABLED
+              ) 
+              VALUES (
+                'SR_TASK_CATEGORY', 
+                'Service Request Task Category', 
+                '{"group":"Service Request","codeTableName":"Service Request Task Category","description":"List of all service request task category","databaseTableName":"SR_TASK_CATEGORY","fields":[{"columnName":"CATEGORY_CODE","displayName":"Task Category Code","dataType":"String","isEditable":true,"length":3,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"DESCRIPTION","displayName":"Description","dataType":"String","isEditable":true,"length":500,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"IS_ACTIVE","displayName":"Is Active","dataType":"String","isEditable":true,"length":1,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":"switch","valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_TIMESTAMP","displayName":"Update Timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#PERSON_ID","defaultValue":null}],"primaryKey":["CATEGORY_CODE"],"dependency":[{"displayName":"Service Request Task Type Category Mapping","table_name":"SR_TASK_TYPE_CATEGORY_MAPPING","columnName":"CATEGORY_CODE"},{"displayName":"Service Request Task Type Category ","table_name":"SR_TASK","columnName":"CATEGORY_CODE"}],"actions":null}', 
+                'Service Request', 
+                'description', 
+                'admin', 
+                UTC_TIMESTAMP(), 
+                'N'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM CODE_TABLE_CONFIGURATION 
+              WHERE TABLE_NAME = 'SR_TASK_CATEGORY' 
+                AND DISPLAY_NAME = 'Service Request Task Category';
+
+  - changeSet:
+      id: FIBI-8856-10
+      author: Moahmed Fazil K
+      labels: 'DML'
+      comment: Insert code table configuration for SR_TASK_TYPE_CATEGORY_MAPPING
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO CODE_TABLE_CONFIGURATION (
+                TABLE_NAME, 
+                DISPLAY_NAME, 
+                CONTENT, 
+                GROUP_NAME, 
+                DESCRIPTION, 
+                UPDATE_USER, 
+                UPDATE_TIMESTAMP, 
+                IS_LOG_ENABLED
+              ) 
+              VALUES (
+                'SR_TASK_TYPE_CATEGORY_MAPPING', 
+                'Service Request Task Type Category Mapping', 
+                '{"group":"Service Request","codeTableName":"Service Request Task Type Category Mapping","description":"List of all service Request task type category mapping","databaseTableName":"SR_TASK_TYPE_CATEGORY_MAPPING","fields":[{"columnName":"CATEGORY_CODE","displayName":"Category","dataType":"String","isEditable":"true","length":3,"canEmpty":"false","visible":"false","valueChanged":null,"index":null,"filterType":"lookUp","valueField":"SR_TASK_CATEGORY#CATEGORY_CODE","isTransient":null,"values":null,"refColumnName":null,"defaultValue":"DESCRIPTION_CATEGORY_CODE"},{"columnName":"DESCRIPTION_CATEGORY_CODE","displayName":"Category","dataType":"String","isEditable":"false","length":null,"canEmpty":"false","visible":"true","valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":"true","values":null,"refColumnName":null,"defaultValue":null},{"columnName":"TASK_TYPE_CODE","displayName":"Task Type","dataType":"String","isEditable":"true","length":3,"canEmpty":"false","visible":"false","valueChanged":null,"index":null,"filterType":"lookUp","valueField":"SR_TASK_TYPE#TASK_TYPE_CODE","isTransient":null,"values":null,"refColumnName":null,"defaultValue":"DESCRIPTION_TASK_TYPE_CODE"},{"columnName":"DESCRIPTION_TASK_TYPE_CODE","displayName":"Task Type","dataType":"String","isEditable":"false","length":null,"canEmpty":"false","visible":"true","valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":"true","values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_TIMESTAMP","displayName":"Update Timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#PERSON_ID","defaultValue":null}],"primaryKey":["CATEGORY_CODE","TASK_TYPE_CODE"],"dependency":[{"displayName":"Service Request Task Type","table_name":"SR_TASK_TYPE","columnName":"TASK_TYPE_CODE"},{"displayName":"Service Request Task Type Category","table_name":"SR_TASK_CATEGORY","columnName":"CATEGORY_CODE"}],"actions":null}', 
+                'Service Request', 
+                'description', 
+                'admin', 
+                UTC_TIMESTAMP(), 
+                'N'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM CODE_TABLE_CONFIGURATION 
+              WHERE TABLE_NAME = 'SR_TASK_TYPE_CATEGORY_MAPPING' 
+                AND DISPLAY_NAME = 'Service Request Task Type Category Mapping';
+
+  - changeSet:
+      id: FIBI-9389
+      author: Robin
+      labels: 'DML'
+      comment: 'Introduced new right SR_ADMIN_CORRECTION_ACCESS.'
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO rights 
+                (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT 
+                (SELECT IFNULL(MAX(RIGHT_ID), 0) + 1 FROM rights) AS id,
+                'SR_ADMIN_CORRECTION_ACCESS',
+                'To modify any service request record except it is in the Terminal Status',
+                'admin',
+                UTC_TIMESTAMP(),
+                '2'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM rights WHERE RIGHT_NAME = 'SR_ADMIN_CORRECTION_ACCESS'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM rights WHERE RIGHT_NAME = 'SR_ADMIN_CORRECTION_ACCESS';
+
+  - changeSet:
+      id: FIBI-9389-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: 'Update SR_STATUS table IS_TERMINAL flag'
+      changes:
+        - sql:
+            sql: |
+              UPDATE SR_STATUS  SET `IS_TERMINAL` = 'Y' WHERE STATUS_CODE in ('13','5');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE SR_STATUS  SET `IS_TERMINAL` = 'N' WHERE STATUS_CODE in ('13','5');
+
+              
+  - changeSet:
+      id: FIBI-9439
+      author: Sreejith T
+      labels: 'DML'
+      comment: Insert into dyn section for questionnaire as a tab or within the overview page
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config` SET `DESCRIPTION` = 'Questionnaire - Overview', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2005');
+              INSERT IGNORE INTO `dyn_section_config` (`SECTION_CODE`, `MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('SR2014', 'SR20', 'Questionnaire - Tab', 'N', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config` SET `DESCRIPTION` = 'Questionnaire', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2005');
+              DELETE FROM `dyn_section_config` WHERE `SECTION_CODE` = 'SR2014' AND `MODULE_CODE` = 'SR20';
+
+  - changeSet:
+      id: FIBI-8955
+      author: Sasikumar Chandran
+      labels: 'DML'
+      comment: Insert section type for Task Comments
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `section_type` (`SECTION_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('2026', 'Task Comments', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `section_type` WHERE `SECTION_CODE` = '2026';

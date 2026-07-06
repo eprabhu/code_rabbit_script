@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9943-1
+      author: Arun Ramesh
+      labels: 'PROCEDURES'
+      comment: Update Procedure GET_AWARD_DASHBOARD_V1 (SMU)
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/SMU/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

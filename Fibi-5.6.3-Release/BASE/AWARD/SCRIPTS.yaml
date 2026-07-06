@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10682-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update Award Title
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE AWARD SET TITLE = TRIM(TITLE) WHERE TITLE IS NOT NULL AND TITLE <> TRIM(TITLE);
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

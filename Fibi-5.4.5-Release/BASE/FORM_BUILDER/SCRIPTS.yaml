@@ -1,0 +1,149 @@
+databaseChangeLog: 
+
+- changeSet:
+      id: FIBI-7450-1
+      author: Prabhu.E
+      labels: 'DDL'
+      comment:  Add DESCRIPTION column to fb_comp_custom_element_answer table
+      changes:
+        - sql:
+            sql: |  
+
+              ANALYZE TABLE fb_comp_custom_element_answer;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'fb_comp_custom_element_answer'
+                        AND COLUMN_NAME = 'DESCRIPTION'
+                        AND CHARACTER_MAXIMUM_LENGTH < 4000
+                  ),
+                  'ALTER TABLE fb_comp_custom_element_answer MODIFY COLUMN `DESCRIPTION` VARCHAR(4000);',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;       
+
+      rollback:
+        - sql:
+            sql: |
+             ALTER TABLE fb_comp_custom_element_answer DROP COLUMN `DESCRIPTION`; 
+
+- changeSet:
+      id: FIBI-7450-2
+      author: Prabhu.E
+      labels: 'DDL'
+      comment:  Update form_builder_section table to increase column sizes  
+      changes:
+        - sql:
+            sql: |    
+              ANALYZE TABLE form_builder_section;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'form_builder_section'
+                        AND (
+                            (COLUMN_NAME = 'SECTION_NAME' AND CHARACTER_MAXIMUM_LENGTH < 300)
+                            OR (COLUMN_NAME = 'HEADER_INSTRUCTION' AND DATA_TYPE != 'longtext')
+                            OR (COLUMN_NAME = 'FOOTER_INSTRUCTION' AND DATA_TYPE != 'longtext')
+                        )
+                  ),
+                  'ALTER TABLE form_builder_section 
+                      MODIFY COLUMN `SECTION_NAME` VARCHAR(300), 
+                      MODIFY COLUMN `HEADER_INSTRUCTION` LONGTEXT, 
+                      MODIFY COLUMN `FOOTER_INSTRUCTION` LONGTEXT;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;     
+
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE form_builder_section 
+              MODIFY COLUMN `SECTION_NAME` VARCHAR(100), 
+              MODIFY COLUMN `HEADER_INSTRUCTION` TEXT, 
+              MODIFY COLUMN `FOOTER_INSTRUCTION` TEXT;
+- changeSet:
+      id: FIBI-7450-3
+      author: Prabhu.E
+      labels: 'DDL'
+      comment:  Update form_builder_section_component table to increase column sizes
+      changes:
+        - sql:
+            sql: | 
+
+              ANALYZE TABLE form_builder_section_component;              
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'form_builder_section_component'
+                        AND (
+                            (COLUMN_NAME = 'COMPONENT_DATA' AND DATA_TYPE != 'longtext') OR
+                            (COLUMN_NAME = 'HEADER_INSTRUCTION' AND DATA_TYPE != 'longtext') OR
+                            (COLUMN_NAME = 'FOOTER_INSTRUCTION' AND DATA_TYPE != 'longtext')
+                        )
+                  ),
+                  'ALTER TABLE form_builder_section_component 
+                      MODIFY COLUMN `COMPONENT_DATA` LONGTEXT, 
+                      MODIFY COLUMN `HEADER_INSTRUCTION` LONGTEXT, 
+                      MODIFY COLUMN `FOOTER_INSTRUCTION` LONGTEXT;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;       
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE form_builder_section_component 
+              MODIFY COLUMN `COMPONENT_DATA` TEXT, 
+              MODIFY COLUMN `HEADER_INSTRUCTION` TEXT, 
+              MODIFY COLUMN `FOOTER_INSTRUCTION` TEXT;
+- changeSet:
+      id: FIBI-7450-4
+      author: Prabhu.E
+      labels: 'DDL'
+      comment:  Update FB_COMP_CUSTOM_ELEMENT table to increase column sizes
+      changes:
+        - sql:
+            sql: | 
+              ANALYZE TABLE FB_COMP_CUSTOM_ELEMENT;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FB_COMP_CUSTOM_ELEMENT'
+                        AND (
+                            (COLUMN_NAME = 'CUSTOM_ELEMENT_NAME' AND CHARACTER_MAXIMUM_LENGTH < 300) OR
+                            (COLUMN_NAME = 'COLUMN_LABEL' AND CHARACTER_MAXIMUM_LENGTH < 300)
+                        )
+                  ),
+                  'ALTER TABLE FB_COMP_CUSTOM_ELEMENT 
+                      MODIFY COLUMN `CUSTOM_ELEMENT_NAME` VARCHAR(300), 
+                      MODIFY COLUMN `COLUMN_LABEL` VARCHAR(300);',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;       
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE FB_COMP_CUSTOM_ELEMENT 
+              MODIFY COLUMN `CUSTOM_ELEMENT_NAME` VARCHAR(100), 
+              MODIFY COLUMN `COLUMN_LABEL` VARCHAR(100);

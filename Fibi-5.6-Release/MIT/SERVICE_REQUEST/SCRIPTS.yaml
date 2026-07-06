@@ -1,0 +1,92 @@
+databaseChangeLog: 
+  - changeSet:
+      id: FIBI-6936-1
+      author: Shyla M
+      labels: 'DDL'
+      comment: MIT initial customs changes and configurations
+      changes:
+        - sql:
+            sql: |
+             CREATE TABLE IF NOT EXISTS SR_CONNECT_LAST_SYNC_TIME (
+                SYNC_ITEM VARCHAR(60) NOT NULL,
+                LAST_SYNC_TIMESTAMP DATETIME DEFAULT NULL,
+                SCHEDULER_STATUS VARCHAR(60) DEFAULT NULL,
+                PRIMARY KEY (SYNC_ITEM)
+                );
+
+                ALTER TABLE SR_INT_STAGE_AGREEMENT
+                MODIFY AGREEMENT_ID VARCHAR(12) NOT NULL,
+                ADD CONSTRAINT UQ_AGREEMENT_ID UNIQUE (AGREEMENT_ID);
+
+                ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX
+                MODIFY MODULE_CODE INT NOT NULL,
+                MODIFY DOCUMENT_NUMBER VARCHAR(40) NOT NULL,
+                ADD CONSTRAINT UQ_MODULE_CODE_DOCUMENT_NUMBER UNIQUE (MODULE_CODE, DOCUMENT_NUMBER);
+
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS SR_CONNECT_LAST_SYNC_TIME;              
+              ALTER TABLE SR_INT_STAGE_AGREEMENT
+                DROP INDEX UQ_AGREEMENT_ID;
+              ALTER TABLE SR_INT_STAGE_AGREEMENT
+                MODIFY AGREEMENT_ID VARCHAR(12) NULL;
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX
+                DROP INDEX UQ_MODULE_CODE_DOCUMENT_NUMBER;
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX
+                MODIFY MODULE_CODE INT NULL;
+              ALTER TABLE SR_INT_STAGE_ELASTIC_INDEX
+                MODIFY DOCUMENT_NUMBER VARCHAR(40) NULL;
+
+  - changeSet:
+      id: FIBI-6936-2
+      author: Shyla M
+      labels: 'DML'
+      comment: MIT initial customs changes and configurations
+      changes:
+        - sql:
+            sql: |
+             INSERT IGNORE INTO `SR_CONNECT_LAST_SYNC_TIME` (`SYNC_ITEM`,`LAST_SYNC_TIMESTAMP`,`SCHEDULER_STATUS`) VALUES ('AGREEMENT',NULL,'WAITING');
+             INSERT IGNORE INTO `SR_CONNECT_LAST_SYNC_TIME` (`SYNC_ITEM`,`LAST_SYNC_TIMESTAMP`,`SCHEDULER_STATUS`) VALUES ('AWARD',NULL,'WAITING');
+             INSERT IGNORE INTO `SR_CONNECT_LAST_SYNC_TIME` (`SYNC_ITEM`,`LAST_SYNC_TIMESTAMP`,`SCHEDULER_STATUS`) VALUES ('IP',NULL,'WAITING');
+             INSERT IGNORE INTO `SR_CONNECT_LAST_SYNC_TIME` (`SYNC_ITEM`,`LAST_SYNC_TIMESTAMP`,`SCHEDULER_STATUS`) VALUES ('PERSON',NULL,'WAITING');
+             INSERT IGNORE INTO `SR_CONNECT_LAST_SYNC_TIME` (`SYNC_ITEM`,`LAST_SYNC_TIMESTAMP`,`SCHEDULER_STATUS`) VALUES ('SERVICE_REQUEST',NULL,'WAITING');
+             INSERT IGNORE INTO `SR_CONNECT_LAST_SYNC_TIME` (`SYNC_ITEM`,`LAST_SYNC_TIMESTAMP`,`SCHEDULER_STATUS`) VALUES ('UNIT',NULL,'WAITING');
+             UPDATE assoc_config SET ASSOCIATION_URL = 'https://fibi-qa.mit.edu/agreements/#/fibi/agreement/form?agreementId=' WHERE (`ASSOC_CONFIG_CODE` = '4');
+
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8975-1
+      author: Shyla M
+      labels: 'DDL'
+      comment: Altering sr_int_stage_agreement table
+      changes:
+        - sql:
+            sql: |
+             ALTER TABLE sr_int_stage_agreement
+              ADD COLUMN PI_PERSON_ID VARCHAR(40) DEFAULT NULL 
+                  AFTER REQUESTOR_FULL_NAME,
+              ADD COLUMN SPONSOR_CODE VARCHAR(6) DEFAULT NULL 
+                  AFTER PRINCIPAL_PERSON_FULL_NAME,
+              ADD COLUMN REQUESTOR_PERSON_ID VARCHAR(40) DEFAULT NULL 
+                  AFTER TITLE,
+              ADD COLUMN AA_PERSON_ID VARCHAR(40) DEFAULT NULL 
+                  AFTER ATTRIBUTE_5_VALUE;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8854-1
+      author: Nabeel Ahamed M
+      labels: DML
+      comment: INSERT query for MIT configuration 
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE  INTO unit_administrator_type
+              (UNIT_ADMINISTRATOR_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, DEFAULT_GROUP_FLAG, IS_ACTIVE)
+              VALUES ('12', 'Contract Admin', utc_timestamp(), 'admin', 'N', 'Y');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM unit_administrator_type WHERE UNIT_ADMINISTRATOR_TYPE_CODE = '12';

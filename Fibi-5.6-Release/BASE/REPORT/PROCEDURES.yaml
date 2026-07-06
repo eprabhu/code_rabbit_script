@@ -1,0 +1,63 @@
+databaseChangeLog: 
+ 
+  - changeSet: 
+      id: FIBI-8198-1
+      author: Hridya E K 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS AWARD_MASTER_DATASET_SYNC; 
+        - sqlFile: 
+            path: ROUTINES/BASE/REPORT/PROCEDURES/AWARD_MASTER_DATASET_SYNC.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-8198-2
+      author: Hridya E K
+      labels: 'PROCEDURES' 
+      comment: Created Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS MIGRATE_AWARD_SPECIAL_REVIEW; 
+        - sqlFile: 
+            path: ROUTINES/BASE/REPORT/PROCEDURES/MIGRATE_AWARD_SPECIAL_REVIEW.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8343-1
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: Update Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS ADD_COLUMN_IN_AWARD_CUSTOM_DATA_RT;
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/ADD_COLUMN_IN_AWARD_CUSTOM_DATA_RT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9983-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS ADD_COLUMN_IN_AWARD_CUSTOM_DATA_RT;
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/ADD_COLUMN_IN_AWARD_CUSTOM_DATA_RT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

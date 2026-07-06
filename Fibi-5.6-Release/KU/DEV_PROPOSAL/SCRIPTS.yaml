@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8341
+      author: Reshma Antony
+      labels: 'DML'
+      comment: update in DASHBOARD_COLUMN_LOOKUP
+      changes:
+        - sql:
+            sql: |
+                UPDATE DASHBOARD_COLUMN_LOOKUP 
+                                SET IS_ACTIVE = 'N' 
+                                WHERE COLUMN_ID = 'COL_DEV_PROPOSAL_TYPE';
+      rollback: empty

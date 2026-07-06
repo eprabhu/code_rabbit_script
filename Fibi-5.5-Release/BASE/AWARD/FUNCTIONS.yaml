@@ -1,0 +1,107 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7646-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_CHK_AWARD_DMP_COMPLETE
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHK_AWARD_DMP_COMPLETE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+              DROP FUNCTION IF EXISTS FN_AWARD_OH_WAIVER_EXCEED_VAL;
+              DROP FUNCTION IF EXISTS FN_AWARD_OH_WAIVER_LESS_VAL;
+              DROP FUNCTION IF EXISTS FN_AWD_LEADUNIT_IS_RULE_UNIT;
+              DROP FUNCTION IF EXISTS FN_AWD_PI_EQ_UNITAPPROVAL_HOD;
+              DROP FUNCTION IF EXISTS FN_AWD_PI_IS_UNIT_HEAD;
+              DROP FUNCTION IF EXISTS FN_CHECK_AWARD_HAS_SAP_FEED;
+              DROP FUNCTION IF EXISTS FN_CHECK_AWARD_LEADUNIT;
+              DROP FUNCTION IF EXISTS FN_CHECK_SDC_GM;
+              DROP FUNCTION IF EXISTS FN_CHK_AWD_LEAD_UNIT_TYPE;
+              DROP FUNCTION IF EXISTS FN_CHK_LEAD_UNIT_IS_IMMD_CHILD;
+              DROP FUNCTION IF EXISTS FN_CHK_MANPOWER_ADMIN_CORRECTION_RIGHT;
+              DROP FUNCTION IF EXISTS FN_FOR_WBS_VALIDATION;
+              DROP FUNCTION IF EXISTS FN_GEN_AWARD_WBS_NUMBER;
+              DROP FUNCTION IF EXISTS FN_RULE_PI_IS_HOD_IN_AWARD;
+              DROP FUNCTION IF EXISTS FN_VALIDATE_AUTO_AWARD_CREATION;
+              DROP FUNCTION IF EXISTS FN_AWD_PI_IS_UNITAPPROVAL_HOD;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_AWARD_OH_WAIVER_EXCEED_VAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_AWARD_OH_WAIVER_LESS_VAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_AWD_LEADUNIT_IS_RULE_UNIT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_AWD_PI_EQ_UNITAPPROVAL_HOD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_AWD_PI_IS_UNIT_HEAD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHECK_AWARD_HAS_SAP_FEED.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHECK_AWARD_LEADUNIT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHECK_SDC_GM.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHK_AWD_LEAD_UNIT_TYPE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHK_LEAD_UNIT_IS_IMMD_CHILD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHK_MANPOWER_ADMIN_CORRECTION_RIGHT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_FOR_WBS_VALIDATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_GEN_AWARD_WBS_NUMBER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_RULE_PI_IS_HOD_IN_AWARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_VALIDATE_AUTO_AWARD_CREATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_AWD_PI_IS_UNITAPPROVAL_HOD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

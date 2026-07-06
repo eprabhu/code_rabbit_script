@@ -1,0 +1,865 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9964-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Updated the status description
+      changes:
+        - sql:
+            sql: |
+              UPDATE `sr_status`
+              SET `DESCRIPTION` = 'Not Submitted',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `STATUS_CODE` = '1';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `sr_status`
+              SET `DESCRIPTION` = 'In Progress',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `STATUS_CODE` = '1';
+
+  - changeSet:
+      id: FIBI-9964-2
+      author: Shyla M
+      labels: 'DML'
+      comment: Inserted the missing arg_value_lookup entries.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SPECIAL_REVIEW_TYPE', 'Human Subjects', 'Human Subjects', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SPECIAL_REVIEW_TYPE' AND ARGUMENT_VALUE = 'Human Subjects');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SPECIAL_REVIEW_TYPE', 'Animal Usage', 'Animal Usage', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SPECIAL_REVIEW_TYPE' AND ARGUMENT_VALUE = 'Animal Usage');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SPECIAL_REVIEW_TYPE', 'Recombinant DNA', 'Recombinant DNA', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SPECIAL_REVIEW_TYPE' AND ARGUMENT_VALUE = 'Recombinant DNA');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SPECIAL_REVIEW_TYPE', 'Radioactive Isotopes', 'Radioactive Isotopes', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SPECIAL_REVIEW_TYPE' AND ARGUMENT_VALUE = 'Radioactive Isotopes');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SPECIAL_REVIEW_TYPE', 'Biohazard Materials', 'Biohazard Materials', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SPECIAL_REVIEW_TYPE' AND ARGUMENT_VALUE = 'Biohazard Materials');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SPECIAL_REVIEW_TYPE', 'International Programs', 'International Programs', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SPECIAL_REVIEW_TYPE' AND ARGUMENT_VALUE = 'International Programs');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SPECIAL_REVIEW_TYPE', 'Space Change', 'Space Change', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SPECIAL_REVIEW_TYPE' AND ARGUMENT_VALUE = 'Space Change');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SP_REVIEW_APPROVAL_STATUS', 'Link to IRB', 'Link to IRB', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SP_REVIEW_APPROVAL_STATUS' AND ARGUMENT_VALUE = 'Link to IRB');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SP_REVIEW_APPROVAL_STATUS', 'Pending', 'Pending', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SP_REVIEW_APPROVAL_STATUS' AND ARGUMENT_VALUE = 'Pending');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SP_REVIEW_APPROVAL_STATUS', 'Approved', 'Approved', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SP_REVIEW_APPROVAL_STATUS' AND ARGUMENT_VALUE = 'Approved');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SP_REVIEW_APPROVAL_STATUS', 'Not yet applied', 'Not yet applied', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SP_REVIEW_APPROVAL_STATUS' AND ARGUMENT_VALUE = 'Not yet applied');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'KC_SP_REVIEW_APPROVAL_STATUS', 'Exempt', 'Exempt', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'KC_SP_REVIEW_APPROVAL_STATUS' AND ARGUMENT_VALUE = 'Exempt');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'BASIS_OF_PAYMENT', 'Firm fixed price', 'Firm fixed price', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'BASIS_OF_PAYMENT' AND ARGUMENT_VALUE = 'Firm fixed price');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'BASIS_OF_PAYMENT', 'Cost reimbursement', 'Cost reimbursement', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'BASIS_OF_PAYMENT' AND ARGUMENT_VALUE = 'Cost reimbursement');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'BASIS_OF_PAYMENT', 'Fixed price level of effort', 'Fixed price level of effort', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'BASIS_OF_PAYMENT' AND ARGUMENT_VALUE = 'Fixed price level of effort');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'BASIS_OF_PAYMENT', 'Other', 'Other', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'BASIS_OF_PAYMENT' AND ARGUMENT_VALUE = 'Other');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'BASIS_OF_PAYMENT', 'Gift', 'Gift', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'BASIS_OF_PAYMENT' AND ARGUMENT_VALUE = 'Gift');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'BASIS_OF_PAYMENT', 'No Payment', 'No Payment', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'BASIS_OF_PAYMENT' AND ARGUMENT_VALUE = 'No Payment');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Federal Letter of Credit', 'Federal Letter of Credit', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Federal Letter of Credit');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Cost invoice', 'Cost invoice', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Cost invoice');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Fixed price invoice', 'Fixed price invoice', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Fixed price invoice');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Level of effort invoices', 'Level of effort invoices', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Level of effort invoices');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Progress payment invoices', 'Progress payment invoices', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Progress payment invoices');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Invoices for fees from members or participants', 'Invoices for fees from members or participants', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Invoices for fees from members or participants');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Advanced payment invoice', 'Advanced payment invoice', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Advanced payment invoice');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Automatic payment/No Dunning', 'Automatic payment/No Dunning', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Automatic payment/No Dunning');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'SF270/Request for Advance', 'SF270/Request for Advance', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'SF270/Request for Advance');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Special Handling/No Dunning', 'Special Handling/No Dunning', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Special Handling/No Dunning');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Scheduled payment invoices', 'Scheduled payment invoices', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Scheduled payment invoices');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Gift', 'Gift', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Gift');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'Cost Invoice with Certification', 'Cost Invoice with Certification', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'Cost Invoice with Certification');
+              
+              INSERT INTO `arg_value_lookup` (`ARG_VALUE_LOOKUP_ID`, `ARGUMENT_NAME`, `ARGUMENT_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`)
+              SELECT (SELECT COALESCE(MAX(ARG_VALUE_LOOKUP_ID), 0) + 1 FROM arg_value_lookup), 'METHOD_OF_PAYMENT', 'No Payment or Billed by Department', 'No Payment or Billed by Department', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM arg_value_lookup WHERE ARGUMENT_NAME = 'METHOD_OF_PAYMENT' AND ARGUMENT_VALUE = 'No Payment or Billed by Department');
+
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10100-1
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Set IS_ACTIVE to Y for dyn_section_config SR2015 (Additional Information) in MIT
+      changes:
+        - sql:
+            sql: |
+              UPDATE dyn_section_config
+              SET IS_ACTIVE = 'Y',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE SECTION_CODE = 'SR2015' AND MODULE_CODE = 'SR20';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE dyn_section_config
+              SET IS_ACTIVE = 'N',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE SECTION_CODE = 'SR2015' AND MODULE_CODE = 'SR20';
+
+  - changeSet:
+      id: FIBI-10100-2
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Insert DYN_ELEMENT_CONFIG for Service Request Description as separate section (SR2001)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG
+              (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, INSTRUCTION, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT
+                  'srvce-reqst-descrption-section',
+                  'Service Request Description As Seperate Section',
+                  '2001',
+                  'SR2001',
+                  'Optional field : provide description of the request which is not captured in the questionnaire',
+                  'IMPORTANT: Do not enter request details in the Description field. Please provide all required information in the questionnaire. The questionnaire will appear once you save the request. Use the Description field only to include additional information that is not captured in the questionnaire.',
+                  'admin',
+                  UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'srvce-reqst-descrption-section'
+                    AND SUB_SECTION_CODE = '2001'
+                    AND SECTION_CODE = 'SR2001'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'srvce-reqst-descrption-section'
+                AND SUB_SECTION_CODE = '2001'
+                AND SECTION_CODE = 'SR2001';
+
+  - changeSet:
+      id: FIBI-10218-1
+      author: Shyla
+      labels: 'DML'
+      comment: Update assoc_config name for award module.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `assoc_config`
+              SET `NAME` = 'Awards',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `ASSOC_CONFIG_CODE` = '3';
+
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `assoc_config`
+              SET `NAME` = 'All Awards',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `ASSOC_CONFIG_CODE` = '3';
+
+  - changeSet:
+      id: FIBI-10218-2
+      author: Shyla
+      labels: 'DML'
+      comment: Inserting the New categories.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('1','New Awards','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('2','Child Account Maintenance','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('3','Consortia','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('4','Requests to Sponsor','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('5','Edits to Awards','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('6','Outgoing Subawards','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('7','Institute Proposal Updates','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('8','Sponsor and Organization Maintenance','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_category` (`CATEGORY_CODE`,`DESCRIPTION`,`IS_ACTIVE`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_DEFAULT`)
+              VALUES ('9','Non-MIT Person Maintenance','Y','admin',UTC_TIMESTAMP(),'N')
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `IS_DEFAULT` = VALUES(`IS_DEFAULT`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10218-3
+      author: Shyla
+      labels: 'DML'
+      comment: Inserting the Sr types
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('11','Change PI/Key Personnel or PI/KP Effort',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',11,'4',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('12','Edits-Award Status',UTC_TIMESTAMP(),'admin','<p>Here\'s the information RAS needs to fulfill this request: </p>\n<ul>\n	<li>New status being requested</li>\n	<li>Child account numbers (if any, or all) that should also have status changed</li>\n	<li>Reason for change</li>\n</ul> ',NULL,'Y',14,'5',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('13','Edits-Award Rates and/or Under recovery',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',15,'5',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('2','New Child',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',3,'2',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('26','New Sponsor',UTC_TIMESTAMP(),'admin','<p>Here\'s the information POPS needs (POPS will check if this Sponsor already exists in KC)</p>\n<ul>\n	<li>Sponsor Name & Address (9-digit zip needed for USA addresses)</li>\n	<li>Type of Sponsor if known (ex: For profit, Institute of Higher Ed, Foreign Federal Government)</li>\n	<li>Any other contact info that may help POPS confirm whether this sponsor already exists, such as a website </li>\n</ul>',NULL,'Y',27,'8',2,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('27','New Address Book',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',30,'9',2,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('28','New Subaward Organization',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',28,'8',2,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('3','New Child-Fab Equip',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',4,'2',2,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('31','New Award Set Up',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',1,'1',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('32','Account Set Up Before Receipt of Award',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',2,'1',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('33','Child Accounts-Date Changes',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',6,'2',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('34','Cost Share Plan Updates',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',8,'2',4,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('37','Consortium Updates',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',9,'3',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('38','Update Obligated Total for Payment Received',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',19,'5',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('39','Sponsor Approval of No Cost Extension',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',10,'4',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('4','New Child-Participant Support',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',5,'2',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('41','Other Sponsor Prior Approval',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',12,'4',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('42','Extend Existing Account in Pending',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',18,'5',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('43','Edits-Billing/Payment Information',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',17,'5',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('44','Sponsor Modification/Amendment',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',13,'5',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('45','New Subaward',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',22,'6',6,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('46','Subaward Modification/Amendment',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',23,'6',6,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('47','Closeouts',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',20,'5',2,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('48','Other Post Award Activity',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',21,'5',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('49','Edits-Institute Proposal Status',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',24,'7',2,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('50','Edits-Institute Proposal Rates/Under Recovery',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',25,'7',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('51','Edits-Institute Proposal Compliance',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',26,'7',3,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('52','Edits-Sponsor or Organization',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',29,'8',2,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('55','Edits-Award Compliance',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',16,'5',NULL,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+              INSERT INTO `sr_type` (`TYPE_CODE`,`DESCRIPTION`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`INSTRUCTION`,`SUBJECT`,`IS_ACTIVE`,`sort_order`,`CATEGORY_CODE`,`ADMIN_GROUP_ID`,`HELP_TEXT`,`STATUS_CODE`)
+              VALUES ('6','Distribute Funds',UTC_TIMESTAMP(),'admin',NULL,NULL,'Y',7,'2',1,NULL,NULL)
+              ON DUPLICATE KEY UPDATE
+                `DESCRIPTION` = VALUES(`DESCRIPTION`),
+                `INSTRUCTION` = VALUES(`INSTRUCTION`),
+                `SUBJECT` = VALUES(`SUBJECT`),
+                `IS_ACTIVE` = VALUES(`IS_ACTIVE`),
+                `sort_order` = VALUES(`sort_order`),
+                `CATEGORY_CODE` = VALUES(`CATEGORY_CODE`),
+                `ADMIN_GROUP_ID` = VALUES(`ADMIN_GROUP_ID`),
+                `HELP_TEXT` = VALUES(`HELP_TEXT`),
+                `STATUS_CODE` = VALUES(`STATUS_CODE`),
+                `UPDATE_USER` = 'admin',
+                `UPDATE_TIMESTAMP` = UTC_TIMESTAMP();
+
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10218-4
+      author: Shyla
+      labels: 'DML'
+      comment: Updated the configuration for COL_SR_PRIORITY.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dashboard_column_lookup`
+              SET `COLUMN_CONF_ID` = '6',
+                  `WIDTH` = '10',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `COLUMN_KEY` = 'COL_SR_PRIORITY';
+
+
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dashboard_column_lookup`
+              SET `COLUMN_CONF_ID` = '5',
+                  `WIDTH` = '5',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `COLUMN_KEY` = 'COL_SR_PRIORITY';
+
+  - changeSet:
+      id: FIBI-10218-5
+      author: Shyla
+      labels: 'DML'
+      comment: Inactivating the criteria and column of Key person and PI.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dashboard_criteria_lookup` SET `IS_ACTIVE` = 'N' where Criteria_KEY in ( 'CRT_SR_KEY_PERSONS','CRT_SR_PI');
+              UPDATE `dashboard_column_lookup` SET `IS_ACTIVE` = 'N' where COLUMN_KEY in ( 'COL_SR_KEY_PERSONS','COL_SR_PI');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dashboard_criteria_lookup` SET `IS_ACTIVE` = 'Y' where Criteria_KEY in ( 'CRT_SR_KEY_PERSONS','CRT_SR_PI');
+              UPDATE `dashboard_column_lookup` SET `IS_ACTIVE` = 'Y' where COLUMN_KEY in ( 'COL_SR_KEY_PERSONS','COL_SR_PI');

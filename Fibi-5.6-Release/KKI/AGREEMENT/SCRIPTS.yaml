@@ -1,0 +1,43 @@
+databaseChangeLog:   
+   
+    - changeSet:
+        id: FIBI-8410-1
+        author: Adarsh 
+        labels: 'DML'
+        comment: Insert in Bussiness rule function
+        changes:
+            - sql:
+                sql: |
+                    INSERT IGNORE INTO BUSINESS_RULE_FUNCTION (FUNCTION_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, DB_FUNCTION_NAME, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('To check Attachment type Exists', '13', '0', 'To check Attachment type Exists', 'FN_CHECK_AGREMENT_ATT_TYP', UTC_TIMESTAMP(), 'admin');
+        rollback:
+            - sql:
+                sql: |
+                    DELETE FROM BUSINESS_RULE_FUNCTION WHERE FUNCTION_NAME = 'To check Attachment type Exists';
+
+    - changeSet:
+        id: FIBI-8410-2
+        author: Adarsh 
+        labels: 'DML'
+        comment: Insert in Bussiness rule function arg
+        changes:
+            - sql:
+                sql: |
+                    INSERT IGNORE INTO BUSINESS_RULE_FUNCTION_ARG (FUNCTION_NAME, ARGUMENT_SEQUENCE_NUMBER, ARGUMENT_NAME, UPDATE_TIMESTAMP, UPDATE_USER, ARGUMENT_TYPE) VALUES ('To check Attachment type Exists', '1', 'MODULE_ITEM_KEY', UTC_TIMESTAMP(), 'admin', 'S');
+        rollback:
+            - sql:
+                sql: |
+                    DELETE FROM BUSINESS_RULE_FUNCTION_ARG WHERE FUNCTION_NAME = 'To check Attachment type Exists';
+
+    - changeSet:
+        id: FIBI-8410-3
+        author: Adarsh 
+        labels: 'DML'
+        comment: Insert in Bussiness rule function arg
+        changes:
+            - sql:
+                sql: |
+                    INSERT IGNORE INTO BUSINESS_RULE_FUNCTION_ARG (FUNCTION_NAME, ARGUMENT_SEQUENCE_NUMBER, ARGUMENT_NAME, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME, LOOKUP_TYPE, ARGUMENT_TYPE, ARGUMENT_LABEL) VALUES ('To check Attachment type Exists', '2', 'AGREEMENT_ATTACHMENT_TYPE_CODE', UTC_TIMESTAMP(), 'admin', 'AGREEMENT_ATTACHMENT_TYPE#AGREEMENT_ATTACHMENT_TYPE_CODE', 'System', 'U', 'Agreement Attachment Type');                
+        rollback:
+            - sql:
+                sql: |
+                    DELETE FROM BUSINESS_RULE_FUNCTION_ARG WHERE FUNCTION_NAME = 'To check Attachment type Exists';

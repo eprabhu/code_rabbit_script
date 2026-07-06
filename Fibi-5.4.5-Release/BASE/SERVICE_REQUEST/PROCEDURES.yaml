@@ -1,0 +1,92 @@
+databaseChangeLog: 
+ 
+  - changeSet: 
+      id: FIBI-7181
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT; 
+        - sqlFile: 
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7346-1
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_COUNT; 
+        - sqlFile: 
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_COUNT.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+
+  - changeSet: 
+      id: FFIBI-7346-2
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD; 
+        - sqlFile: 
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7346-3
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT_IN_DETAIL; 
+        - sqlFile: 
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT_IN_DETAIL.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7346-4
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT; 
+        - sqlFile: 
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7346-5
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET; 
+        - sqlFile: 
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty

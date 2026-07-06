@@ -1,0 +1,38 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9711-1
+      author: Sasikumar Chandran
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_COUNT_BY_STATUS;
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_COUNT_BY_STATUS_DETAIL;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_COUNT_BY_STATUS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_COUNT_BY_STATUS_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9633-1
+      author: Sasikumar Chandran
+      labels: 'PROCEDURES'
+      comment: Created Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AGREEMENT_DETAILS_FOR_ELASTIC;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_DETAILS_FOR_ELASTIC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

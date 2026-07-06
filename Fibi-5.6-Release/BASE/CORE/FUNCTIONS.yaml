@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-7901-1
+        author: Nabeel Ahamed M
+        labels: 'FUNCTIONS'
+        comment: updation on funtion FN_FEED_INST_PROPOSAL
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP FUNCTION IF EXISTS FN_FEED_INST_PROPOSAL;
+          - sqlFile:
+              path: ROUTINES/BASE/CORE/FUNCTIONS/FN_FEED_INST_PROPOSAL.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty

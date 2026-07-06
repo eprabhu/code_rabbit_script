@@ -1,0 +1,242 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10371-1
+      author: Reshma  Antony
+      labels: 'DML'
+      comment: Introduce new Parameter CAN_CREATE_AGREEMENT_IN_ANY_UNIT to controls Lead Unit visibility
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO PARAMETER (`PARAMETER_NAME`, `VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('CAN_CREATE_AGREEMENT_IN_ANY_UNIT', 'Y', 'To enable Agreement creation in any of the unit', UTC_TIMESTAMP(), 'admin');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10792-1
+      author: Reshma  Antony
+      labels: 'DML'
+      comment: Introduced a new right, MODIFY_SERVICE_REQUEST_PROJECT_ASSOCIATION, to authorize personnel to add or update project associations.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO rights (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT
+                  (SELECT COALESCE(MAX(RIGHT_ID), 0) + 1 FROM rights),
+                  'MODIFY_SERVICE_REQUEST_PROJECT_ASSOCIATION',
+                  'Controls and manages project association modifications for service requests, ensuring that only authorized personnel can add or update project associations.',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '1'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM rights WHERE RIGHT_NAME = 'MODIFY_SERVICE_REQUEST_PROJECT_ASSOCIATION'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM rights WHERE RIGHT_NAME = 'MODIFY_SERVICE_REQUEST_PROJECT_ASSOCIATION';
+
+  - changeSet:
+      id: FIBI-10792-2
+      author: Reshma  Antony
+      labels: 'DML'
+      comment: Introduced a new right, MODIFY_AGREEMENT_PROJECT_ASSOCIATION, to authorize personnel to add or update project associations.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO rights (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT
+                  (SELECT COALESCE(MAX(RIGHT_ID), 0) + 1 FROM rights),
+                  'MODIFY_AGREEMENT_PROJECT_ASSOCIATION',
+                  'Controls and manages project association modifications for Agreement, ensuring that only authorized personnel can add or update project associations.',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '1'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM rights WHERE RIGHT_NAME = 'MODIFY_AGREEMENT_PROJECT_ASSOCIATION'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM rights WHERE RIGHT_NAME = 'MODIFY_AGREEMENT_PROJECT_ASSOCIATION';
+
+  - changeSet:
+      id: FIBI-11017-1
+      author: Vishnu B H
+      labels: 'DDL,DML'
+      comment: Add DESCRIPTION column to ASSOC_CONFIG for lookup and code table support.
+      changes:
+        - sql:
+            sql: |
+              SET @add_assoc_config_description = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.columns
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'ASSOC_CONFIG'
+                      AND column_name = 'DESCRIPTION'
+                  ) = 0,
+                  'ALTER TABLE ASSOC_CONFIG ADD COLUMN DESCRIPTION VARCHAR(200) DEFAULT NULL',
+                  'SELECT 1'
+                )
+              );
+              PREPARE stmt FROM @add_assoc_config_description;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+              
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE ASSOC_CONFIG
+              SET DESCRIPTION = NAME
+              WHERE DESCRIPTION IS NULL;
+
+      rollback:
+        - sql:
+            sql: |
+              SET @drop_assoc_config_description = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.columns
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'ASSOC_CONFIG'
+                      AND column_name = 'DESCRIPTION'
+                  ) > 0,
+                  'ALTER TABLE ASSOC_CONFIG DROP COLUMN DESCRIPTION',
+                  'SELECT 1'
+                )
+              );
+              PREPARE stmt FROM @drop_assoc_config_description;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-11098-1
+      author: Solih
+      labels: 'DML'
+      comment: Update elasticsearch_index_config for reviewer search configuration.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `elasticsearch_index_config` SET `EXTRA_CONDITIONS` = '{}', `INDEX_SETTINGS` = '{\n    \"index\": {\n        \"mappings\": {\n            \"properties\": {\n                \"hindex\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"aff_code\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"full_name\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"fields\": {\n                        \"sort\": {\n                            \"type\": \"keyword\",\n                            \"index\": true\n                        }\n                    },\n                    \"analyzer\": \"name_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"name_search\"\n                },\n                \"last_name\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"prncpl_id\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"prncpl_nm\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"email_addr\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"whitespace\"\n                },\n                \"country_code\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"country_name\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"academic_rank\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"standard\"\n                },\n                \"sk_description\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"whitespace\",\n                    \"search_analyzer\": \"standard\"\n                },\n                \"aff_description\": {\n                    \"type\": \"text\",\n                    \"index\": true,\n                    \"analyzer\": \"ngram_analyzer\",\n                    \"term_vector\": \"yes\",\n                    \"search_analyzer\": \"keyword\"\n                },\n                \"reviewer_rights_id\": {\n                    \"type\": \"keyword\"\n                }\n            }\n        },\n        \"settings\": {\n            \"analysis\": {\n                \"filter\": {\n                    \"ngram_filter\": {\n                        \"type\": \"edge_ngram\",\n                        \"max_gram\": 60,\n                        \"min_gram\": 2\n                    }\n                },\n                \"analyzer\": {\n                    \"name_search\": {\n                        \"tokenizer\": \"standard\",\n                        \"char_filter\": [\n                            \"my_mapping\"\n                        ]\n                    },\n                    \"name_analyzer\": {\n                        \"type\": \"custom\",\n                        \"filter\": [\n                            \"lowercase\",\n                            \"ngram_filter\"\n                        ],\n                        \"tokenizer\": \"whitespace\",\n                        \"char_filter\": [\n                            \"my_mapping\"\n                        ]\n                    },\n                    \"ngram_analyzer\": {\n                        \"type\": \"custom\",\n                        \"filter\": [\n                            \"lowercase\",\n                            \"ngram_filter\"\n                        ],\n                        \"tokenizer\": \"whitespace\"\n                    }\n                },\n                \"char_filter\": {\n                    \"my_mapping\": {\n                        \"type\": \"pattern_replace\",\n                        \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\",\n                        \"replacement\": \" \"\n                    }\n                }\n            },\n            \"number_of_shards\": 5\n        }\n    },\n    \"documentId\": \"%{prncpl_id}\",\n    \"queryString\": \"SELECT t1.external_reviewer_id AS prncpl_id, t1.full_name, t1.user_name AS prncpl_nm, t1.email_address_primary AS email_addr, t1.affilation_instituition_code AS aff_code, t1.country_code AS country_code, t2.description AS aff_description, t3.country_name AS country_name, t5.description AS academic_rank, t6.hi_index AS hindex, t4.reviewer_rights_id AS reviewer_rights_id FROM external_reviewer t1 LEFT OUTER JOIN ext_reviewer_affiliation t2 ON t1.affilation_instituition_code = t2.affilation_instituition_code LEFT OUTER JOIN country t3 ON t1.country_code = t3.country_code LEFT OUTER JOIN external_reviewer_rights t4 ON t1.external_reviewer_id = t4.external_reviewer_id LEFT OUTER JOIN ext_reviewer_academic_rank t5 ON t1.academic_rank_code = t5.academic_rank_code LEFT OUTER JOIN external_reviewer_ext t6 ON t6.external_reviewer_id = t1.external_reviewer_id WHERE t1.status = \'A\'\",\n    \"extraCondition\": \" and t1.external_reviewer_id = ?\"\n}', `UPDATE_USER` = 'admin', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP() WHERE (`ES_CONFIG_ID` = 'reviewer');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10847-1
+      author: Shyla
+      labels: 'DML'
+      comment: Insert dashboard Yes/No single-select criteria configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO dashboard_criteria_conf (
+                  CRITERIA_CONF_ID,
+                  DESCRIPTION,
+                  TYPE,
+                  CONFIG_JSON,
+                  UPDATE_TIMESTAMP,
+                  UPDATE_USER
+              )
+              SELECT
+                  (SELECT IFNULL(MAX(CRITERIA_CONF_ID), 0) + 1 FROM dashboard_criteria_conf),
+                  'Dashboard Yes/No filter (single select)',
+                  'LOOK_UP_EXTERNAL',
+                  '{\"option\": \"EMPTY#EMPTY#false#true\", \"lookupType\": \"argValueLookup\", \"argumentName\": \"DASHBOARD_OPTIONS_YES/NO\"}',
+                  UTC_TIMESTAMP(),
+                  'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM dashboard_criteria_conf
+                  WHERE TYPE = 'LOOK_UP_EXTERNAL'
+                    AND CONFIG_JSON = '{\"option\": \"EMPTY#EMPTY#false#true\", \"lookupType\": \"argValueLookup\", \"argumentName\": \"DASHBOARD_OPTIONS_YES/NO\"}'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dashboard_criteria_conf
+              WHERE TYPE = 'LOOK_UP_EXTERNAL'
+                AND CONFIG_JSON = '{\"option\": \"EMPTY#EMPTY#false#true\", \"lookupType\": \"argValueLookup\", \"argumentName\": \"DASHBOARD_OPTIONS_YES/NO\"}';
+
+  - changeSet:
+      id: FIBI-10342-1
+      author: Hridya E K
+      labels: 'DDL'
+      comment: Alter column size for UI_REFERENCE_ID column in DYN_ELEMENT_CONFIG table.
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'DYN_ELEMENT_CONFIG' 
+                      AND COLUMN_NAME = 'UI_REFERENCE_ID') > 0,
+                    'ALTER TABLE DYN_ELEMENT_CONFIG MODIFY COLUMN UI_REFERENCE_ID VARCHAR(255);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; 
+                EXECUTE stmt; 
+                DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'DYN_ELEMENT_CONFIG' 
+                      AND COLUMN_NAME = 'UI_REFERENCE_ID') > 0,
+                    'ALTER TABLE DYN_ELEMENT_CONFIG MODIFY COLUMN UI_REFERENCE_ID VARCHAR(30);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; 
+                EXECUTE stmt; 
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-11366-1
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create dashboard_column_preference table for per-user dashboard column width preferences
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS DASHBOARD_COLUMN_PREFERENCE (
+                COLUMN_PREFERENCE_ID INT NOT NULL AUTO_INCREMENT,
+                COLUMN_ID INT NOT NULL,
+                PERSON_ID VARCHAR(60) NOT NULL,
+                WIDTH INT NOT NULL,
+                CREATE_USER VARCHAR(60) DEFAULT NULL,
+                CREATE_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER VARCHAR(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (COLUMN_PREFERENCE_ID),
+                KEY DASHBOARD_COLUMN_PREFERENCE_FK1 (COLUMN_ID),
+                KEY DASHBOARD_COLUMN_PREFERENCE_FK2 (PERSON_ID),
+                CONSTRAINT DASHBOARD_COLUMN_PREFERENCE_FK1 FOREIGN KEY (COLUMN_ID) REFERENCES DASHBOARD_COLUMN_LOOKUP (COLUMN_ID),
+                CONSTRAINT DASHBOARD_COLUMN_PREFERENCE_FK2 FOREIGN KEY (PERSON_ID) REFERENCES PERSON (PERSON_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS DASHBOARD_COLUMN_PREFERENCE;
+
+  - changeSet:
+      id: FIBI-11409-1
+      author: Nabeel Ahamed M 
+      labels: 'DML'
+      comment: Update WORKFLOW_MAP_DETAIL table for the stops have no primary approvers
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE WORKFLOW_MAP_DETAIL SET PRIMARY_APPROVER_FLAG = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE MAP_DETAIL_ID IN (
+              SELECT MAP_DETAIL_ID FROM (
+              SELECT  MIN(MAP_DETAIL_ID) AS MAP_DETAIL_ID
+              FROM WORKFLOW_MAP_DETAIL
+              GROUP BY MAP_ID, APPROVAL_STOP_NUMBER
+              HAVING SUM(
+              CASE
+              WHEN PRIMARY_APPROVER_FLAG = 'Y' THEN 1
+              ELSE 0
+              END) = 0) t);
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

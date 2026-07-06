@@ -1,0 +1,47 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+              DROP FUNCTION IF EXISTS FN_CHCK_NOT_GRANT_CALL_UNIT;
+              DROP FUNCTION IF EXISTS FN_CHK_IS_GRANT_CALL_LEADUNIT;
+              DROP FUNCTION IF EXISTS FN_CHK_RSO_HOD_IS_NOT_PI;
+              DROP FUNCTION IF EXISTS FN_CHK_RSO_HOD_IS_PI;
+              DROP FUNCTION IF EXISTS FN_CHK_SDC_HOD_IS_NOT_PI;
+              DROP FUNCTION IF EXISTS FN_CHK_SDC_HOD_IS_PI;
+              DROP FUNCTION IF EXISTS FN_LEAD_UNIT_BELOW;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/FUNCTIONS/FN_CHCK_NOT_GRANT_CALL_UNIT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/FUNCTIONS/FN_CHK_IS_GRANT_CALL_LEADUNIT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/FUNCTIONS/FN_CHK_RSO_HOD_IS_NOT_PI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/FUNCTIONS/FN_CHK_RSO_HOD_IS_PI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/FUNCTIONS/FN_CHK_SDC_HOD_IS_NOT_PI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/FUNCTIONS/FN_CHK_SDC_HOD_IS_PI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/FUNCTIONS/FN_LEAD_UNIT_BELOW.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

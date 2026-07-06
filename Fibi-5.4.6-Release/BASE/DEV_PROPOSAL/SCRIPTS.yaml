@@ -1,0 +1,38 @@
+databaseChangeLog: 
+
+- changeSet:
+      id: FIBI-6979-1
+      author: Prabhu.E
+      labels: 'DML'
+      comment:    Update report templates for proposal module 
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE REPORT_TEMPLATE SET TEMPLATE_JSON = '{"fields":["PROPOSAL_ID","TITLE","END_DATE","START_DATE","DURATION","PROPOSAL_STATUS","AWARD_TYPE","SPONSOR_DEADLINE_DATE","SUBMISSION_DATE","PROPOSAL_TYPE","GRANT_CALL_TYPE","GRANT_CALL_TITLE","BUDGET_STATUS","PI_NAME","TOTAL_COST","TOTAL_DIRECT_COST","TOTAL_INDIRECT_COST","TOTAL_SUBCONTRACT_COST","UNDERRECOVERY_AMOUNT","SPONSOR_NAME","LEAD_UNIT_NAME","PERSON_NAME","PERSON_ROLE","ACTIVITY_TYPE","SPECIAL_REVIEW","PERCENTAGE_OF_EFFORT","PERMISSION_ASSIGNEE_NAME","PROPOSAL_PERMISSION"],"filters":["PROPOSAL_ID","TITLE","END_DATE","START_DATE","DURATION","PROPOSAL_STATUS","AWARD_TYPE","SPONSOR_DEADLINE_DATE","SUBMISSION_DATE","PROPOSAL_TYPE","GRANT_CALL_TYPE","GRANT_CALL_TITLE","BUDGET_STATUS","PI_NAME","TOTAL_COST","TOTAL_DIRECT_COST","TOTAL_INDIRECT_COST","TOTAL_SUBCONTRACT_COST","UNDERRECOVERY_AMOUNT","SPONSOR_NAME","LEAD_UNIT_NAME","ACTIVITY_TYPE","SPECIAL_REVIEW","PERSON_NAME","PERSON_ROLE","PERMISSION_ASSIGNEE_NAME","PROPOSAL_PERMISSION"],"headers":["Proposal #","Title","End Date","Start Date","Duration","Proposal Status","Award Type","Deadline Date","Submission Date","Proposal Type","Grant Call Type","Grant Call Title","Budget Status","Principal Investigator","Total Cost","Total Direct Cost","Total Indirect Cost","Total Subcontract Cost","Under Recovery Amount","Sponsor","Lead Unit","Person Name","Person Role","Activity Type","Special Review Type","Percentage Of effort","Permission Assigned Person","Proposal Permission"],"values":{}}' WHERE TYPE_CODE = 1 AND TEMPLATE_TYPE = 'S';
+              SET SQL_SAFE_UPDATES = 1;
+
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE REPORT_TEMPLATE SET TEMPLATE_JSON = '{"fields":["PROPOSAL_ID","TITLE","END_DATE","START_DATE","DURATION","PROPOSAL_STATUS","AWARD_TYPE","SPONSOR_DEADLINE_DATE","SUBMISSION_DATE","PROPOSAL_TYPE","GRANT_CALL_TYPE","GRANT_CALL_TITLE","BUDGET_STATUS","PI_NAME","TOTAL_COST","TOTAL_DIRECT_COST","TOTAL_INDIRECT_COST","TOTAL_SUBCONTRACT_COST","UNDERRECOVERY_AMOUNT","SPONSOR_NAME","LEAD_UNIT_NAME","PERSON_NAME","PERSON_ROLE","ACTIVITY_TYPE","SPECIAL_REVIEW","PERCENTAGE_OF_EFFORT"],"filters":["PROPOSAL_ID","TITLE","END_DATE","START_DATE","DURATION","PROPOSAL_STATUS","AWARD_TYPE","SPONSOR_DEADLINE_DATE","SUBMISSION_DATE","PROPOSAL_TYPE","GRANT_CALL_TYPE","GRANT_CALL_TITLE","BUDGET_STATUS","PI_NAME","TOTAL_COST","TOTAL_DIRECT_COST","TOTAL_INDIRECT_COST","TOTAL_SUBCONTRACT_COST","UNDERRECOVERY_AMOUNT"],"headers":["Proposal #", "Title", "End Date", "Start Date", "Duration", "Proposal Status", "Award Type", "Deadline Date", "Submission Date", "Proposal Type", "Grant Call Type", "Grant Call Title", "Budget Status", "Principal Investigator", "Total Cost", "Total Direct Cost", "Total Indirect Cost", "Total Subcontract Cost", "Under Recovery Amount", "Sponsor", "Lead Unit", "Person Name", "Person Role", "Activity Type", "Special Review Type", "Percentage Of effort"],"values":{}}' WHERE TYPE_CODE = 1 AND TEMPLATE_TYPE = 'S';
+              SET SQL_SAFE_UPDATES = 1;
+- changeSet:
+      id: FIBI-6979-2
+      author: Prabhu.E
+      labels: 'DML'
+      comment:    Update report templates for proposal module 
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE REPORT_TEMPLATE SET TEMPLATE_JSON = '{"fields":["PROPOSAL_ID","PROPOSAL_STATUS","TITLE","PROPOSAL_TYPE","SPONSOR_NAME","DURATION","PERSON_NAME","PERSON_ROLE","PERSON_DEPARTMENT","TOTAL_COST","TOTAL_DIRECT_COST","TOTAL_INDIRECT_COST","BUDGET_CATEGORY","COST_ELEMENT","LINE_ITEM_COST","GRANT_CALL_TITLE","AWARD_SPONSOR_AWARD_NUMBER","AWARD_FINAL_EXPIRATION_DATE","LEAD_UNIT_NAME","PERMISSION_ASSIGNEE_NAME","PROPOSAL_PERMISSION"],"headers":["Proposal #","Proposal Status","Title","Proposal Type","Sponsor","Duration","Key Person Name","Key Person Role","Key Person Department","Total Cost","Direct Cost","Indirect Cost","Budget Category","Cost Element","Line Item Cost ($)","Title of Grant Call","Sponsor Award Number","Final Expiration Date","Permission Assigned Person","Proposal Permission"],"values":{},"filters":["AWARD_NUMBER","PROPOSAL_STATUS","PROPOSAL_TYPE","SPONSOR_NAME","PERSON_NAME","PERSON_ROLE","TOTAL_COST","TOTAL_DIRECT_COST","TOTAL_INDIRECT_COST","BUDGET_CATEGORY","COST_ELEMENT","LINE_ITEM_COST","START_DATE","PERMISSION_ASSIGNEE_NAME","PROPOSAL_PERMISSION"]}' WHERE TYPE_CODE = 33 AND TEMPLATE_TYPE = 'S';
+              SET SQL_SAFE_UPDATES = 1;
+
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE REPORT_TEMPLATE SET TEMPLATE_JSON = '{"fields":["PROPOSAL_ID"],"headers":["Proposal #"],"values":{},"filters":["PROPOSAL_ID"]}' WHERE TYPE_CODE = 33 AND TEMPLATE_TYPE = 'S';
+              SET SQL_SAFE_UPDATES = 1;

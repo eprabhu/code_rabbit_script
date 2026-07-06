@@ -1,0 +1,36 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.2-Release/JHU/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #REPORT
+    - include:
+        file: Fibi-5.5.2-Release/JHU/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'  
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.5.2-Release/JHU/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'  
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.5.2-Release/JHU/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'  
+
+    #AWARD
+    - include:
+        file: Fibi-5.5.2-Release/JHU/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'  
+
+    #PROGRESS_REPORT
+    - include:
+        file: Fibi-5.5.2-Release/JHU/PROGRESS_REPORT/PROCEDURES.yaml
+        labels: 'PROGRESS_REPORT' 
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.2-Release/JHU/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'

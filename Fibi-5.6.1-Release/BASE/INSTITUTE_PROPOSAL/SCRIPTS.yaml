@@ -1,0 +1,57 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10053-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Script to the DASHBOARD_CRITERIA_LOOKUP table for the Key Persons Role Filter
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DASHBOARD_CRITERIA_LOOKUP
+              (CRITERIA_KEY, DESCRIPTION, DISPLAY_NAME, MODULE_CODE, CRITERIA_CONF_ID, IS_ACTIVE, DEFAULT_SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT
+              'CRT_IP_KEY_PERSON_ROLES',
+              'Key Personnel Role',
+              'Key Personnel Role',
+              '2',
+              '52',
+              'Y',
+              '28',
+              UTC_TIMESTAMP(),
+              'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM DASHBOARD_CRITERIA_LOOKUP
+                  WHERE CRITERIA_KEY = 'CRT_IP_KEY_PERSON_ROLES'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DASHBOARD_CRITERIA_LOOKUP WHERE CRITERIA_KEY = 'CRT_IP_KEY_PERSON_ROLES' AND MODULE_CODE = 2;
+
+  - changeSet:
+      id: FIBI-8512-1
+      author: Hridya 
+      labels: 'DDL'
+      comment: Alter table PROPOSAL to update column size
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE PROPOSAL;
+              SET @sql := IF(
+              (SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'PROPOSAL'
+              AND COLUMN_NAME = 'PROGRAM_ANNOUNCEMENT_NUMBER') > 0,
+              'ALTER TABLE PROPOSAL MODIFY PROGRAM_ANNOUNCEMENT_NUMBER VARCHAR(1000);',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql; 
+              EXECUTE stmt; 
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE PROPOSAL MODIFY PROGRAM_ANNOUNCEMENT_NUMBER VARCHAR(255);

@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10059-1
+      author: Solih N
+      labels: 'PROCEDURES'
+      comment: Update on Procedure GET_PROPOSAL_DASHBOARD_V1
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/KU/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

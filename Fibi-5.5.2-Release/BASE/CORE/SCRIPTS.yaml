@@ -1,0 +1,219 @@
+databaseChangeLog:
+  - changeSet:
+      id: FIBI-8855-1
+      author: Arun Ramesh
+      labels: 'DDL'
+      comment: Add IS_DEFAULT column to ASSOC_RELATION_TYPE_MODULE_MAPPING if not exists
+      changes:
+        - sql:
+            sql: |
+              SET @SQL := IF(
+                (SELECT COUNT(*)
+                 FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING'
+                   AND COLUMN_NAME = 'IS_DEFAULT') = 0,
+                'ALTER TABLE ASSOC_RELATION_TYPE_MODULE_MAPPING ADD COLUMN IS_DEFAULT VARCHAR(1) DEFAULT ''N'';',
+                'DO 1'
+              );
+
+              PREPARE stmt FROM @SQL;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @SQL := IF(
+                EXISTS(
+                  SELECT 1 FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = ''ASSOC_RELATION_TYPE_MODULE_MAPPING''
+                    AND COLUMN_NAME = ''IS_DEFAULT''
+                ),
+                'ALTER TABLE ASSOC_RELATION_TYPE_MODULE_MAPPING DROP COLUMN IS_DEFAULT;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @SQL;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-8855-2
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Set default flags for specific association mapping rows
+      changes:
+        - sql:
+            sql: |
+              UPDATE ASSOC_RELATION_TYPE_MODULE_MAPPING
+              SET IS_DEFAULT = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE ASSOC_RELATION_TYPE_CODE = '1'
+                AND MODULE_CODE = '13';
+
+              UPDATE ASSOC_RELATION_TYPE_MODULE_MAPPING
+              SET IS_DEFAULT = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE ASSOC_RELATION_TYPE_CODE = '1'
+                AND MODULE_CODE = '20';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE ASSOC_RELATION_TYPE_MODULE_MAPPING
+              SET IS_DEFAULT = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE ASSOC_RELATION_TYPE_CODE = '1'
+                AND MODULE_CODE IN ('13', '20');
+  - changeSet:
+      id: FIBI-8855-3
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Update code_table_configuration for Association Relation Type Module Mapping
+      changes:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration 
+              SET CONTENT = '{
+                "group": "General",
+                "codeTableName": "Association Relation Type Module Mapping",
+                "description": "List of all Association Relation Type Module Mapping",
+                "databaseTableName": "ASSOC_RELATION_TYPE_MODULE_MAPPING",
+                "fields": [
+                  {
+                    "columnName": "ASSOC_MAPPING_CODE",
+                    "displayName": "Association Mapping Code",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "length": 1,
+                    "canEmpty": false,
+                    "visible": true
+                  },
+                  {
+                    "columnName": "ASSOC_RELATION_TYPE_CODE",
+                    "displayName": "Association Relation Type",
+                    "dataType": "String",
+                    "isEditable": true,
+                    "length": 3,
+                    "canEmpty": false,
+                    "visible": false,
+                    "defaultValue": "DESCRIPTION_ASSOC_RELATION_TYPE_CODE",
+                    "filterType": "lookUp",
+                    "valueField": "ASSOC_RELATION_TYPE#ASSOC_RELATION_TYPE_CODE"
+                  },
+                  {
+                    "visible": true,
+                    "columnName": "DESCRIPTION_ASSOC_RELATION_TYPE_CODE",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "canEmpty": true,
+                    "displayName": "Association Relation Type",
+                    "isTransient": true
+                  },
+                  {
+                    "columnName": "MODULE_CODE",
+                    "displayName": "Applied Module",
+                    "dataType": "INTEGER",
+                    "isEditable": true,
+                    "length": 11,
+                    "canEmpty": false,
+                    "visible": false,
+                    "defaultValue": "DESCRIPTION_MODULE_CODE",
+                    "filterType": "lookUp",
+                    "valueField": "COEUS_MODULE#MODULE_CODE"
+                  },
+                  {
+                    "visible": true,
+                    "columnName": "DESCRIPTION_MODULE_CODE",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "canEmpty": true,
+                    "displayName": "Applied Module",
+                    "isTransient": true
+                  },
+                  {
+                    "columnName": "IS_DEFAULT",
+                    "displayName": "Is Default",
+                    "dataType": "String",
+                    "isEditable": true,
+                    "length": 1,
+                    "canEmpty": false,
+                    "visible": true,
+                    "filterType": "switch"
+                  },
+                  {
+                    "columnName": "UPDATE_TIMESTAMP",
+                    "displayName": "Update Timestamp",
+                    "dataType": "Date",
+                    "isEditable": false,
+                    "canEmpty": false,
+                    "visible": true
+                  },
+                  {
+                    "columnName": "UPDATE_USER",
+                    "displayName": "Update User",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "length": 60,
+                    "canEmpty": false,
+                    "visible": true,
+                    "refColumnName": "PERSON#USER_NAME"
+                  }
+                ],
+                "primaryKey": ["ASSOC_MAPPING_CODE"],
+                "dependency": [
+                  {
+                    "displayName": "Association Relation Type",
+                    "table_name": "ASSOC_RELATION_TYPE",
+                    "columnName": "ASSOC_RELATION_TYPE_CODE",
+                    "showTableName": true
+                  },
+                  {
+                    "displayName": "Coeus Module",
+                    "table_name": "COEUS_MODULE",
+                    "columnName": "MODULE_CODE",
+                    "showTableName": true
+                  }
+                ],
+                "actions": "IUD"
+              }', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration
+              SET CONTENT = '{"group":"Agreements","codeTableName":"Association Relation Type Module Mapping","description":"List of all Association Relation Type Module Mapping","databaseTableName":"ASSOC_RELATION_TYPE_MODULE_MAPPING","fields":[{"columnName":"ASSOC_MAPPING_CODE","displayName":"Association Mapping Code","dataType":"String","isEditable":false,"length":1,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"ASSOC_RELATION_TYPE_CODE","displayName":"Association Relation Type","dataType":"String","isEditable":true,"length":3,"canEmpty":false,"visible":false,"defaultValue":"DESCRIPTION_ASSOC_RELATION_TYPE_CODE","filterType":"lookUp","valueField":"ASSOC_RELATION_TYPE#ASSOC_RELATION_TYPE_CODE"},{"visible":"true","columnName":"DESCRIPTION_ASSOC_RELATION_TYPE_CODE","dataType":"String","isEditable":"false","canEmpty":"true","displayName":"Association Relation Type","isTransient":"true"},{"columnName":"MODULE_CODE","displayName":"Applied Module","dataType":"INTEGER","isEditable":true,"length":11,"canEmpty":false,"visible":false,"defaultValue":"DESCRIPTION_MODULE_CODE","filterType":"lookUp","valueField":"COEUS_MODULE#MODULE_CODE"},{"visible":"true","columnName":"DESCRIPTION_MODULE_CODE","dataType":"String","isEditable":"false","canEmpty":"true","displayName":"Applied Module","isTransient":"true"},{"columnName":"UPDATE_TIMESTAMP","displayName":"Update Timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#USER_NAME","defaultValue":null}],"primaryKey":["ASSOC_MAPPING_CODE"],"dependency":[{"displayName":"Association Relation Type","table_name":"ASSOC_RELATION_TYPE","columnName":"ASSOC_RELATION_TYPE_CODE","showTableName":"true"},{"displayName":"Coeus Module","table_name":"COEUS_MODULE","columnName":"MODULE_CODE","showTableName":"true"}],"actions":"IUD"}', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+
+  - changeSet:
+      id: FIBI-8855-4
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Update description for Association Relation Type Module Mapping
+      changes:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration 
+              SET DESCRIPTION = 'List of all Association Relation Type Module Mapping. (If multiple default relationtypes are configured for one module the newly updated default value will be populated.)',
+              UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration
+              SET DESCRIPTION = 'List of all Association Relation Type Module Mapping'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+
+  - changeSet:
+      id: FIBI-9378-1
+      author: Shyla M
+      labels: DML
+      comment: Add DATE_TIME format in dashboard_column_conf table.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO dashboard_column_conf
+                (COLUMN_CONF_ID, FORMAT_TYPE, FORMAT_STRING, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES
+                (18, 'DATE_TIME', NULL, UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dashboard_column_conf
+              WHERE COLUMN_CONF_ID = 18;

@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.2-Release/JHU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6.2-Release/JHU/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:    
+        file: Fibi-5.6.2-Release/JHU/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'

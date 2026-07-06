@@ -1,0 +1,73 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9943-1
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Update DISPLAY_NAME of dashboard_tab_type to 'Service Request Search' for ALL_REQUEST tab (MODULE_CODE=20)
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_TAB_TYPE SET DISPLAY_NAME = 'Service Request Search', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (MODULE_CODE = 20 AND TAB_KEY = 'ALL_REQUEST');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9943-2
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Update DISPLAY_NAME to 'Project Number' for CRT_AWD_ACCOUNT_NUMBER and COL_AWD_ACCOUNT_NUMBER in DASHBOARD_CRITERIA_LOOKUP and DASHBOARD_COLUMN_LOOKUP
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_CRITERIA_LOOKUP SET DISPLAY_NAME = 'Project Number', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (MODULE_CODE = 1 AND CRITERIA_KEY = 'CRT_AWD_ACCOUNT_NUMBER');
+              UPDATE DASHBOARD_COLUMN_LOOKUP SET DISPLAY_NAME = 'Project Number', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (MODULE_CODE = 1 AND COLUMN_KEY = 'COL_AWD_ACCOUNT_NUMBER');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Configure the PARAMETER value for IS_FIBI_LANDING_PORTAL_ENABLED.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `parameter` SET `VALUE` = 'N', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE (`PARAMETER_NAME` = 'IS_FIBI_LANDING_PORTAL_ENABLED');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-2
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Configure the PARAMETER value for GLOBAL_SEARCH_ENABLED_MODULES.
+      changes:
+        - sql:
+            sql: |
+             UPDATE `parameter` SET `VALUE` = 'SR20,AG13,DP03,IP02,AW01', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE (`PARAMETER_NAME` = 'GLOBAL_SEARCH_ENABLED_MODULES');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-
+      author: Reshma Antony
+      labels: 'DML'
+      comment:  Configure the PARAMETER value for SHOW_DISCLOSURE_DETAILS_IN_PROPOSAL_KEY_PERSON.
+      changes:
+        - sql:
+            sql: |
+             UPDATE `parameter` SET `VALUE` = 'N', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(), `UPDATE_USER` = 'admin' WHERE (`PARAMETER_NAME` = 'SHOW_DISCLOSURE_DETAILS_IN_PROPOSAL_KEY_PERSON');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10326-4
+      author: Reshma Antony
+      labels: 'DML'
+      comment:  Configure the dyn_section_config value for Formbuilder section.
+      changes:
+        - sql:
+            sql: |
+             UPDATE `dyn_section_config` SET `IS_ACTIVE` = 'N', `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),`UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2012');
+      rollback: empty
+

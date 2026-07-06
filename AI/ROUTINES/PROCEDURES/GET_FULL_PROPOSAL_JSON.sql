@@ -1,0 +1,70 @@
+CREATE PROCEDURE `GET_FULL_PROPOSAL_JSON`(IN AV_PROPOSAL_ID INT)
+BEGIN
+    DECLARE LI_BUDGET_ID INT;
+    DECLARE generalDetails JSON;
+    DECLARE budgetSummary JSON;
+    DECLARE attachments JSON;
+    DECLARE comments JSON;
+    DECLARE questionnaireData JSON;
+    DECLARE certification JSON;
+    DECLARE customData JSON;
+    DECLARE reviews JSON;
+    DECLARE supportQuestions JSON;
+
+    DECLARE context TEXT DEFAULT '';
+    DECLARE v_error_code VARCHAR(500);
+    DECLARE v_message VARCHAR(1000);
+    DECLARE v_debug_message VARCHAR(1000);
+
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_code = RETURNED_SQLSTATE, v_message = MESSAGE_TEXT;
+		SET v_debug_message = CONCAT('Context: ', context, ';\n SQLSTATE: ', v_error_code, ';\n Message: ', v_message);
+
+        INSERT INTO exception_log(ERROR_CODE, MESSAGE, API_REQUEST, METHOD, REQUEST_BODY, DEBUG_MESSSAGE, STACKTRACE, REQUESTER_PERSON, CREATE_TIMESTAMP, CREATE_USER)
+        VALUES (v_error_code, v_message, 'GET_FULL_PROPOSAL_JSON', 'Procedure', CONCAT('Proposal ID: ', AV_PROPOSAL_ID), v_debug_message, NULL, 'admin', UTC_TIMESTAMP(), 'admin');
+    END;
+
+    SET context = 'Select BUDGET_HEADER_ID from BUDGET_HEADER in GET_FULL_PROPOSAL_JSON in GET_FULL_PROPOSAL_JSON';
+    SELECT BUDGET_HEADER_ID INTO LI_BUDGET_ID FROM BUDGET_HEADER WHERE PROPOSAL_ID = AV_PROPOSAL_ID LIMIT 1;
+
+    SET context = 'Call GET_PROPOSAL_GENERAL_DETAILS_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_GENERAL_DETAILS_JSON(AV_PROPOSAL_ID, generalDetails);
+
+    SET context = 'Call GET_PROPOSAL_BUDGET_SUMMARY_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_BUDGET_SUMMARY_JSON(AV_PROPOSAL_ID, budgetSummary);
+
+    SET context = 'Call GET_PROPOSAL_ATTACHMENTS_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_ATTACHMENTS_JSON(AV_PROPOSAL_ID, attachments);
+
+    SET context = 'Call GET_PROPOSAL_COMMENTS_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_COMMENTS_JSON(AV_PROPOSAL_ID, comments);
+
+    SET context = 'Call GET_PROPOSAL_QUESTIONNAIRE_DATA_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_QUESTIONNAIRE_DATA_JSON(AV_PROPOSAL_ID, questionnaireData);
+
+    SET context = 'Call GET_PROPOSAL_CERTIFICATION_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_CERTIFICATION_JSON(AV_PROPOSAL_ID, certification);
+
+    SET context = 'Call GET_PROPOSAL_CUSTOM_DATA_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_CUSTOM_DATA_JSON(AV_PROPOSAL_ID, customData);
+
+    SET context = 'Call GET_PROPOSAL_REVIEW_JSON in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_REVIEW_JSON(AV_PROPOSAL_ID, reviews);
+
+    SET context = 'Call GET_PROPOSAL_SUPPORT_QUESTIONS_JSON  in GET_FULL_PROPOSAL_JSON';
+    CALL GET_PROPOSAL_SUPPORT_QUESTIONS_JSON(AV_PROPOSAL_ID, supportQuestions);
+
+    SET context = 'Select final JSON_OBJECT in GET_FULL_PROPOSAL_JSON';
+	SELECT JSON_OBJECT(
+		'generalDetails', CAST(generalDetails AS JSON),
+		'budgetSummary', CAST(budgetSummary AS JSON),
+		'attachments', CAST(attachments AS JSON),
+		'comments', CAST(comments AS JSON),
+		'questionnaireData', CAST(questionnaireData AS JSON),
+		'certification', CAST(certification AS JSON),
+		'customData', CAST(customData AS JSON),
+		'reviews', CAST(reviews AS JSON),
+		'supportQuestions', CAST(supportQuestions AS JSON)
+	) AS fullProposalJson;
+END

@@ -1,0 +1,11 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6-Release/SMU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6-Release/SMU/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'

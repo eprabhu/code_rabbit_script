@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10787-19
+      author: Nabeel Ahamed M
+      labels: 'FUNCTIONS'
+      comment: Update FN_CHECK_AWARD_HAS_SAP_FEED for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP FUNCTION IF EXISTS FN_CHECK_AWARD_HAS_SAP_FEED;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/FUNCTIONS/FN_CHECK_AWARD_HAS_SAP_FEED.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

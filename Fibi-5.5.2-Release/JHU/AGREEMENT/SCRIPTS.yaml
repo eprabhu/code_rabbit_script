@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+   - changeSet:
+        id: FIBI-9316
+        author: Robin
+        labels: 'DML'
+        comment: Triage questionnaire template mapping missing script 
+        changes:
+            - sql:
+                sql: |
+                    INSERT IGNORE INTO TRIAGE_TEMPLATE_MAPPING (TRIAGE_TEMPLATE_ID,MODULE_CODE,MODULE_ITEM_KEY,SUB_MODULE_CODE,UPDATE_TIMESTAMP,UPDATE_USER) VALUES (57,13,'59',0,NOW(),'admin');
+                    INSERT IGNORE INTO TRIAGE_TEMPLATE_MAPPING (TRIAGE_TEMPLATE_ID,MODULE_CODE,MODULE_ITEM_KEY,SUB_MODULE_CODE,UPDATE_TIMESTAMP,UPDATE_USER) VALUES (58,13,'60',0,NOW(),'admin');
+        rollback: 
+            - sql:
+                sql: |
+                    DELETE FROM TRIAGE_TEMPLATE_MAPPING WHERE TRIAGE_TEMPLATE_ID = '57';
+                    DELETE FROM TRIAGE_TEMPLATE_MAPPING WHERE TRIAGE_TEMPLATE_ID = '58';

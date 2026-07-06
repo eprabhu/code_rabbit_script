@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: FIBI-8410-1
+        author: Adarsh 
+        labels: 'FUNCTIONS'
+        comment: Created a new Function
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP FUNCTION IF EXISTS FN_CHECK_AGREMENT_ATT_TYP;
+            - sqlFile:
+                path: ROUTINES/KKI/AGREEMENT/FUNCTIONS/FN_CHECK_AGREMENT_ATT_TYP.sql
+                relativeToChangelogFile: false
+                splitStatements: false
+        rollback: empty

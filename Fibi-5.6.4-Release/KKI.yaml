@@ -1,0 +1,13 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.4-Release/KKI/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6.4-Release/KKI/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6.4-Release/KKI/CORE/FUNCTIONS.yaml
+        labels: 'CORE'
+

@@ -1,0 +1,33 @@
+databaseChangeLog:
+
+    - changeSet:  
+        id: FIBI-8766-1
+        author: Suganya.S
+        labels: 'DML'
+        comment: Insert into dashboard_criteria_conf table
+        changes:
+           - sql:
+               sql: |   
+                   INSERT IGNORE INTO dashboard_criteria_conf (CRITERIA_CONF_ID, DESCRIPTION, TYPE, CONFIG_JSON, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('31', 'For Agreement Linked module lookup', 'LOOK_UP_EXTERNAL', '{\"option\": \"EMPTY#EMPTY#true#true\", \"lookupType\": \"linkedModule\" , \"moduleCode\":\"13\"}', UTC_TIMESTAMP(), 'admin');
+        rollback:    
+           - sql:
+               sql: |
+                   DELETE FROM dashboard_criteria_conf WHERE CRITERIA_CONF_ID = '31';
+    
+    - changeSet:
+        id: FIBI-8766-2
+        author: Suganya.S
+        labels: 'DML'
+        comment: Update dashboard_criteria_lookup table.
+        changes:
+            - sql:
+                sql: | 
+                    set sql_safe_updates=0;
+                    UPDATE dashboard_criteria_lookup  SET CRITERIA_CONF_ID = 31 ,UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE  CRITERIA_KEY = 'CRT_AG_ASSOC_LINKED_MODULE';
+                    set sql_safe_updates=1;
+        rollback:
+            - sql:
+                sql: | 
+                    set sql_safe_updates=0;
+                    UPDATE dashboard_criteria_lookup  SET CRITERIA_CONF_ID = 30 ,UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE  CRITERIA_KEY = 'CRT_AG_ASSOC_LINKED_MODULE';
+                    set sql_safe_updates=1;

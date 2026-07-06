@@ -1,0 +1,662 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: AI-261-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Inserted the configuration for AI Billing Dashboard.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_CONFIG (`AI_CONFIG_ID`, `AI_MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `CREATE_TIMESTAMP`, `CREATE_USER`) VALUES ('8', 'AI-008', 'AI Billing Dashboard', 'Y', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_CONFIG WHERE AI_CONFIG_ID = 8;
+
+  - changeSet:
+      id: AI-301-1
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Change MODULE_ITEM_CODE data type from VARCHAR(10) to INT in the AI Summary table as per orginal DB CR.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_SUMMARY;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_SUMMARY'
+                    AND COLUMN_NAME = 'MODULE_ITEM_CODE'
+                    AND (DATA_TYPE <> 'int' OR IS_NULLABLE <> 'NO')
+                ) > 0,
+                'ALTER TABLE AI_SUMMARY MODIFY COLUMN MODULE_ITEM_CODE INT NOT NULL;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_SUMMARY MODIFY COLUMN MODULE_ITEM_CODE VARCHAR(10) NOT NULL;
+
+  - changeSet:
+      id: AI-301-2
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Change MODULE_ITEM_CODE data type from VARCHAR(10) to VARCHAR(20) in the AI Summary table as per orginal DB CR.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_SUMMARY;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_SUMMARY'
+                    AND COLUMN_NAME = 'MODULE_ITEM_KEY'
+                    AND (COLUMN_TYPE <> 'varchar(20)' OR IS_NULLABLE <> 'NO')
+                ) > 0,
+                'ALTER TABLE AI_SUMMARY MODIFY COLUMN MODULE_ITEM_KEY VARCHAR(20) NOT NULL;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_SUMMARY MODIFY COLUMN MODULE_ITEM_KEY VARCHAR(10) NOT NULL;
+
+  - changeSet:
+      id: AI-254-1
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create AI_PROMPT_CATEGORY table.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_PROMPT_CATEGORY (
+                AI_PROMPT_CATEGORY_ID INT NOT NULL AUTO_INCREMENT,
+                AI_FEATURE_CODE VARCHAR(10),
+                MODULE_CODE INT,
+                AI_PROMPT_CATEGORY_NAME VARCHAR(100) NOT NULL,
+                IS_SYSTEM_CATEGORY TINYINT(1),
+                IS_ACTIVE TINYINT(1),
+                CREATE_USER VARCHAR(100) NOT NULL,
+                CREATE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER VARCHAR(100) NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (AI_PROMPT_CATEGORY_ID),
+                CONSTRAINT AI_PROMPT_CATEGORY_FK1 FOREIGN KEY (AI_FEATURE_CODE) REFERENCES AI_CONFIG(AI_MODULE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_PROMPT_CATEGORY;
+
+  - changeSet:
+      id: AI-254-2
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Add AI_PROMPT_CATEGORY_ID column to AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_PROMPT'
+                    AND COLUMN_NAME = 'AI_PROMPT_CATEGORY_ID'
+                ) = 0,
+                'ALTER TABLE AI_PROMPT ADD COLUMN AI_PROMPT_CATEGORY_ID INT AFTER PROMPT_NAME;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT DROP COLUMN AI_PROMPT_CATEGORY_ID;
+
+  - changeSet:
+      id: AI-254-3
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Drop old column AI_PROMPTS_CATEGORY from AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_PROMPT'
+                    AND COLUMN_NAME = 'AI_PROMPTS_CATEGORY'
+                ) > 0,
+                'ALTER TABLE AI_PROMPT DROP COLUMN AI_PROMPTS_CATEGORY;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT ADD COLUMN AI_PROMPTS_CATEGORY VARCHAR(50);
+
+  - changeSet:
+      id: AI-254-4
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Drop old column AI_PROMPTS_TYPE from AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_PROMPT'
+                    AND COLUMN_NAME = 'AI_PROMPTS_TYPE'
+                ) > 0,
+                'ALTER TABLE AI_PROMPT DROP COLUMN AI_PROMPTS_TYPE;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT ADD COLUMN AI_PROMPTS_TYPE VARCHAR(50);
+
+  - changeSet:
+      id: AI-254-5
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert AI prompt categories.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (1, 'Proposal', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (2, 'Compliance', 0, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (3, 'Keywords', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (4, 'Chat', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (5, 'Attachment_Summary', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (6, 'Doc_Analyzer', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (7, 'AI_Chatbot', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (8, 'Ask_AI', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (9, 'Chat_Merge', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (10, 'Keywords_Merge', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (11, 'service_request', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (12, 'Compliance_General_Prompt', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PROMPT_CATEGORY (AI_PROMPT_CATEGORY_ID, AI_PROMPT_CATEGORY_NAME, IS_SYSTEM_CATEGORY, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (13, 'SR_Mail_Reader', 1, 1, 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_PROMPT_CATEGORY WHERE AI_PROMPT_CATEGORY_ID IN (1,2,3,4,5,6,7,8,9,10,11,12,13);
+
+  - changeSet:
+      id: AI-254-6
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Map AI_PROMPT records to categories.
+      changes:
+        - sql:
+            sql: |
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 1, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID IN (1,2);
+              DELETE FROM AI_PROMPT WHERE AI_PROMPTS_ID = 3;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 2, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID IN (5,6,7,8,9);
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 3, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 10;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 4, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 11;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 5, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 12;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 6, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 13;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 7, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID IN (14,15,16);
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 8, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID IN (17,18);
+              DELETE FROM AI_PROMPT WHERE AI_PROMPTS_ID = 19;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 9, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 20;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 10, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 21;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 11, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 22;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 12, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 23;
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = 13, UPDATED_AT = UTC_TIMESTAMP(), UPDATED_BY = 'admin' WHERE AI_PROMPTS_ID = 25;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE AI_PROMPT SET AI_PROMPT_CATEGORY_ID = NULL;
+
+  - changeSet:
+      id: AI-254-7
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Drop old index PROMPT_NAME from AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.STATISTICS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_PROMPT'
+                    AND INDEX_NAME = 'PROMPT_NAME'
+                ) > 0,
+                'ALTER TABLE AI_PROMPT DROP INDEX PROMPT_NAME;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT ADD INDEX PROMPT_NAME (PROMPT_NAME);
+
+  - changeSet:
+      id: AI-254-8
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Add unique key UK_PROMPT_NAME_CATEGORY to AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.STATISTICS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_PROMPT'
+                    AND INDEX_NAME = 'UK_PROMPT_NAME_CATEGORY'
+                ) = 0,
+                'ALTER TABLE AI_PROMPT ADD UNIQUE KEY UK_PROMPT_NAME_CATEGORY (PROMPT_NAME, AI_PROMPT_CATEGORY_ID);',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT DROP INDEX UK_PROMPT_NAME_CATEGORY;
+
+  - changeSet:
+      id: AI-254-9
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Add unique key UK_CAT_NAME_MODULE to AI_PROMPT_CATEGORY.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT_CATEGORY;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.STATISTICS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_PROMPT_CATEGORY'
+                    AND INDEX_NAME = 'UK_CAT_NAME_MODULE'
+                ) = 0,
+                'ALTER TABLE AI_PROMPT_CATEGORY ADD UNIQUE KEY UK_CAT_NAME_MODULE (AI_PROMPT_CATEGORY_NAME, MODULE_CODE);',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT_CATEGORY DROP INDEX UK_CAT_NAME_MODULE;
+
+  - changeSet:
+      id: AI-254-10
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Rename AI_PROMPT primary key column from AI_PROMPTS_ID to AI_PROMPT_ID.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @exists := (
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_PROMPT'
+                  AND COLUMN_NAME = 'AI_PROMPTS_ID'
+              );
+              SET @sql := IF(@exists > 0,
+                'ALTER TABLE AI_PROMPT RENAME COLUMN AI_PROMPTS_ID TO AI_PROMPT_ID;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT RENAME COLUMN AI_PROMPT_ID TO AI_PROMPTS_ID;
+
+  - changeSet:
+      id: AI-265-1
+      author: Subin Abraham
+      labels: 'DDL'
+      comment: Create AI_ACTIVITY_LOG table.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE AI_ACTIVITY_LOG ( 
+                AI_ACTIVITY_LOG_ID BIGINT AUTO_INCREMENT, 
+                PERSON_ID VARCHAR(40), 
+                SESSION_ID VARCHAR(100), 
+                FEATURE_ID VARCHAR(10), 
+                ACTION_TYPE VARCHAR(100), 
+                START_TIMESTAMP TIMESTAMP NULL, 
+                END_TIMESTAMP TIMESTAMP NULL, 
+                PROCESSING_TIME BIGINT, 
+                STATUS VARCHAR(50), 
+                ERROR_CODE VARCHAR(50), 
+                ERROR_MESSAGE TEXT,
+                TOKENS_USED INT, 
+                TOKEN_COST DECIMAL(10,5), 
+                MODEL_USED VARCHAR(200),
+                INPUT_FILE_TYPE VARCHAR(50), 
+                INPUT_FILE_SIZE BIGINT, 
+                INPUT_CHAR_COUNT INT, 
+                OUTPUT_CHAR_COUNT INT, 
+                CREATED_BY VARCHAR(60), 
+                CREATED_ON TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+                FEATURE_HASH INT UNSIGNED GENERATED ALWAYS AS (CRC32(FEATURE_ID)) STORED, 
+                PRIMARY KEY (AI_ACTIVITY_LOG_ID, FEATURE_HASH), 
+                INDEX IDX_STATUS (STATUS), 
+                INDEX IDX_ACTION_TYPE (ACTION_TYPE), 
+                INDEX IDX_FEATURE_ACTION_STATUS (ACTION_TYPE, STATUS), 
+                INDEX IDX_FEATURE_ID_ACTION_STATUS (FEATURE_ID, ACTION_TYPE, STATUS) 
+              )  
+              PARTITION BY HASH(FEATURE_HASH)  
+              PARTITIONS 8; 
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_ACTIVITY_LOG;
+
+  - changeSet:
+      id: AI-265-2
+      author: Subin Abraham
+      labels: 'DDL'
+      comment: Add new column to AI_ACTIVITY_LOG table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_ACTIVITY_LOG;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_ACTIVITY_LOG'
+                    AND COLUMN_NAME = 'MODULE_CODE' 
+                ) = 0,
+                'ALTER TABLE AI_ACTIVITY_LOG ADD COLUMN MODULE_CODE INT;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_ACTIVITY_LOG DROP COLUMN IF EXISTS MODULE_CODE;
+
+  - changeSet:
+      id: AI-265-3
+      author: Subin Abraham
+      labels: 'DDL'
+      comment: Add new column to AI_ACTIVITY_LOG table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_ACTIVITY_LOG;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_ACTIVITY_LOG'
+                    AND COLUMN_NAME = 'MODULE_ITEM_KEY' 
+                ) = 0,
+                'ALTER TABLE AI_ACTIVITY_LOG ADD COLUMN MODULE_ITEM_KEY VARCHAR(100);',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_ACTIVITY_LOG DROP COLUMN IF EXISTS MODULE_ITEM_KEY;
+
+  - changeSet:
+      id: AI-265-4
+      author: Subin Abraham
+      labels: 'DDL'
+      comment: Drop column MODEL_USED from AI_ACTIVITY_LOG table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_ACTIVITY_LOG;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_ACTIVITY_LOG'
+                    AND COLUMN_NAME = 'MODEL_USED' 
+                ) > 0,
+                'ALTER TABLE AI_ACTIVITY_LOG DROP COLUMN MODEL_USED;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_ACTIVITY_LOG ADD COLUMN MODEL_USED VARCHAR(200);
+
+  - changeSet:
+      id: AI-265-5
+      author: Subin Abraham
+      labels: 'DDL'
+      comment: Drop column INPUT_FILE_TYPE from AI_ACTIVITY_LOG table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_ACTIVITY_LOG;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_ACTIVITY_LOG'
+                    AND COLUMN_NAME = 'INPUT_FILE_TYPE' 
+                ) > 0,
+                'ALTER TABLE AI_ACTIVITY_LOG DROP COLUMN INPUT_FILE_TYPE;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_ACTIVITY_LOG ADD COLUMN INPUT_FILE_TYPE VARCHAR(50);
+
+  - changeSet:
+      id: AI-265-6
+      author: Subin Abraham
+      labels: 'DDL'
+      comment: Drop column INPUT_FILE_SIZE from AI_ACTIVITY_LOG table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_ACTIVITY_LOG;
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_ACTIVITY_LOG'
+                    AND COLUMN_NAME = 'INPUT_FILE_SIZE' 
+                ) > 0,
+                'ALTER TABLE AI_ACTIVITY_LOG DROP COLUMN INPUT_FILE_SIZE;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_ACTIVITY_LOG ADD COLUMN INPUT_FILE_SIZE BIGINT;
+
+  - changeSet:
+      id: AI-322-1
+      author: Subin Abraham
+      labels: 'DDL'
+      comment: Create AI_FEATURE_MODULE_MAP table.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE AI_FEATURE_MODULE_MAP ( 
+                AI_FEATURE_MODULE_MAP_ID INT NOT NULL AUTO_INCREMENT, 
+                AI_FEATURE_CODE VARCHAR(10) NOT NULL, 
+                MODULE_CODE VARCHAR(5) NOT NULL,  
+                IS_ACTIVE VARCHAR(1), 
+                CREATE_USER VARCHAR(60) NOT NULL, 
+                CREATE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+                UPDATE_USER VARCHAR(60) DEFAULT NULL, 
+                UPDATE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+                PRIMARY KEY (AI_FEATURE_MODULE_MAP_ID), 
+                UNIQUE KEY AI_FEATURE_MODULE_MAP_ITEM (AI_FEATURE_CODE, MODULE_CODE), 
+                CONSTRAINT AI_FEATURE_MODULE_MAP_FK1 FOREIGN KEY (AI_FEATURE_CODE) REFERENCES AI_CONFIG(AI_MODULE_CODE) 
+              );  
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_FEATURE_MODULE_MAP;
+
+  - changeSet:
+      id: AI-322-2
+      author: Subin Abraham
+      labels: 'DML'
+      comment: Inserted the configuration for AI_FEATURE_MODULE_MAP table.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `AI_FEATURE_MODULE_MAP` (`AI_FEATURE_MODULE_MAP_ID`, `AI_FEATURE_CODE`, `MODULE_CODE`, `IS_ACTIVE`, `CREATE_USER`, `CREATE_TIMESTAMP`, `UPDATE_USER`, `UPDATE_TIMESTAMP`) VALUES ('1', 'AI-004', 'ER22', 'Y', 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_FEATURE_MODULE_MAP WHERE AI_FEATURE_MODULE_MAP_ID = 1;
+
+  - changeSet:
+      id: AI-322-3
+      author: Subin Abraham
+      labels: 'DML'
+      comment: Insert the configuration for External Review INTO DYN_MODULES_CONFIG table.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `DYN_MODULES_CONFIG` (`MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('ER22', 'External Review', 'Y', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_MODULES_CONFIG WHERE MODULE_CODE = 'ER22';
+
+  - changeSet:
+      id: AI-344-1
+      author: Subin Abraham
+      labels: 'DML'
+      comment: Insert the user details for ERM authentication INTO FIS_USER table.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO `FIS_USER` (`FIS_USER_ID`, `FULL_NAME`, `USER_NAME`, `EMAIL_ADDRESS`, `PASSWORD`, `IS_ACTIVE`, `CREATE_USER`, `CREATE_TIMESTAMP`, `UPDATE_USER`, `UPDATE_TIMESTAMP`) VALUES ('20', 'ERM', 'ERM_ER22', 'erm@polussolutions.com', '$2a$10$as97peX4GGOrSwtyaoLzKOr3ThY9HeZujF5x1AUqe8SMagqnurz6K', 'Y', 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP());
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM FIS_USER WHERE USER_NAME = 'ERM_ER22';
+
+  - changeSet:
+      id: AI-178-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert default values of the RAG credentials in AI_PARAMETERS table.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO AI_PARAMETER
+                (AI_PARAMETER_ID, AI_PARAMETER_NAME, AI_PARAMETER_VALUE, AI_PARAMETER_DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES
+                (7, 'rag_collection_id', '', 'RAG collection ID returned from plugin lookup', 'admin', UTC_TIMESTAMP()),
+                (8, 'rag_plugin_token', '', 'RAG plugin access token returned from plugin lookup', 'admin', UTC_TIMESTAMP()),
+                (9, 'rag_admin_url', '', 'RAG admin redirect URL returned from plugin lookup', 'admin', UTC_TIMESTAMP()),
+                (10, 'rag_token_expiry', '0', 'RAG plugin token expiry time in epoch milliseconds', 'admin', UTC_TIMESTAMP());
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_PARAMETER WHERE AI_PARAMETER_ID IN (7,8,9,10);
+
+  - changeSet:
+      id: AI-178-2
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Change the data type of AI_CB_HISTORY table's AI_RESPONSE column from VARCHAR(3000) to TEXT.
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                (
+                  SELECT COUNT(*)
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AI_CB_HISTORY'
+                    AND COLUMN_NAME = 'AI_RESPONSE'
+                    AND COLUMN_TYPE = 'varchar(3000)'
+                ),
+                'ALTER TABLE AI_CB_HISTORY MODIFY COLUMN AI_RESPONSE TEXT',
+                'SELECT 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_CB_HISTORY MODIFY COLUMN AI_RESPONSE VARCHAR(3000);

@@ -1,0 +1,64 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10760-1
+      author: Shyla
+      labels: 'DML'
+      comment: Clean up scripts for multiple active versions existed in 22101206 and 24031721.
+      changes:
+        - sql:
+            sql: |
+              UPDATE PROPOSAL
+              SET PROPOSAL_SEQUENCE_STATUS = 'ARCHIVE'
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID IN (1223, 1232, 1237)
+                AND PROPOSAL_SEQUENCE_STATUS <> 'ARCHIVE';
+
+              UPDATE PROPOSAL
+              SET PROPOSAL_SEQUENCE_STATUS = 'ACTIVE'
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID = 1236
+                AND PROPOSAL_SEQUENCE_STATUS <> 'ACTIVE';
+
+              UPDATE PROPOSAL
+              SET PROPOSAL_SEQUENCE_STATUS = 'ARCHIVE'
+              WHERE PROPOSAL_NUMBER = '24031721'
+                AND PROPOSAL_ID = 1939
+                AND PROPOSAL_SEQUENCE_STATUS <> 'ARCHIVE';
+
+              UPDATE PROPOSAL
+              SET SEQUENCE_NUMBER = 6
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID = 1236
+                AND SEQUENCE_NUMBER <> 6;
+
+              UPDATE PROPOSAL
+              SET SEQUENCE_NUMBER = 5
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID = 1237
+                AND SEQUENCE_NUMBER <> 5;
+
+              UPDATE proposal_persons
+              SET SEQUENCE_NUMBER = 6
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID = 1236
+                AND SEQUENCE_NUMBER <> 6;
+
+              UPDATE proposal_persons
+              SET SEQUENCE_NUMBER = 5
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID = 1237
+                AND SEQUENCE_NUMBER <> 5;
+
+              UPDATE proposal_resrch_areas
+              SET SEQUENCE_NUMBER = 6
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID = 1236
+                AND SEQUENCE_NUMBER <> 6;
+
+              UPDATE proposal_resrch_areas
+              SET SEQUENCE_NUMBER = 5
+              WHERE PROPOSAL_NUMBER = '22101206'
+                AND PROPOSAL_ID = 1237
+                AND SEQUENCE_NUMBER <> 5;
+      rollback: empty

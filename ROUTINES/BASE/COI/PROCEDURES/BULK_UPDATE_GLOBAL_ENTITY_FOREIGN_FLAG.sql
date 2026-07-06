@@ -1,0 +1,24 @@
+
+CREATE PROCEDURE `BULK_UPDATE_GLOBAL_ENTITY_FOREIGN_FLAG`()
+BEGIN
+
+    DECLARE done INT DEFAULT 0;
+    DECLARE LI_ENTITY_ID INT;
+
+    DECLARE entity_cursor CURSOR FOR SELECT ENTITY_ID FROM ENTITY WHERE VERSION_STATUS = 'ACTIVE';
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+        OPEN entity_cursor;
+        read_loop: LOOP
+            FETCH entity_cursor INTO LI_ENTITY_ID;
+
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+
+            CALL UPDATE_GLOBAL_ENTITY_FOREIGN_FLAG(LI_ENTITY_ID);
+
+        END LOOP;
+    CLOSE entity_cursor;
+
+END

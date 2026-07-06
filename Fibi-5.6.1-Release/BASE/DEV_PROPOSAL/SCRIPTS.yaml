@@ -1,0 +1,182 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10053-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Script to the DASHBOARD_CRITERIA_LOOKUP table for the Key Persons Role Filter
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DASHBOARD_CRITERIA_LOOKUP
+              (CRITERIA_KEY, DESCRIPTION, DISPLAY_NAME, MODULE_CODE, CRITERIA_CONF_ID, IS_ACTIVE, DEFAULT_SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT
+              'CRT_DEV_PROPOSAL_KEY_PERSON_ROLES',
+              'Key Persons Role',
+              'Key Persons Role',
+              '3',
+              '52',
+              'Y',
+              '31',
+              UTC_TIMESTAMP(),
+              'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM DASHBOARD_CRITERIA_LOOKUP
+                  WHERE CRITERIA_KEY = 'CRT_DEV_PROPOSAL_KEY_PERSON_ROLES'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DASHBOARD_CRITERIA_LOOKUP WHERE CRITERIA_KEY = 'CRT_DEV_PROPOSAL_KEY_PERSON_ROLES' AND MODULE_CODE = 3;
+
+  - changeSet:
+      id: FIBI-9679-1
+      author: Shyla
+      labels: 'DDL'
+      comment: Add IS_DEFAULT column to ACTIVITY_TYPE.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE ACTIVITY_TYPE;
+              SET @sql := IF(
+              (SELECT COUNT(*)
+              FROM INFORMATION_SCHEMA.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'ACTIVITY_TYPE'
+                  AND COLUMN_NAME = 'IS_DEFAULT') = 0,
+              'ALTER TABLE ACTIVITY_TYPE ADD COLUMN IS_DEFAULT VARCHAR(1) DEFAULT ''N''',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE ACTIVITY_TYPE
+              DROP COLUMN IS_DEFAULT;
+
+  - changeSet:
+      id: FIBI-9679-2
+      author: Shyla
+      labels: 'DDL'
+      comment: Add IS_DEFAULT column to EPS_PROPOSAL_TYPE.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE EPS_PROPOSAL_TYPE;
+              SET @sql := IF(
+              (SELECT COUNT(*)
+              FROM INFORMATION_SCHEMA.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'EPS_PROPOSAL_TYPE'
+                  AND COLUMN_NAME = 'IS_DEFAULT') = 0,
+              'ALTER TABLE EPS_PROPOSAL_TYPE ADD COLUMN IS_DEFAULT VARCHAR(1) DEFAULT ''N''',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE EPS_PROPOSAL_TYPE
+              DROP COLUMN IS_DEFAULT;
+
+  - changeSet:
+      id: FIBI-9679-3
+      author: Shyla
+      labels: 'DDL'
+      comment: Add IS_DEFAULT column to AWARD_TYPE.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AWARD_TYPE;
+              SET @sql := IF(
+              (SELECT COUNT(*)
+              FROM INFORMATION_SCHEMA.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AWARD_TYPE'
+                  AND COLUMN_NAME = 'IS_DEFAULT') = 0,
+              'ALTER TABLE AWARD_TYPE ADD COLUMN IS_DEFAULT VARCHAR(1) DEFAULT ''N''',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AWARD_TYPE
+              DROP COLUMN IS_DEFAULT;
+
+  - changeSet:
+      id: FIBI-10054-1
+      author: Shyla
+      labels: 'DML'
+      comment: Update in DASHBOARD_CRITERIA_LOOKUP
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `dashboard_criteria_lookup`
+              SET `CRITERIA_CONF_ID` = '14',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `CRITERIA_KEY` = 'CRT_DEV_PROPO_GRANT_CALL_TITLE';
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dashboard_criteria_lookup`
+              SET `CRITERIA_CONF_ID` = '1',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE `CRITERIA_KEY` = 'CRT_DEV_PROPO_GRANT_CALL_TITLE';
+
+  - changeSet:
+      id: FIBI-10053-2
+      author: Reshma
+      labels: 'DML,5.6.1-Release'
+      comment: Update in DASHBOARD_CRITERIA_LOOKUP
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE dashboard_criteria_lookup
+              SET CRITERIA_CONF_ID = '1',
+              UPDATE_USER = 'admin',
+              UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE CRITERIA_KEY = 'CRT_DEV_PROPOSAL_ORGANIZATION'
+              AND MODULE_CODE = 3;
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8512-1
+      author: Hridya 
+      labels: 'DDL'
+      comment: Alter table EPS_PROPOSAL to update column size
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE EPS_PROPOSAL;
+              SET @sql := IF(
+              (SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'EPS_PROPOSAL'
+              AND COLUMN_NAME = 'PROGRAM_ANNOUNCEMENT_NUMBER') > 0,
+              'ALTER TABLE EPS_PROPOSAL MODIFY PROGRAM_ANNOUNCEMENT_NUMBER VARCHAR(1000);',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql; 
+              EXECUTE stmt; 
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE EPS_PROPOSAL MODIFY PROGRAM_ANNOUNCEMENT_NUMBER VARCHAR(255);

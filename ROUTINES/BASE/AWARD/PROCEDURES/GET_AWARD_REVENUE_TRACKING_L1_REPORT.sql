@@ -1,0 +1,26 @@
+-- `GET_AWARD_REVENUE_TRACKING_L1_REPORT`; 
+
+CREATE PROCEDURE `GET_AWARD_REVENUE_TRACKING_L1_REPORT`( )
+    DETERMINISTIC
+BEGIN
+truncate l1_revenue_report_budget;
+truncate l1_revenue_report;
+insert into l1_revenue_report (ACCOUNT_NUMBER, AMOUNT_IN_FMA_CURRENCY)
+select T1.ACCOUNT_NUMBER,SUM(T1.AMOUNT_IN_FMA_CURRENCY) from AWARD_REVENUE_TRANSACTIONS T1
+WHERE ACTUAL_OR_COMMITTED_FLAG= 'R' GROUP by T1.ACCOUNT_NUMBER;
+insert into l1_revenue_report_budget 
+(AWARD_ID,AWARD_NUMBER,ACCOUNT_NUMBER,TOTAL_COST , CAMPUS, UNIT_NUMBER, UNIT_NAME)
+SELECT T1.AWARD_ID,T1.AWARD_NUMBER,T1.ACCOUNT_NUMBER,T2.TOTAL_COST , t3.campus, t3.UNIT_NUMBER, t3.UNIT_NAME
+FROM AWARD T1  
+INNER JOIN AWARD_BUDGET_HEADER T2 ON T1.AWARD_ID = T2.AWARD_ID
+inner join unit t3 on T1.LEAD_UNIT_NUMBER = t3.UNIT_NUMBER
+WHERE T1.ACCOUNT_NUMBER IN(SELECT DISTINCT ACCOUNT_NUMBER FROM AWARD_REVENUE_TRANSACTIONS)
+						   AND T1.AWARD_SEQUENCE_STATUS = 'ACTIVE'
+AND T2.SEQUENCE_NUMBER in (select max(t4.SEQUENCE_NUMBER) from award_budget_header t4 where t4.award_id = t2.award_id);
+commit;
+select t2.unit_number, t2.UNIT_NAME, t2.campus,
+t1.account_number,t2.total_cost, t1.AMOUNT_IN_FMA_CURRENCY,
+IFNULL(t2.total_cost,0)-IFNULL(t1.AMOUNT_IN_FMA_CURRENCY,0) as Balance
+from l1_revenue_report t1
+left outer join l1_revenue_report_budget t2 on trim(t1.account_number) = trim(t2.account_number);
+END

@@ -1,0 +1,49 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10875-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: added custom changes for custom data sync procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS CUSTOM_DATA_SYNC;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/PROCEDURES/CUSTOM_DATA_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10875-2
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment:  added custom changes for award master dataset sync procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS AWARD_MASTER_DATASET_SYNC;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/PROCEDURES/AWARD_MASTER_DATASET_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10910-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment:  Procedure to load proposal pre report details for new workflow
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS LOAD_PROP_PRE_RPT_DTLS_NW;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/PROCEDURES/LOAD_PROP_PRE_RPT_DTLS_NW.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

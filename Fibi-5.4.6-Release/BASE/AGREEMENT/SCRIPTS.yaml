@@ -1,0 +1,103 @@
+databaseChangeLog:
+  - changeSet:
+        id: FIBI-6898-1
+        author: Prabhu.E
+        labels: 'DDL'
+        comment: Droped column IS_TERMINAL 
+        changes:
+          - sql:
+              sql: |
+               Analyze table AGREEMENT_AVAILABLE_ACTION;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                     WHERE TABLE_SCHEMA = DATABASE() 
+                       AND TABLE_NAME = 'AGREEMENT_AVAILABLE_ACTION' 
+                       AND COLUMN_NAME = 'IS_TERMINAL') = 1,
+
+                    'ALTER TABLE AGREEMENT_AVAILABLE_ACTION DROP COLUMN IS_TERMINAL;',
+                    'DO 1'
+                );
+
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+               
+        rollback:
+          - sql:
+              sql: |
+               ALTER TABLE AGREEMENT_AVAILABLE_ACTION ADD COLUMN IS_TERMINAL VARCHAR(1) DEFAULT NULL;
+
+  - changeSet:
+        id: FIBI-6898-2
+        author: Prabhu.E
+        labels: 'DDL'
+        comment:  Added column IS_TERMINAL to AGREEMENT_STATUS
+        changes:
+          - sql:
+              sql: |
+
+                Analyze table AGREEMENT_STATUS;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                     WHERE TABLE_SCHEMA = DATABASE() 
+                       AND TABLE_NAME = 'AGREEMENT_STATUS' 
+                       AND COLUMN_NAME = 'IS_TERMINAL') = 0,
+
+                    'ALTER TABLE AGREEMENT_STATUS ADD COLUMN IS_TERMINAL VARCHAR(1) DEFAULT ''N'';',
+                    'DO 1'
+                );
+
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+               
+        rollback:
+          - sql:
+              sql: | 
+               ALTER TABLE AGREEMENT_STATUS DROP COLUMN IS_TERMINAL;              
+
+  - changeSet:
+        id: FIBI-6898-3
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Set IS_TERMINAL to 'Y' for specific AGREEMENT_STATUS_CODE
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE AGREEMENT_STATUS
+                SET IS_TERMINAL = 'Y'
+                WHERE AGREEMENT_STATUS_CODE IN ('9', '8', '4', '10')
+                AND (IS_TERMINAL IS NULL OR IS_TERMINAL != 'Y');
+                SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-6898-4
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Update CODE_TABLE_CONFIGURATION for AGREEMENT_STATUS
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE `CODE_TABLE_CONFIGURATION`
+                SET `CONTENT` = '{\"group\":\"Agreements\",\"codeTableName\":\"Agreement Status\",\"description\":\"List of all agreement statuses\",\"databaseTableName\":\"AGREEMENT_STATUS\",\"fields\":[{\"columnName\":\"AGREEMENT_STATUS_CODE\",\"displayName\":\"Agreement Status Code\",\"dataType\":\"String\",\"isEditable\":true,\"length\":3,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DESCRIPTION\",\"displayName\":\"Description\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"update timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null},{\"columnName\":\"IS_ACTIVE\",\"displayName\":\"Is Active\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"IS_TERMINAL\",\"displayName\":\"Is Terminal\",\"dataType\":\"String\",\"isEditable\":\"true\",\"length\":\"1\",\"canEmpty\":\"false\",\"visible\":\"true\",\"filterType\":\"switch\"}],\"primaryKey\":[\"AGREEMENT_STATUS_CODE\"],\"dependency\":[{\"displayName\":\"Agreement Header\",\"table_name\":\"agreement_header\",\"columnName\":\"AGREEMENT_STATUS_CODE\"}],\"actions\":null}'
+                WHERE (`TABLE_NAME` = 'AGREEMENT_STATUS' AND `CONTENT` != '{\"group\":\"Agreements\",\"codeTableName\":\"Agreement Status\",\"description\":\"List of all agreement statuses\",\"databaseTableName\":\"AGREEMENT_STATUS\",\"fields\":[{\"columnName\":\"AGREEMENT_STATUS_CODE\",\"displayName\":\"Agreement Status Code\",\"dataType\":\"String\",\"isEditable\":true,\"length\":3,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DESCRIPTION\",\"displayName\":\"Description\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"update timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null},{\"columnName\":\"IS_ACTIVE\",\"displayName\":\"Is Active\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"IS_TERMINAL\",\"displayName\":\"Is Terminal\",\"dataType\":\"String\",\"isEditable\":\"true\",\"length\":\"1\",\"canEmpty\":\"false\",\"visible\":\"true\",\"filterType\":\"switch\"}],\"primaryKey\":[\"AGREEMENT_STATUS_CODE\"],\"dependency\":[{\"displayName\":\"Agreement Header\",\"table_name\":\"agreement_header\",\"columnName\":\"AGREEMENT_STATUS_CODE\"}],\"actions\":null}');
+                SET SQL_SAFE_UPDATES = 1; 
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-6898-5
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Update CODE_TABLE_CONFIGURATION for AGREEMENT_AVAILABLE_ACTION
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE `CODE_TABLE_CONFIGURATION`
+                SET `CONTENT` = '{\"group\":\"Agreements\",\"codeTableName\":\"Agreement Available Action\",\"description\":\"List of all agreement action\",\"databaseTableName\":\"AGREEMENT_AVAILABLE_ACTION\",\"fields\":[{\"columnName\":\"AVAILABLE_ACTION_ID\",\"displayName\":\"Available Action Id\",\"dataType\":\"INTEGER\",\"isEditable\":\"true\",\"length\":\"11\",\"canEmpty\":\"false\",\"visible\":\"true\"},{\"columnName\":\"AGREEMENT_STATUS_CODE\",\"displayName\":\"Current Agreement Status\",\"dataType\":\"String\",\"isEditable\":\"true\",\"length\":\"3\",\"canEmpty\":\"true\",\"visible\":\"false\",\"defaultValue\":\"DESCRIPTION_AGREEMENT_STATUS_CODE\",\"filterType\":\"lookUp\",\"valueField\":\"AGREEMENT_STATUS#AGREEMENT_STATUS_CODE\"},{\"visible\":\"true\",\"columnName\":\"DESCRIPTION_AGREEMENT_STATUS_CODE\",\"dataType\":\"String\",\"isEditable\":\"false\",\"canEmpty\":\"true\",\"displayName\":\"Current Agreement Status\",\"isTransient\":\"true\"},{\"columnName\":\"AGREEMENT_WORKFLOW_ACTION_ID\",\"displayName\":\"Next Workflow Action\",\"dataType\":\"String\",\"isEditable\":\"true\",\"length\":\"3\",\"canEmpty\":\"true\",\"visible\":\"false\",\"defaultValue\":\"DESCRIPTION_AGREEMENT_WORKFLOW_ACTION_ID\",\"filterType\":\"lookUp\",\"valueField\":\"AGREEMENT_WORKFLOW_ACTION#AGREEMENT_WORKFLOW_ACTION_ID\"},{\"visible\":\"true\",\"columnName\":\"DESCRIPTION_AGREEMENT_WORKFLOW_ACTION_ID\",\"dataType\":\"String\",\"isEditable\":\"false\",\"canEmpty\":\"true\",\"displayName\":\"Next Workflow Action\",\"isTransient\":\"true\"},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"update timestamp\",\"dataType\":\"Date\",\"isEditable\":\"false\",\"canEmpty\":\"false\",\"visible\":\"true\"},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"refColumnName\":\"PERSON#USER_NAME\",\"dataType\":\"String\",\"isEditable\":\"false\",\"length\":\"60\",\"canEmpty\":\"false\",\"visible\":\"true\"}],\"primaryKey\":[\"AVAILABLE_ACTION_ID\"],\"dependency\":[{\"displayName\":\"Agreement Status\",\"table_name\":\"AGREEMENT_STATUS\",\"columnName\":\"AGREEMENT_STATUS_CODE\",\"showTableName\":\"true\"},{\"displayName\":\"Agreement Workflow Action\",\"table_name\":\"AGREEMENT_WORKFLOW_ACTION\",\"columnName\":\"AGREEMENT_WORKFLOW_ACTION_ID\",\"showTableName\":\"true\"}]}'
+                WHERE (`TABLE_NAME` = 'AGREEMENT_AVAILABLE_ACTION' AND `CONTENT` != '{\"group\":\"Agreements\",\"codeTableName\":\"Agreement Available Action\",\"description\":\"List of all agreement action\",\"databaseTableName\":\"AGREEMENT_AVAILABLE_ACTION\",\"fields\":[{\"columnName\":\"AVAILABLE_ACTION_ID\",\"displayName\":\"Available Action Id\",\"dataType\":\"INTEGER\",\"isEditable\":\"true\",\"length\":\"11\",\"canEmpty\":\"false\",\"visible\":\"true\"},{\"columnName\":\"AGREEMENT_STATUS_CODE\",\"displayName\":\"Current Agreement Status\",\"dataType\":\"String\",\"isEditable\":\"true\",\"length\":\"3\",\"canEmpty\":\"true\",\"visible\":\"false\",\"defaultValue\":\"DESCRIPTION_AGREEMENT_STATUS_CODE\",\"filterType\":\"lookUp\",\"valueField\":\"AGREEMENT_STATUS#AGREEMENT_STATUS_CODE\"},{\"visible\":\"true\",\"columnName\":\"DESCRIPTION_AGREEMENT_STATUS_CODE\",\"dataType\":\"String\",\"isEditable\":\"false\",\"canEmpty\":\"true\",\"displayName\":\"Current Agreement Status\",\"isTransient\":\"true\"},{\"columnName\":\"AGREEMENT_WORKFLOW_ACTION_ID\",\"displayName\":\"Next Workflow Action\",\"dataType\":\"String\",\"isEditable\":\"true\",\"length\":\"3\",\"canEmpty\":\"true\",\"visible\":\"false\",\"defaultValue\":\"DESCRIPTION_AGREEMENT_WORKFLOW_ACTION_ID\",\"filterType\":\"lookUp\",\"valueField\":\"AGREEMENT_WORKFLOW_ACTION#AGREEMENT_WORKFLOW_ACTION_ID\"},{\"visible\":\"true\",\"columnName\":\"DESCRIPTION_AGREEMENT_WORKFLOW_ACTION_ID\",\"dataType\":\"String\",\"isEditable\":\"false\",\"canEmpty\":\"true\",\"displayName\":\"Next Workflow Action\",\"isTransient\":\"true\"},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"update timestamp\",\"dataType\":\"Date\",\"isEditable\":\"false\",\"canEmpty\":\"false\",\"visible\":\"true\"},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"refColumnName\":\"PERSON#USER_NAME\",\"dataType\":\"String\",\"isEditable\":\"false\",\"length\":\"60\",\"canEmpty\":\"false\",\"visible\":\"true\"}],\"primaryKey\":[\"AVAILABLE_ACTION_ID\"],\"dependency\":[{\"displayName\":\"Agreement Status\",\"table_name\":\"AGREEMENT_STATUS\",\"columnName\":\"AGREEMENT_STATUS_CODE\",\"showTableName\":\"true\"},{\"displayName\":\"Agreement Workflow Action\",\"table_name\":\"AGREEMENT_WORKFLOW_ACTION\",\"columnName\":\"AGREEMENT_WORKFLOW_ACTION_ID\",\"showTableName\":\"true\"}]}');
+                SET SQL_SAFE_UPDATES = 1;
+        rollback: empty

@@ -1,0 +1,399 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7335-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Create AUTO_DOCUMENT_CREATION_LOG table (LOA)
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AUTO_DOCUMENT_CREATION_LOG (
+              AUTO_DOCUMENT_CREATION_LOG_ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+              SENDER_EMAIL VARCHAR(60) NOT NULL,
+              MESSAGE_ID VARCHAR(255) NOT NULL,
+              MODULE_CODE INT NULL,
+              MODULE_ITEM_ID INT NULL,
+              CREATE_TIMESTAMP DATETIME NULL,
+              UPDATE_TIMESTAMP DATETIME NULL,
+              STATUS VARCHAR(10) NULL,
+              REQUEST_BODY JSON NOT NULL,
+              CONSTRAINT AUTO_DOCUMENT_CREATION_LOG_FK1 FOREIGN KEY (MODULE_CODE)
+              REFERENCES COEUS_MODULE (MODULE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AUTO_DOCUMENT_CREATION_LOG;
+
+  - changeSet:
+      id: FIBI-7259-3
+      author: Prabhu.E
+      labels: 'DDL'
+      comment: alter AUTO_DOCUMENT_CREATION_LOG table (LOA)
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AUTO_DOCUMENT_CREATION_LOG;
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                   FROM information_schema.COLUMNS 
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'AUTO_DOCUMENT_CREATION_LOG'
+                     AND COLUMN_NAME = 'ERROR_MESSAGE') = 0,
+                  'ALTER TABLE AUTO_DOCUMENT_CREATION_LOG ADD COLUMN ERROR_MESSAGE VARCHAR(255);',
+                  'DO 1;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                   FROM information_schema.COLUMNS 
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'AUTO_DOCUMENT_CREATION_LOG'
+                     AND COLUMN_NAME = 'REQUEST_BODY'
+                     AND DATA_TYPE = 'json') = 1,
+                  'ALTER TABLE AUTO_DOCUMENT_CREATION_LOG MODIFY COLUMN REQUEST_BODY JSON NULL;',
+                  'DO 1;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+                  SET @sql := IF(
+                      (SELECT COUNT(*)
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'AUTO_DOCUMENT_CREATION_LOG'
+                        AND COLUMN_NAME = 'ERROR_MESSAGE') > 0,
+                      'ALTER TABLE AUTO_DOCUMENT_CREATION_LOG DROP COLUMN ERROR_MESSAGE;',
+                      'DO 1;'
+                  );
+                  PREPARE stmt FROM @sql;
+                  EXECUTE stmt;
+                  DEALLOCATE PREPARE stmt;
+                  SET @sql := IF(
+                      (SELECT COUNT(*)
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'AUTO_DOCUMENT_CREATION_LOG'
+                        AND COLUMN_NAME = 'REQUEST_BODY'
+                        AND DATA_TYPE = 'json') > 0,
+                      'ALTER TABLE AUTO_DOCUMENT_CREATION_LOG MODIFY COLUMN REQUEST_BODY TEXT NULL;',
+                      'DO 1;'
+                  );
+                  PREPARE stmt FROM @sql;
+                  EXECUTE stmt;
+                  DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-7259-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Add UPDATE_TIMESTAMP and UPDATE_USER columns to LOA_TEMPLATE_TYPE table
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE LOA_TEMPLATE_TYPE;
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                  FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LOA_TEMPLATE_TYPE'
+                    AND COLUMN_NAME = 'UPDATE_TIMESTAMP') = 0,
+                  'ALTER TABLE LOA_TEMPLATE_TYPE ADD COLUMN UPDATE_TIMESTAMP DATETIME;',
+                  'DO 1;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                  FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LOA_TEMPLATE_TYPE'
+                    AND COLUMN_NAME = 'UPDATE_USER') = 0,
+                  'ALTER TABLE LOA_TEMPLATE_TYPE ADD COLUMN UPDATE_USER VARCHAR(60);',
+                  'DO 1;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ANALYZE TABLE LOA_TEMPLATE_TYPE;
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                  FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LOA_TEMPLATE_TYPE'
+                    AND COLUMN_NAME = 'UPDATE_TIMESTAMP') > 0,
+                  'ALTER TABLE LOA_TEMPLATE_TYPE DROP COLUMN UPDATE_TIMESTAMP;',
+                  'DO 1;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                  (SELECT COUNT(*) 
+                  FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LOA_TEMPLATE_TYPE'
+                    AND COLUMN_NAME = 'UPDATE_USER') > 0,
+                  'ALTER TABLE LOA_TEMPLATE_TYPE DROP COLUMN UPDATE_USER;',
+                  'DO 1;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-7259-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Add Notification Type for NOA failure and Code Table Configuration for LOA Template Type
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES 
+              (1450,13,0,'Agreement Creation from NOA Failed Notification','Failed to Create Agreement from {NOA_FILE_NAME}','<p>Dear User,</p><p>Agreement creation from NOA <strong>{NOA_FILE_NAME}</strong>, received on {DATE} could not be completed.</p><p><strong>Reason:</strong> {ERROR_MESSAGE}</p><p>Since the agreement could not be auto-generated, please review the NOA details and take corrective action by either:</p><p>Submitting corrected information, or Manually creating the agreement.</p><p> </p><p>Thank you.</p><p>Note: This is a system-generated email. Please do not reply to this email.</p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'N',NULL,NULL);
+
+              INSERT IGNORE INTO NOTIFICATION_TYPE (`NOTIFICATION_TYPE_ID`,`MODULE_CODE`,`SUB_MODULE_CODE`,`DESCRIPTION`,`SUBJECT`,`MESSAGE`,`PROMPT_USER`,`IS_ACTIVE`,`CREATE_USER`,`CREATE_TIMESTAMP`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`IS_SYSTEM_SPECIFIC`,`SHOW_TEMPLATE_IN_MODULE`,`SENT_TO_INITIATOR`) VALUES 
+              (1451,13,0,'Agreement Creation from NOA Success Notification','Successfully Created Agreement from {NOA_FILE_NAME}','<p>Dear User,</p><p>Successfully created Agreement for <strong>{NOA_FILE_NAME}</strong>, received on {DATE}.</p><p>Agreement ID : {AGREEMENT_ID}</p><p>Please click {APPLICATION_URL} to review the application.</p><p> </p><p>Thank you.</p><p>Note: This is a system-generated email. Please do not reply to this email.</p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'N',NULL,NULL);
+
+              INSERT IGNORE INTO CODE_TABLE_CONFIGURATION (TABLE_NAME, DISPLAY_NAME, CONTENT, GROUP_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP) VALUES ('LOA_TEMPLATE_TYPE', 'LOA Template Type', '{"group": "General","codeTableName": "LOA Template Type","description": "List of all LOA template types","databaseTableName": "LOA_TEMPLATE_TYPE","fields": [{"columnName": "TYPE_CODE","displayName": "Type Code","dataType": "INTEGER","isEditable": true,"length": 10,"canEmpty": false,"visible": true,"valueChanged": null,"index": null,"filterType": null,"valueField": null,"isTransient": null,"values": null,"refColumnName": null,"defaultValue": null},{"columnName": "DESCRIPTION","displayName": "Description","dataType": "String","isEditable": true,"length": 255,"canEmpty": false,"visible": true,"valueChanged": null,"index": null,"filterType": null,"valueField": null,"isTransient": null,"values": null,"refColumnName": null,"defaultValue": null},{"columnName": "PROCEDURE_NAME","displayName": "DB Procedure","dataType": "String","isEditable": true,"length": 255,"canEmpty": false,"visible": true,"valueChanged": null,"index": null,"filterType": null,"valueField": null,"isTransient": null,"values": null,"refColumnName": null,"defaultValue": null}],"primaryKey": ["TYPE_CODE"],"dependency": [],"actions": null}', 'General', 'List of all Loa Template Types', 'admin', utc_timestamp());
+              UPDATE CODE_TABLE_CONFIGURATION SET `CONTENT` = '{\"group\":\"General\",\"codeTableName\":\"LOA Template Identifier\",\"description\":\"List of all LOA template Keywords,values and its condition\",\"databaseTableName\":\"LOA_TEMPLATE_IDENTIFIER\",\"fields\":[{\"columnName\":\"LOA_TEMPLATE_IDENTIFIER_ID\",\"displayName\":\"null\",\"dataType\":\"INTEGER\",\"isEditable\":false,\"length\":10,\"canEmpty\":false,\"visible\":false,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"TYPE_CODE\",\"displayName\":\"LOA Template Type\",\"dataType\":\"INTEGER\",\"isEditable\":true,\"length\":10,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"lookUp\",\"valueField\":\"LOA_TEMPLATE_TYPE#TYPE_CODE\",\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":\"DESCRIPTION_TYPE_CODE\"},{\"columnName\":\"DESCRIPTION_TYPE_CODE\",\"displayName\":\"Template Type\",\"dataType\":\"String\",\"isEditable\":false,\"length\":255,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":\"true\",\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"KEY_WORD\",\"displayName\":\"Keyword\",\"dataType\":\"String\",\"isEditable\":true,\"length\":255,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"EVAL_VALUE\",\"displayName\":\"Value\",\"dataType\":\"String\",\"isEditable\":true,\"length\":255,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"EVAL_CONDITION\",\"displayName\":\"Eval_Condition\",\"dataType\":\"String\",\"isEditable\":true,\"length\":20,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update Timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null}],\"primaryKey\":[\"LOA_TEMPLATE_IDENTIFIER_ID\"],\"dependency\":[],\"actions\":null}',`UPDATE_USER` = 'admin', `UPDATE_TIMESTAMP` = utc_timestamp() WHERE (`TABLE_NAME` = 'LOA_TEMPLATE_IDENTIFIER');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM NOTIFICATION_TYPE WHERE NOTIFICATION_TYPE_ID IN (1450, 1451);
+              DELETE FROM CODE_TABLE_CONFIGURATION WHERE TABLE_NAME = 'LOA_TEMPLATE_TYPE';
+
+  - changeSet:
+      id: FIBI-8154-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Add OLD_AWARD_NUMBER column to AWARD_EXPENSE_TEMP table
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AWARD_EXPENSE_TEMP;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AWARD_EXPENSE_TEMP'
+                    AND COLUMN_NAME = 'OLD_AWARD_NUMBER') = 0,
+                  'ALTER TABLE AWARD_EXPENSE_TEMP ADD COLUMN OLD_AWARD_NUMBER VARCHAR(12) DEFAULT NULL;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ANALYZE TABLE AWARD_EXPENSE_TEMP;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'AWARD_EXPENSE_TEMP'
+                    AND COLUMN_NAME = 'OLD_AWARD_NUMBER') > 0,
+                  'ALTER TABLE AWARD_EXPENSE_TEMP DROP COLUMN OLD_AWARD_NUMBER;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Unit number award changes.
+      changes:
+        - sql:
+            sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award' 
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE award MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award_assoc_detail' 
+                      AND COLUMN_NAME = 'LEAD_UNIT') > 0,
+                    'ALTER TABLE award_assoc_detail MODIFY COLUMN LEAD_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award_cost_share' 
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE award_cost_share MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award_master_dataset_rt' 
+                      AND COLUMN_NAME = 'KEY_PERSON_DEPARTMENT_NUMBER') > 0,
+                    'ALTER TABLE award_master_dataset_rt MODIFY COLUMN KEY_PERSON_DEPARTMENT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award_master_dataset_rt' 
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE award_master_dataset_rt MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award_master_dataset_rt' 
+                      AND COLUMN_NAME = 'PI_HOME_UNIT_NUMBER') > 0,
+                    'ALTER TABLE award_master_dataset_rt MODIFY COLUMN PI_HOME_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award_person_unit' 
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE award_person_unit MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND TABLE_NAME = 'award_persons' 
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE award_persons MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'institute_la_rates'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE institute_la_rates MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'institute_rates'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE institute_rates MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'sap_feed_unit_mapping'
+                      AND COLUMN_NAME = 'PERSON_RESPONSIBLE_NUMBER') > 0,
+                    'ALTER TABLE sap_feed_unit_mapping MODIFY COLUMN PERSON_RESPONSIBLE_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'sap_feed_unit_mapping'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE sap_feed_unit_mapping MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'award_sup_org_mapping'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE award_sup_org_mapping MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'temp_user'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE temp_user MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'award_expense_transactions'
+                      AND COLUMN_NAME = 'PREDECESSOR_DOC_ITEM_ORG_UNIT') > 0,
+                    'ALTER TABLE award_expense_transactions MODIFY COLUMN PREDECESSOR_DOC_ITEM_ORG_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'award_expense_transactions'
+                      AND COLUMN_NAME = 'REFERENCE_ORG_UNIT') > 0,
+                    'ALTER TABLE award_expense_transactions MODIFY COLUMN REFERENCE_ORG_UNIT VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'award'
+                      AND COLUMN_NAME = 'LEAD_UNIT_NUMBER') > 0,
+                    'ALTER TABLE award MODIFY COLUMN LEAD_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+      rollback: empty

@@ -1,0 +1,26 @@
+-- `custom_data_migration`; 
+
+CREATE PROCEDURE `custom_data_migration`()
+BEGIN
+DECLARE LI_ORDER_NUMBER INT;
+DECLARE LI_MODULE_ITEM_KEY VARCHAR(40);
+DECLARE LI_CUSTOM_DATA_ELEMENTS_ID VARCHAR(40);
+DECLARE LI_CUSTOM_DATA_OPTION_ID VARCHAR(40);
+DECLARE LS_OPTION_NAME VARCHAR(400);
+DECLARE LI_CUSTOM_DATA_ID VARCHAR(40);
+DECLARE DONE1 INT DEFAULT FALSE;
+DECLARE ELE_CUR_DATA CURSOR FOR select t1.CUSTOM_DATA_ID, t1.MODULE_ITEM_KEY, t1.CUSTOM_DATA_ELEMENTS_ID from custom_data t1, custom_data_elements t2 
+where t2.CUSTOM_DATA_ELEMENTS_ID = t1.CUSTOM_DATA_ELEMENTS_ID and t2.DATA_TYPE = '4' and value ='true';
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET DONE1 = TRUE;
+	OPEN ELE_CUR_DATA;
+	ELEMENT_LOOP: LOOP 
+	FETCH ELE_CUR_DATA INTO LI_CUSTOM_DATA_ID, LI_MODULE_ITEM_KEY, LI_CUSTOM_DATA_ELEMENTS_ID;
+		IF DONE1 THEN
+			LEAVE ELEMENT_LOOP;
+		END IF;
+		select rankval into LI_ORDER_NUMBER from(select custom_data_id, rank() over (order by custom_data_id) as rankval from custom_data where module_item_key = LI_MODULE_ITEM_KEY and custom_data_elements_id = LI_CUSTOM_DATA_ELEMENTS_ID ) rnk where rnk.custom_data_id =LI_CUSTOM_DATA_ID;
+		select custom_data_option_id , OPTION_NAME into LI_CUSTOM_DATA_OPTION_ID,LS_OPTION_NAME from(select custom_data_option_id,OPTION_NAME,rank() over (order by custom_data_option_id ) as rnkval from custom_data_elements_options where CUSTOM_DATA_ELEMENTS_ID = LI_CUSTOM_DATA_ELEMENTS_ID) rnk where rnkval= LI_ORDER_NUMBER;
+		UPDATE custom_data set VALUE = LI_CUSTOM_DATA_OPTION_ID, DESCRIPTION = LS_OPTION_NAME WHERE CUSTOM_DATA_ID = LI_CUSTOM_DATA_ID;
+	END LOOP;
+	CLOSE ELE_CUR_DATA;
+END

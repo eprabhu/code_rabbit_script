@@ -1,0 +1,27 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+              DROP FUNCTION IF EXISTS FN_CHK_GRANTCALL_ELGLTY_COI;
+              DROP FUNCTION IF EXISTS FN_CHK_GRANTCALL_ELGLTY_KP;
+              DROP FUNCTION IF EXISTS FN_CHK_GRANTCALL_ELGLTY_PI;
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/FUNCTIONS/FN_CHK_GRANTCALL_ELGLTY_COI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/FUNCTIONS/FN_CHK_GRANTCALL_ELGLTY_KP.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/FUNCTIONS/FN_CHK_GRANTCALL_ELGLTY_PI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

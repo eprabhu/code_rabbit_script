@@ -1,0 +1,36 @@
+CREATE PROCEDURE GET_AWARD_DETAILS_FOR_ASSOC(
+IN AV_MODULE_ITEM_ID INT)
+BEGIN
+SELECT 'ID'
+	,'Title'
+	,'Status'
+	,'Award Number'
+	,'Account Number'
+	,'PI Name'
+	,'Lead Unit'
+	,'Sponsor Award ID'
+	,'Sponsor'
+	,'Anticipated Total Amount'
+    ,'Authorized Total Amount'
+    ,'Obligation Start Date'
+    ,'Obligation End Date'
+	,'Final Expiration Date'
+UNION 
+SELECT 
+	MODULE_ITEM_KEY, 
+	TITLE,
+	STATUS,
+	MODULE_ITEM_KEY,
+    ACCOUNT_NUMBER,
+    PI_NAME,
+	CONCAT(LEAD_UNIT_NUMBER, ' - ',LEAD_UNIT_NAME) AS LEAD_UNIT,
+    SPONSOR_AWARD_ID,
+    CONCAT(SPONSOR_CODE, ' - ', SPONSOR_NAME) AS SPONSOR,
+	ANTICIPATED_TOTAL_AMOUNT,
+	OBLIGATED_TOTAL,
+	OBLIGATION_START_DATE,
+	OBLIGATION_EXPIRATION_DATE,
+	END_DATE
+FROM SR_INT_STAGE_ELASTIC_INDEX
+WHERE DOCUMENT_NUMBER = AV_MODULE_ITEM_ID AND MODULE_CODE = 1;     	
+END

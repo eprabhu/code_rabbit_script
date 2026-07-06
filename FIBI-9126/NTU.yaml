@@ -1,0 +1,6 @@
+databaseChangeLog:
+
+    #REPORT
+    - include:
+        file: FIBI-9126/NTU/REPORT/SCRIPTS.yaml  
+        labels: 'REPORT'

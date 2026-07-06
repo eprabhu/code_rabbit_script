@@ -1,0 +1,48 @@
+  - changeSet:
+      id: FIBI-8854-1
+      author: Nabeel Ahamed M
+      labels: DML
+      comment: INSERT query for MIT configuration 
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `lookup_window`
+              (`LOOKUP_WINDOW_NAME`,`DESCRIPTION`,`TABLE_NAME`,`COLUMN_NAME`,`OTHERS_DISPLAY_COLUMNS`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`DATA_TYPE_CODE`)
+              VALUES
+              ('SR_CONTRACT_ADMIN', 'Contract Admin', 'sr_contract_admin_v', 'person_id', 'DESCRIPTION', UTC_TIMESTAMP(), 'admin', 8);
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM unit_administrator_type WHERE UNIT_ADMINISTRATOR_TYPE_CODE = '12';      
+
+  - changeSet:
+      id: FIBI-9768-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Remove active award assoc config and its dependency data.
+      changes:
+        - sql:
+            sql: |
+              set sql_safe_updates=0;
+              DELETE FROM `assoc_agreement` where ASSOC_CONFIG_CODE = 1;
+              DELETE FROM `assoc_module_mapping` where ASSOC_CONFIG_CODE = 1;
+              DELETE FROM `assoc_sr` where ASSOC_CONFIG_CODE = 1;
+              DELETE FROM `sr_module_mapping` where ASSOC_CONFIG_CODE = 1;
+              DELETE FROM `assoc_config` WHERE (`ASSOC_CONFIG_CODE` = '1');
+              set sql_safe_updates=1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9887-2
+      author: Shyla M
+      labels: 'DML'
+      comment: Insert hold and Deferred status
+      changes:
+        - sql:
+            sql: |
+              set sql_safe_updates=0;
+              UPDATE sr_status SET IS_TERMINAL = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE STATUS_CODE = '7';
+              INSERT IGNORE INTO sr_status (STATUS_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, ACTION_TYPE_CODE, IS_TERMINAL) VALUES (21, 'Hold', UTC_TIMESTAMP(), 'admin', NULL, NULL);
+              INSERT IGNORE INTO sr_status (STATUS_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, ACTION_TYPE_CODE, IS_TERMINAL) VALUES (22, 'Deferred', UTC_TIMESTAMP(), 'admin', NULL, NULL);
+              set sql_safe_updates=1;
+      rollback: empty

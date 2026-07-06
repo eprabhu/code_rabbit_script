@@ -1,0 +1,39 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-7656-1
+        author: Farsana Khadar
+        labels: 'DDL'
+        comment: Modification on PERSON_TRAINING
+        changes:
+          - sql:
+              sql: |
+                    Analyze table PERSON_TRAINING;
+                    SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'PERSON_TRAINING' AND COLUMN_NAME = 'TRAINING_NUMBER') = 1,
+                    'ALTER TABLE PERSON_TRAINING CHANGE COLUMN `TRAINING_NUMBER` `TRAINING_NUMBER` INT NULL;',
+                    'DO 1');
+                    PREPARE stmt FROM @sql;
+                    EXECUTE stmt;
+                    DEALLOCATE PREPARE stmt;
+
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Unit number coi changes.
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'person_role_rt'
+                    AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                  'ALTER TABLE person_role_rt MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+      rollback: empty

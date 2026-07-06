@@ -1,0 +1,44 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.4.6-Release/BASE/CORE/SCRIPTS.yaml
+        labels: CORE
+    - include:
+        file: Fibi-5.4.6-Release/BASE/CORE/FUNCTIONS.yaml
+        labels: CORE
+    - include:
+        file: Fibi-5.4.6-Release/BASE/CORE/PROCEDURES.yaml
+        labels: CORE
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.4.6-Release/BASE/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: DEV_PROPOSAL
+    - include:
+        file: Fibi-5.4.6-Release/BASE/DEV_PROPOSAL/VIEWS.yaml
+        labels: DEV_PROPOSAL
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.4.6-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: AGREEMENT
+    - include:
+        file: Fibi-5.4.6-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: AGREEMENT
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.4.6-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: SERVICE_REQUEST
+    - include:
+        file: Fibi-5.4.6-Release/BASE/SERVICE_REQUEST/FUNCTIONS.yaml
+        labels: SERVICE_REQUEST
+    - include:
+        file: Fibi-5.4.6-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: SERVICE_REQUEST
+
+    #PROGRESS_REPORT
+    - include:
+        file: Fibi-5.4.6-Release/BASE/PROGRESS_REPORT/PROCEDURES.yaml
+        labels: PROGRESS_REPORT

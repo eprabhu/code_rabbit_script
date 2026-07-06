@@ -1,0 +1,267 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10048-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Insert integration sync configuration entries
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES 
+              ('sync_awards', 'integration_sync', 'Sync Awards', 'N',
+              (SELECT * FROM (SELECT IFNULL(MAX(SORT_ORDER),0) + 1 FROM integration_sync_config) AS t),
+              UTC_TIMESTAMP(), 'admin');
+               
+              INSERT IGNORE INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES 
+              ('sync_ips', 'integration_sync', 'Sync Institute Proposals', 'N',
+              (SELECT * FROM (SELECT IFNULL(MAX(SORT_ORDER),0) + 1 FROM integration_sync_config) AS t),
+              UTC_TIMESTAMP(), 'admin');
+               
+              INSERT IGNORE INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES 
+              ('sync_agreements', 'integration_sync', 'Sync Agreements', 'N',
+              (SELECT * FROM (SELECT IFNULL(MAX(SORT_ORDER),0) + 1 FROM integration_sync_config) AS t),
+              UTC_TIMESTAMP(), 'admin');
+               
+              INSERT IGNORE INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES 
+              ('sync_service_requests', 'integration_sync', 'Sync Service Requests', 'N',
+              (SELECT * FROM (SELECT IFNULL(MAX(SORT_ORDER),0) + 1 FROM integration_sync_config) AS t),
+              UTC_TIMESTAMP(), 'admin');
+               
+              INSERT IGNORE INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES 
+              ('sync_persons', 'integration_sync', 'Sync Persons', 'N',
+              (SELECT * FROM (SELECT IFNULL(MAX(SORT_ORDER),0) + 1 FROM integration_sync_config) AS t),
+              UTC_TIMESTAMP(), 'admin');
+               
+              INSERT IGNORE INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES 
+              ('sync_units', 'integration_sync', 'Sync Units', 'N',
+              (SELECT * FROM (SELECT IFNULL(MAX(SORT_ORDER),0) + 1 FROM integration_sync_config) AS t),
+              UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM integration_sync_config
+              WHERE CONFIG_KEY IN (
+                'sync_awards',
+                'sync_ips',
+                'sync_agreements',
+                'sync_service_requests',
+                'sync_persons',
+                'sync_units'
+              );
+  - changeSet:
+      id: FIBI-10254-1
+      author: Vishnu BH
+      labels: 'DML'
+      comment: Insert dyn_modules_config and dyn_section_config for Person Maintenance (PE06)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO dyn_modules_config (MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'PE06', 'Person Maintenance', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM dyn_modules_config
+                  WHERE MODULE_CODE = 'PE06'
+              );
+
+              INSERT INTO dyn_section_config (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'PE0601', 'PE06', 'Person Maintenance - Orcid', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM dyn_section_config
+                  WHERE SECTION_CODE = 'PE0601' AND MODULE_CODE = 'PE06'
+              );
+
+              INSERT INTO dyn_section_config (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'PE0602', 'PE06', 'Person Maintenance- Delegation', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM dyn_section_config
+                  WHERE SECTION_CODE = 'PE0602' AND MODULE_CODE = 'PE06'
+              );
+
+              INSERT INTO dyn_section_config (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'PE0603', 'PE06', 'Person Maintenance- Timesheet', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM dyn_section_config
+                  WHERE SECTION_CODE = 'PE0603' AND MODULE_CODE = 'PE06'
+              );
+
+              INSERT INTO dyn_section_config (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'PE0604', 'PE06', 'Person Maintenance- Training', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM dyn_section_config
+                  WHERE SECTION_CODE = 'PE0604' AND MODULE_CODE = 'PE06'
+              );
+
+              INSERT INTO dyn_section_config (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'PE0605', 'PE06', 'Person Maintenance- Degree', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM dyn_section_config
+                  WHERE SECTION_CODE = 'PE0605' AND MODULE_CODE = 'PE06'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dyn_section_config
+              WHERE MODULE_CODE = 'PE06'
+                AND SECTION_CODE IN ('PE0601', 'PE0602', 'PE0603', 'PE0604', 'PE0605');
+
+              DELETE FROM dyn_modules_config
+              WHERE MODULE_CODE = 'PE06';
+
+  - changeSet:
+      id: FIBI-10327-1
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: Increase ACRONYM column size from VARCHAR(10) to VARCHAR(20) in SPONSOR table
+      changes:
+        - sql:
+            sql: |
+                SET @sql := IF(
+                (
+                    SELECT CHARACTER_MAXIMUM_LENGTH
+                    FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'SPONSOR'
+                    AND COLUMN_NAME = 'ACRONYM'
+                ) < 20,
+                'ALTER TABLE SPONSOR MODIFY COLUMN ACRONYM VARCHAR(20);',
+                'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE SPONSOR MODIFY COLUMN ACRONYM VARCHAR(10);
+
+  - changeSet:
+      id: FIBI-10354-1
+      author: vishnu BH
+      labels: 'DDL'
+      comment: Add EXCELLENCE_AREA_CODE to EPS_PROPOSAL_RESRCH_AREAS
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+              (
+                  SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'EPS_PROPOSAL_RESRCH_AREAS'
+                  AND COLUMN_NAME = 'EXCELLENCE_AREA_CODE'
+              ) = 0,
+              'ALTER TABLE EPS_PROPOSAL_RESRCH_AREAS ADD COLUMN EXCELLENCE_AREA_CODE INT DEFAULT NULL;',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE EPS_PROPOSAL_RESRCH_AREAS
+              DROP COLUMN EXCELLENCE_AREA_CODE;
+
+  - changeSet:
+      id: FIBI-10355-1
+      author: vishnu BH
+      labels: 'DDL'
+      comment: Rename ACTIVE_FLAG to IS_ACTIVE in FREQUENCY
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+              (
+                  SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'FREQUENCY'
+                  AND COLUMN_NAME = 'ACTIVE_FLAG'
+              ) > 0,
+              'ALTER TABLE FREQUENCY RENAME COLUMN ACTIVE_FLAG TO IS_ACTIVE;',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @sql := IF(
+              (
+                  SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'FREQUENCY'
+                  AND COLUMN_NAME = 'IS_ACTIVE'
+              ) > 0,
+              'ALTER TABLE FREQUENCY RENAME COLUMN IS_ACTIVE TO ACTIVE_FLAG;',
+              'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-10379-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update Width for Status field in SR and IP Status for Dev Proposal
+      changes:
+        - sql:
+            sql: |
+              UPDATE dashboard_column_lookup SET WIDTH = '25' WHERE (COLUMN_KEY = 'COL_SR_STATUS');
+              UPDATE dashboard_column_lookup SET WIDTH = '25' WHERE (COLUMN_KEY = 'COL_DEV_IP_STATUS');
+      rollback: empty     
+
+  - changeSet:
+      id: FIBI-10454
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Disable SR2012 section in dyn_section_config to avoid API error "getAplicableForms" since form builder is not being used for any forms currently. This will be re-enabled when form builder is used for any form in future.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+
+              UPDATE DYN_SECTION_CONFIG 
+              SET IS_ACTIVE = 'N', 
+              UPDATE_TIMESTAMP = UTC_TIMESTAMP(), 
+              UPDATE_USER = 'admin' 
+              WHERE SECTION_CODE = 'SR2012'; 
+              
+              SET SQL_SAFE_UPDATES = 1;
+
+      rollback: 
+        - sql:
+            sql: |
+              UPDATE DYN_SECTION_CONFIG 
+              SET IS_ACTIVE = 'Y', 
+              UPDATE_TIMESTAMP = UTC_TIMESTAMP(), 
+              UPDATE_USER = 'admin' 
+              WHERE SECTION_CODE = 'SR2012';
+
+  - changeSet:
+      id: FIBI-10435-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Update Build version in build_details table
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO build_details (`BUILD_ID`, `BUILD_VERSION`, `STATUS`, `APPLICATION_NAME`, `BUILD_UPDATE_TIMESTAMP`)
+              VALUES (NULL, 'Fibi-5.6.2', 'Success', 'FIBI-WEB', now());
+      rollback: empty

@@ -1,0 +1,22 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9314-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_DYNAMIC_JSON;
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_COUNT_DYNAMIC_JSON;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_DYNAMIC_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_COUNT_DYNAMIC_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,176 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9930-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Service Request Task Description configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG
+              (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'sr-task-description',
+                    'Service Request Task Description',
+                    '6009',
+                    'SR2013',
+                    'Provide detailed information about the task, including context, requirements, or special instructions.',
+                    'admin',
+                    UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'sr-task-description'
+                    AND SUB_SECTION_CODE = '6009'
+                    AND SECTION_CODE = 'SR2013'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'sr-task-description'
+                AND SUB_SECTION_CODE = '6009'
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-9930-2
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Service Request Task Assignee configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG
+              (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'sr-task-assignee',
+                    'Service Request Task Assignee',
+                    '6009',
+                    'SR2013',
+                    'Search and select the employee responsible for completing this task.',
+                    'admin',
+                    UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'sr-task-assignee'
+                    AND SUB_SECTION_CODE = '6009'
+                    AND SECTION_CODE = 'SR2013'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'sr-task-assignee'
+                AND SUB_SECTION_CODE = '6009'
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-9930-3
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Service Request Task Due Date configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG
+              (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'sr-task-duedate',
+                    'Service Request Task Due date',
+                    '6009',
+                    'SR2013',
+                    'Specify the date by which the task must be completed.',
+                    'admin',
+                    UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'sr-task-duedate'
+                    AND SUB_SECTION_CODE = '6009'
+                    AND SECTION_CODE = 'SR2013'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'sr-task-duedate'
+                AND SUB_SECTION_CODE = '6009'
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-9930-4
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Service Request Task Assigned On configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG
+              (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'sr-task-assigned-on',
+                    'Service Request Task Assigned On',
+                    '6009',
+                    'SR2013',
+                    'Select the date when the task was assigned.',
+                    'admin',
+                    UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'sr-task-assigned-on'
+                    AND SUB_SECTION_CODE = '6009'
+                    AND SECTION_CODE = 'SR2013'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'sr-task-assigned-on'
+                AND SUB_SECTION_CODE = '6009'
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-9930-5
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Service Request Task Attachments configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_ELEMENT_CONFIG
+              (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+              SELECT 'sr-task-attachments',
+                    'Service Request Task Attachments',
+                    '6009',
+                    'SR2013',
+                    'Upload supporting documents related to this task (maximum file size: 50 MB per file).',
+                    'admin',
+                    UTC_TIMESTAMP()
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'sr-task-attachments'
+                    AND SUB_SECTION_CODE = '6009'
+                    AND SECTION_CODE = 'SR2013'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'sr-task-attachments'
+                AND SUB_SECTION_CODE = '6009'
+                AND SECTION_CODE = 'SR2013';
+
+  - changeSet:
+      id: FIBI-10210-1
+      author: Vishnu BH
+      labels: 'DML'
+      comment: Update lookup window name for Service Request lead unit
+      changes:
+        - sql:
+            sql: |
+              UPDATE BUSINESS_RULE_FUNCTION_ARG
+              SET LOOKUP_WINDOW_NAME = 'fibiDepartment'
+              WHERE FUNCTION_NAME = 'SERVICE_REQUEST_LEAD_UNIT'
+                AND LOOKUP_WINDOW_NAME = 'unitName';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE BUSINESS_RULE_FUNCTION_ARG
+              SET LOOKUP_WINDOW_NAME = 'unitName'
+              WHERE FUNCTION_NAME = 'SERVICE_REQUEST_LEAD_UNIT'
+                AND LOOKUP_WINDOW_NAME = 'fibiDepartment';

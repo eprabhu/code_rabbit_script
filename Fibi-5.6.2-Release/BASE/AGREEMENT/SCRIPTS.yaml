@@ -1,0 +1,62 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-10379-1
+        author: Sasikumar Chandran
+        labels: 'DML'
+        comment: Insert parameter to control Agreement Lead Unit auto-fill behavior
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO `PARAMETER` (`PARAMETER_NAME`, `VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('AGREEMENT_LEAD_UNIT_AUTOFILL', 'N', 'Determines if the Lead Unit field on an Agreement is auto-filled based on system rules (Y/N)', UTC_TIMESTAMP(), 'admin');
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM `PARAMETER` WHERE `PARAMETER_NAME` = 'AGREEMENT_LEAD_UNIT_AUTOFILL';
+
+  - changeSet:
+      id: FIBI-10544-1
+      author: Nabeel Ahamed M  
+      labels: 'DML'
+      comment: Inserting Notification Type for Agreement related Support creation and support reply.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `notification_type` (`NOTIFICATION_TYPE_ID`, `MODULE_CODE`, `SUB_MODULE_CODE`, `DESCRIPTION`, `SUBJECT`, `MESSAGE`, `PROMPT_USER`, `IS_ACTIVE`, `CREATE_USER`,`CREATE_TIMESTAMP`, `UPDATE_USER`,`UPDATE_TIMESTAMP`, `IS_SYSTEM_SPECIFIC`, `SHOW_TEMPLATE_IN_MODULE`, `SENT_TO_INITIATOR`) 
+              VALUES 
+              ('8091', '13', '0', 'Support Request Replied', 
+              'Notification: Response to support ticket for {AGREEMENT_ID} {AGREEMENT_TITLE} ', 
+              '<p style=\"margin-left:0px;\">Dear {REQUESTOR_FULLNAME},</p><p style=\"margin-left:0px;\">The support ticket you have raised for {AGREEMENT_ID} {AGREEMENT_TITLE} has a response.</p><p style=\"margin-left:0px;\">Please follow {APPLICATION_URL} to view the task details.</p><p style=\"margin-left:0px;\">Thank you.</p>',
+              'N', 'Y', 'admin', utc_timestamp(), 'admin', utc_timestamp(), 'Y', 'N', 'Y') ;
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM notification_type WHERE NOTIFICATION_TYPE_ID = 8091;                 
+
+  - changeSet:
+      id: FIBI-10546-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Update Script to the DASHBOARD_CRITERIA_LOOKUP table for the Key Persons Filter
+      changes:
+        - sql:
+            sql: |
+              UPDATE DASHBOARD_CRITERIA_LOOKUP
+                SET CRITERIA_CONF_ID = '16',
+                    UPDATE_USER = 'admin',
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                WHERE CRITERIA_KEY = 'CRT_AG_KEY_PERSON';
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10541-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update Script for code_table_configuration table
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `code_table_configuration` SET `CONTENT` = '{\n    \"group\": \"Agreements\",\n    \"codeTableName\": \"Agreement Action Type\",\n    \"description\": \"List of all agreement action types\",\n    \"databaseTableName\": \"AGREEMENT_ACTION_TYPE\",\n    \"fields\": [\n        {\n            \"columnName\": \"ACTION_TYPE_CODE\",\n            \"displayName\": \"Action Type Code\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 3,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"DESCRIPTION\",\n            \"displayName\": \"Description\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n		{\n            \"columnName\": \"MESSAGE\",\n            \"displayName\": \"Message\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 200,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_TIMESTAMP\",\n            \"displayName\": \"update timestamp\",\n            \"dataType\": \"Date\",\n            \"isEditable\": false,\n            \"length\": null,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"UPDATE_USER\",\n            \"displayName\": \"Update User\",\n            \"dataType\": \"String\",\n            \"isEditable\": false,\n            \"length\": 60,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": null,\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": \"PERSON#USER_NAME\",\n            \"defaultValue\": null\n        },\n        {\n            \"columnName\": \"IS_ACTIVE\",\n            \"displayName\": \"Is Active\",\n            \"dataType\": \"String\",\n            \"isEditable\": true,\n            \"length\": 1,\n            \"canEmpty\": false,\n            \"visible\": true,\n            \"valueChanged\": null,\n            \"index\": null,\n            \"filterType\": \"switch\",\n            \"valueField\": null,\n            \"isTransient\": null,\n            \"values\": null,\n            \"refColumnName\": null,\n            \"defaultValue\": null\n        }\n    ],\n    \"primaryKey\": [\n        \"ACTION_TYPE_CODE\"\n    ],\n    \"dependency\": [\n        {\n            \"displayName\": \"Agreement Action Log\",\n            \"table_name\": \"agreement_action_log\",\n            \"columnName\": \"ACTION_TYPE_CODE\"\n        }\n    ],\n    \"actions\": null\n}' WHERE (`TABLE_NAME` = 'AGREEMENT_ACTION_TYPE');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

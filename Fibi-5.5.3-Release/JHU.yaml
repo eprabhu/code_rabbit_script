@@ -1,0 +1,24 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.3-Release/JHU/CORE/FUNCTIONS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5.3-Release/JHU/CORE/TRIGGERS.yaml
+        labels: 'CORE'        
+
+    #AWARD
+    - include:
+        file: Fibi-5.5.3-Release/JHU/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'        
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.3-Release/JHU/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5.3-Release/JHU/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'

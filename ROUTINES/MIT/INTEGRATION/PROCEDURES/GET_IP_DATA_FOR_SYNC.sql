@@ -1,0 +1,37 @@
+CREATE OR REPLACE PROCEDURE GET_IP_DATA_FOR_SYNC (
+    AV_START_TIMESTAMP IN TIMESTAMP,
+    AV_END_TIMESTAMP   IN TIMESTAMP,
+    AV_OFFSET          IN NUMBER,
+    AV_LIMIT           IN NUMBER,
+    AV_RESULT_SET      OUT SYS_REFCURSOR
+)
+IS
+BEGIN
+    OPEN AV_RESULT_SET FOR
+        SELECT 
+            MODULE_CODE,
+            MODULE_ITEM_KEY,
+            PI_NAME,
+            ACCOUNT_NUMBER,
+            LEAD_UNIT_NUMBER,
+            LEAD_UNIT_NAME,
+            TITLE,
+            STATUS_CODE,
+            STATUS,
+            nvl(to_char(START_DATE,'yyyy-mm-dd'),' ') AS START_DATE,
+            nvl(to_char(END_DATE,'yyyy-mm-dd'),' ') AS END_DATE,
+            ASSOCIATED_DOCUMENT,
+            SPONSOR_CODE,
+            SPONSOR_NAME,
+            SPONSOR_AWARD_ID,
+            MODULE_ITEM_ID,
+            PERSON_ID,
+            DOCUMENT_NUMBER,
+            IP_TOT_PROJ_COST
+        FROM MITKC_ELASTIC_INDEX
+        WHERE MODULE_CODE = 2 
+          AND LOAD_TIMESTAMP BETWEEN AV_START_TIMESTAMP AND AV_END_TIMESTAMP
+        ORDER BY MODULE_CODE, DOCUMENT_NUMBER ASC
+        OFFSET AV_OFFSET ROWS
+        FETCH NEXT AV_LIMIT ROWS ONLY;
+END;

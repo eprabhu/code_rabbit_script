@@ -1,0 +1,36 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10424-1
+      author: Shyla
+      labels: 'DML'
+      comment: Inactivate Hold For Funding Agency Review dashboard tab for module Award.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE dashboard_tab_type
+              SET IS_ACTIVE = 'N',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE MODULE_CODE = 1
+                AND TAB_KEY = 'HOLD_AWARDS';
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10406-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Insert Query for inserting a letter template with type code 12.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO letter_template_type
+              (LETTER_TEMPLATE_TYPE_CODE, FILE_NAME, CORRESPONDENCE_TEMPLATE, CONTENT_TYPE, UPDATE_TIMESTAMP, UPDATE_USER, MODULE_CODE, SUB_MODULE_CODE, PRINT_FILE_TYPE, IS_ACTIVE)
+              SELECT 112, FILE_NAME, CORRESPONDENCE_TEMPLATE, CONTENT_TYPE, utc_timestamp(), 'admin', MODULE_CODE, SUB_MODULE_CODE, PRINT_FILE_TYPE, IS_ACTIVE
+              FROM letter_template_type WHERE LETTER_TEMPLATE_TYPE_CODE = 111;
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM letter_template_type WHERE LETTER_TEMPLATE_TYPE_CODE = 112; 

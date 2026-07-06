@@ -1,0 +1,415 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FSP-77-1
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_EXT_SYSTEM.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXT_SYSTEM (
+                SYSTEM_ID int NOT NULL AUTO_INCREMENT,
+                SYSTEM_NAME varchar(100) NOT NULL,
+                PARENT_SYSTEM_ID int DEFAULT NULL,
+                IS_ACTIVE char(1) NOT NULL DEFAULT 'Y',
+                CREATE_USER varchar(60) DEFAULT NULL,
+                CREATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER varchar(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (SYSTEM_ID),
+                KEY FIS_EXT_SYSTEM_FK1 (PARENT_SYSTEM_ID),
+                CONSTRAINT FIS_EXT_SYSTEM_FK1 FOREIGN KEY (PARENT_SYSTEM_ID) REFERENCES FIS_EXT_SYSTEM (SYSTEM_ID) ON DELETE SET NULL,
+                CONSTRAINT FIS_EXT_SYSTEM_CHK1 CHECK (IS_ACTIVE IN ('Y', 'N'))
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXT_SYSTEM;
+
+  - changeSet:
+      id: FSP-77-2
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_EXT_INTEGRATION.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXT_INTEGRATION (
+                INTEGRATION_ID int NOT NULL AUTO_INCREMENT,
+                INTEGRATION_NAME varchar(200) NOT NULL,
+                DESCRIPTION varchar(500) DEFAULT NULL,
+                SYSTEM_ID int NOT NULL,
+                IS_ACTIVE char(1) NOT NULL DEFAULT 'Y',
+                CREATE_USER varchar(60) DEFAULT NULL,
+                CREATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER varchar(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (INTEGRATION_ID),
+                UNIQUE KEY UK_FIS_EXT_INTEGRATION_NAME (INTEGRATION_NAME),
+                KEY FIS_EXT_INTEGRATION_FK1 (SYSTEM_ID),
+                CONSTRAINT FIS_EXT_INTEGRATION_FK1 FOREIGN KEY (SYSTEM_ID) REFERENCES FIS_EXT_SYSTEM (SYSTEM_ID),
+                CONSTRAINT FIS_EXT_INTEGRATION_CHK1 CHECK (IS_ACTIVE IN ('Y', 'N'))
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXT_INTEGRATION;
+
+  - changeSet:
+      id: FSP-77-3
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_EXT_SYSTEM_AUTH_CONFIG.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXT_SYSTEM_AUTH_CONFIG (
+                AUTH_CONFIG_ID int NOT NULL AUTO_INCREMENT,
+                INTEGRATION_ID int NOT NULL,
+                AUTH_TYPE varchar(30) NOT NULL,
+                TOKEN_URL varchar(500) DEFAULT NULL,
+                TOKEN_REQUEST_CONTENT_TYPE varchar(20) NOT NULL DEFAULT 'FORM',
+                SKIP_SSL_VERIFICATION char(1) NOT NULL DEFAULT 'N',
+                CONFIG_JSON json DEFAULT NULL,
+                IS_ACTIVE char(1) NOT NULL DEFAULT 'Y',
+                CREATE_USER varchar(60) DEFAULT NULL,
+                CREATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER varchar(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (AUTH_CONFIG_ID),
+                UNIQUE KEY UK_FIS_EXT_SYS_AUTH_CONFIG (INTEGRATION_ID),
+                CONSTRAINT FIS_EXT_SYS_AUTH_CONFIG_FK1 FOREIGN KEY (INTEGRATION_ID) REFERENCES FIS_EXT_INTEGRATION (INTEGRATION_ID),
+                CONSTRAINT FIS_EXT_SYS_AUTH_CONFIG_CHK1 CHECK (IS_ACTIVE IN ('Y', 'N')),
+                CONSTRAINT FIS_EXT_SYS_AUTH_CONFIG_CHK2 CHECK (SKIP_SSL_VERIFICATION IN ('Y', 'N'))
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXT_SYSTEM_AUTH_CONFIG;
+
+  - changeSet:
+      id: FSP-77-4
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_EXT_SYSTEM_AUTH_PARAM.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXT_SYSTEM_AUTH_PARAM (
+                AUTH_REQUEST_PARAM_ID int NOT NULL AUTO_INCREMENT,
+                AUTH_CONFIG_ID int NOT NULL,
+                API_ID int DEFAULT NULL,
+                PARAM_KEY varchar(200) NOT NULL,
+                PARAM_VALUE varchar(200) DEFAULT NULL,
+                PARAM_LOCATION varchar(30) NOT NULL,
+                PARAM_TYPE varchar(20) NOT NULL DEFAULT 'STATIC',
+                PARAM_ORDER int NOT NULL DEFAULT 0,
+                IS_ACTIVE char(1) NOT NULL DEFAULT 'Y',
+                CREATE_USER varchar(60) DEFAULT NULL,
+                CREATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER varchar(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (AUTH_REQUEST_PARAM_ID),
+                UNIQUE KEY UK_FIS_EXT_SYS_AUTH_REQ_PARAM (AUTH_CONFIG_ID, PARAM_KEY),
+                KEY FIS_EXT_SYSTEM_AUTH_PARAM_FK1 (AUTH_CONFIG_ID),
+                KEY FIS_EXT_SYSTEM_AUTH_PARAM_FK2 (API_ID),
+                CONSTRAINT FIS_EXT_SYSTEM_AUTH_PARAM_FK1 FOREIGN KEY (AUTH_CONFIG_ID) REFERENCES FIS_EXT_SYSTEM_AUTH_CONFIG (AUTH_CONFIG_ID),
+                CONSTRAINT FIS_EXT_SYSTEM_AUTH_PARAM_FK2 FOREIGN KEY (API_ID) REFERENCES FIS_API_DETAILS (API_ID),
+                CONSTRAINT FIS_EXT_SYSTEM_AUTH_PARAM_CHK1 CHECK (IS_ACTIVE IN ('Y', 'N')),
+                CONSTRAINT FIS_EXT_SYSTEM_AUTH_PARAM_CHK2 CHECK (PARAM_LOCATION IN ('BODY', 'HEADER', 'QUERY')),
+                CONSTRAINT FIS_EXT_SYSTEM_AUTH_PARAM_CHK3 CHECK (PARAM_TYPE IN ('STATIC', 'SECRET_REF')),
+                CONSTRAINT FIS_EXT_SYSTEM_AUTH_PARAM_CHK4 CHECK (PARAM_ORDER >= 0)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXT_SYSTEM_AUTH_PARAM;
+
+  - changeSet:
+      id: FSP-77-5
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_EXT_FLOW.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXT_FLOW (
+                FLOW_ID int NOT NULL AUTO_INCREMENT,
+                FLOW_NAME varchar(100) NOT NULL,
+                FLOW_TYPE varchar(50) NOT NULL,
+                INTEGRATION_ID int NOT NULL,
+                JOB_ID int DEFAULT NULL,
+                START_STEP_ID int DEFAULT NULL,
+                IS_ACTIVE char(1) NOT NULL DEFAULT 'Y',
+                CREATE_USER varchar(60) DEFAULT NULL,
+                CREATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER varchar(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (FLOW_ID),
+                UNIQUE KEY UK_FIS_EXT_FLOW_NAME (FLOW_NAME),
+                KEY FIS_EXT_FLOW_FK1 (INTEGRATION_ID),
+                KEY FIS_EXT_FLOW_FK2 (JOB_ID),
+                KEY FIS_EXT_FLOW_FK3 (START_STEP_ID),
+                CONSTRAINT FIS_EXT_FLOW_FK1 FOREIGN KEY (INTEGRATION_ID) REFERENCES FIS_EXT_INTEGRATION (INTEGRATION_ID),
+                CONSTRAINT FIS_EXT_FLOW_FK2 FOREIGN KEY (JOB_ID) REFERENCES SCHEDULER_JOB_INFO (JOB_ID),
+                CONSTRAINT FIS_EXT_FLOW_CHK1 CHECK (IS_ACTIVE IN ('Y', 'N'))
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXT_FLOW;
+
+  - changeSet:
+      id: FSP-77-6
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_EXT_FLOW_STEP.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXT_FLOW_STEP (
+                STEP_ID int NOT NULL AUTO_INCREMENT,
+                FLOW_ID int NOT NULL,
+                API_ID int DEFAULT NULL,
+                STEP_ORDER int NOT NULL,
+                STEP_TYPE varchar(50) NOT NULL,
+                CONFIG_JSON json DEFAULT NULL,
+                NEXT_STEP_ON_SUCCESS int DEFAULT NULL,
+                NEXT_STEP_ON_FAILURE int DEFAULT NULL,
+                STEP_CONDITION varchar(500) DEFAULT NULL,
+                IS_ACTIVE char(1) NOT NULL DEFAULT 'Y',
+                CREATE_USER varchar(60) DEFAULT NULL,
+                CREATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER varchar(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (STEP_ID),
+                UNIQUE KEY UK_FIS_EXT_FLOW_STEP_ORDER (FLOW_ID, STEP_ORDER),
+                KEY FIS_EXT_FLOW_STEP_FK1 (FLOW_ID),
+                KEY FIS_EXT_FLOW_STEP_FK2 (API_ID),
+                KEY FIS_EXT_FLOW_STEP_FK3 (NEXT_STEP_ON_SUCCESS),
+                KEY FIS_EXT_FLOW_STEP_FK4 (NEXT_STEP_ON_FAILURE),
+                CONSTRAINT FIS_EXT_FLOW_STEP_FK1 FOREIGN KEY (FLOW_ID) REFERENCES FIS_EXT_FLOW (FLOW_ID),
+                CONSTRAINT FIS_EXT_FLOW_STEP_FK2 FOREIGN KEY (API_ID) REFERENCES FIS_API_DETAILS (API_ID),
+                CONSTRAINT FIS_EXT_FLOW_STEP_FK3 FOREIGN KEY (NEXT_STEP_ON_SUCCESS) REFERENCES FIS_EXT_FLOW_STEP (STEP_ID),
+                CONSTRAINT FIS_EXT_FLOW_STEP_FK4 FOREIGN KEY (NEXT_STEP_ON_FAILURE) REFERENCES FIS_EXT_FLOW_STEP (STEP_ID),
+                CONSTRAINT FIS_EXT_FLOW_STEP_CHK1 CHECK (IS_ACTIVE IN ('Y', 'N')),
+                CONSTRAINT FIS_EXT_FLOW_STEP_CHK2 CHECK (STEP_ORDER > 0)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXT_FLOW_STEP;
+
+  - changeSet:
+      id: FSP-77-7
+      author: Kishore
+      labels: 'DDL'
+      comment: Add constraint FIS_EXT_FLOW_FK3 to FIS_EXT_FLOW.
+      changes:
+        - sql:
+            sql: |
+              SET @add_fk = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.table_constraints
+                    WHERE constraint_schema = DATABASE()
+                      AND table_name = 'FIS_EXT_FLOW'
+                      AND constraint_name = 'FIS_EXT_FLOW_FK3'
+                      AND constraint_type = 'FOREIGN KEY'
+                  ) = 0,
+                  'ALTER TABLE FIS_EXT_FLOW ADD CONSTRAINT FIS_EXT_FLOW_FK3 FOREIGN KEY (START_STEP_ID) REFERENCES FIS_EXT_FLOW_STEP (STEP_ID)',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @add_fk;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @drop_fk = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.table_constraints
+                    WHERE constraint_schema = DATABASE()
+                      AND table_name = 'FIS_EXT_FLOW'
+                      AND constraint_name = 'FIS_EXT_FLOW_FK3'
+                      AND constraint_type = 'FOREIGN KEY'
+                  ) > 0,
+                  'ALTER TABLE FIS_EXT_FLOW DROP FOREIGN KEY FIS_EXT_FLOW_FK3',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @drop_fk;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FSP-77-8
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_EXT_STEP_EXECUTION.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXT_STEP_EXECUTION (
+                STEP_EXECUTION_ID bigint NOT NULL AUTO_INCREMENT,
+                JOB_HISTORY_ID int NOT NULL,
+                STEP_ID int DEFAULT NULL,
+                STEP_TYPE varchar(50) DEFAULT NULL,
+                STATUS varchar(20) DEFAULT NULL,
+                START_TIME timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                END_TIME timestamp DEFAULT NULL,
+                EXECUTION_TIME_MS bigint DEFAULT NULL,
+                ERROR_ID int DEFAULT NULL,
+                CREATE_TIMESTAMP timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (STEP_EXECUTION_ID),
+                KEY FIS_EXT_STEP_EXECUTION_FK1 (JOB_HISTORY_ID),
+                KEY FIS_EXT_STEP_EXECUTION_FK2 (STEP_ID),
+                KEY IDX_FIS_EXT_STEP_EXEC_STATUS (STATUS),
+                KEY IDX_FIS_EXT_STEP_EXEC_STRTIME (START_TIME),
+                CONSTRAINT FIS_EXT_STEP_EXECUTION_FK1 FOREIGN KEY (JOB_HISTORY_ID) REFERENCES SCHEDULER_JOB_INFO_HISTORY (JOB_HISTORY_ID),
+                CONSTRAINT FIS_EXT_STEP_EXECUTION_FK2 FOREIGN KEY (STEP_ID) REFERENCES FIS_EXT_FLOW_STEP (STEP_ID),
+                CONSTRAINT FIS_EXT_STEP_EXECUTION_FK3 FOREIGN KEY (ERROR_ID) REFERENCES FIS_EXCEPTION_LOG (EXCEPTION_ID) ON DELETE SET NULL ON UPDATE CASCADE
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXT_STEP_EXECUTION;
+
+  - changeSet:
+      id: FSP-77-9
+      author: Kishore
+      labels: 'DDL'
+      comment: Add columns to FIS_API_DETAILS.
+      changes:
+        - sql:
+            sql: |
+              SET @add_cols = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.columns
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'FIS_API_DETAILS'
+                      AND column_name = 'INTEGRATION_ID'
+                  ) = 0,
+                  'ALTER TABLE FIS_API_DETAILS ADD COLUMN INTEGRATION_ID INT NULL AFTER MODULE_CODE, ADD COLUMN CONNECTOR_TYPE VARCHAR(20) NULL AFTER IS_ACTIVE, ADD COLUMN CREATE_USER VARCHAR(60) NULL AFTER CONNECTOR_TYPE, ADD COLUMN CREATE_TIMESTAMP TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER CREATE_USER',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @add_cols;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @drop_cols = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.columns
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'FIS_API_DETAILS'
+                      AND column_name = 'INTEGRATION_ID'
+                  ) > 0,
+                  'ALTER TABLE FIS_API_DETAILS DROP COLUMN INTEGRATION_ID, DROP COLUMN CONNECTOR_TYPE, DROP COLUMN CREATE_USER, DROP COLUMN CREATE_TIMESTAMP',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @drop_cols;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FSP-77-10
+      author: Kishore
+      labels: 'DDL'
+      comment: Add constraint FIS_API_DETAILS_FK2 to FIS_API_DETAILS.
+      changes:
+        - sql:
+            sql: |
+              SET @add_fk2 = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.table_constraints
+                    WHERE constraint_schema = DATABASE()
+                      AND table_name = 'FIS_API_DETAILS'
+                      AND constraint_name = 'FIS_API_DETAILS_FK2'
+                      AND constraint_type = 'FOREIGN KEY'
+                  ) = 0,
+                  'ALTER TABLE FIS_API_DETAILS ADD CONSTRAINT FIS_API_DETAILS_FK2 FOREIGN KEY (INTEGRATION_ID) REFERENCES FIS_EXT_INTEGRATION (INTEGRATION_ID)',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @add_fk2;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @drop_fk2 = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.table_constraints
+                    WHERE constraint_schema = DATABASE()
+                      AND table_name = 'FIS_API_DETAILS'
+                      AND constraint_name = 'FIS_API_DETAILS_FK2'
+                      AND constraint_type = 'FOREIGN KEY'
+                  ) > 0,
+                  'ALTER TABLE FIS_API_DETAILS DROP FOREIGN KEY FIS_API_DETAILS_FK2',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @drop_fk2;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FSP-77-11
+      author: Kishore
+      labels: 'DDL'
+      comment: Add DESCRIPTION column to FIS_USER.
+      changes:
+        - sql:
+            sql: |
+              SET @add_user_desc = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.columns
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'FIS_USER'
+                      AND column_name = 'DESCRIPTION'
+                  ) = 0,
+                  'ALTER TABLE FIS_USER ADD COLUMN DESCRIPTION VARCHAR(500) DEFAULT NULL AFTER USER_NAME',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @add_user_desc;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @drop_user_desc = (
+                SELECT IF(
+                  (
+                    SELECT COUNT(*)
+                    FROM information_schema.columns
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'FIS_USER'
+                      AND column_name = 'DESCRIPTION'
+                  ) > 0,
+                  'ALTER TABLE FIS_USER DROP COLUMN DESCRIPTION',
+                  'DO 1'
+                )
+              );
+              PREPARE stmt FROM @drop_user_desc;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;

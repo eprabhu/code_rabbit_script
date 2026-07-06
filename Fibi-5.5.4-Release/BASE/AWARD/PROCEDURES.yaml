@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9633-1
+      author: Sasikumar Chandran
+      labels: 'PROCEDURES'
+      comment: Created Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DETAILS_FOR_ELASTIC;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DETAILS_FOR_ELASTIC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9251-1
+      author: Suganya.S
+      labels: 'VIEWS'
+      comment: Updated view to remove duplicates from progress status report
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS progress_report_status_v;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/VIEWS/progress_report_status_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

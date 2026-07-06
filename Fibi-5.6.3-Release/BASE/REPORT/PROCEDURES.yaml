@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-11223-2
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modify CUSTOM_DATA_SYNC
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS CUSTOM_DATA_SYNC;
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/CUSTOM_DATA_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

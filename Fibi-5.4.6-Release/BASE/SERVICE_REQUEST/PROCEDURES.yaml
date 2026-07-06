@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7554-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS CLOSE_SERVICE_REQUEST
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/CLOSE_SERVICE_REQUEST.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,15 @@
+-- `FN_CHK_PROP_KEYWORD`; 
+
+CREATE FUNCTION `FN_CHK_PROP_KEYWORD`(
+    AV_PROPOSAL_ID    INT(11)
+) RETURNS varchar(10) 
+    DETERMINISTIC
+BEGIN
+DECLARE LI_COUNT INT(3);
+    select count(*) INTO LI_COUNT from eps_proposal_keywords where `PROPOSAL_ID` = AV_PROPOSAL_ID;
+    IF LI_COUNT > 0 THEN
+                RETURN 'TRUE';
+    END IF;
+   
+RETURN 'FALSE';
+END

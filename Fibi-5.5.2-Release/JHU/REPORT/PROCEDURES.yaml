@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9291-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS rpt_get_702_2_proc;
+        - sqlFile:
+            path: ROUTINES/JHU/REPORT/PROCEDURES/rpt_get_702_2_proc.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

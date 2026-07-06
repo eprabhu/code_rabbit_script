@@ -1,0 +1,40 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-8678-1
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Unit number claims changes.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'claim_invoice'
+                      AND COLUMN_NAME = 'VENDOR_SB_UNIT_NUMBER') > 0,
+                    'ALTER TABLE claim_invoice MODIFY COLUMN VENDOR_SB_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'claim_invoice_log'
+                      AND COLUMN_NAME = 'VENDOR_SB_UNIT_NUMBER') > 0,
+                    'ALTER TABLE claim_invoice_log MODIFY COLUMN VENDOR_SB_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'claim'
+                      AND COLUMN_NAME = 'HOST_UNIT_NUMBER') > 0,
+                    'ALTER TABLE claim MODIFY COLUMN HOST_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback: empty

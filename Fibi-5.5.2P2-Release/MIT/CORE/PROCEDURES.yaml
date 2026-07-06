@@ -1,0 +1,49 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9157-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AWARD_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9157-2
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_IP_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_IP_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9157-3
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DETAILS_FOR_ASSOC;
+        - sqlFile:
+            path: ROUTINES/MIT/CORE/PROCEDURES/GET_AWARD_DETAILS_FOR_ASSOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

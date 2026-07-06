@@ -1,0 +1,6 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.4-Release/NTU/CORE/PROCEDURES.yaml
+        labels: 'CORE'

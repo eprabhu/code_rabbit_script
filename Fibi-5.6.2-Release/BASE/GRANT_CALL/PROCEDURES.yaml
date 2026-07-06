@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+- changeSet:
+      id: FIBI-10351-1
+      author: Reshma Antony.
+      labels: 'PROCEDURES'
+      comment: Update the  sponsor displayName in Procedure GET_GRANTCALL_DASHBOARD
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_GRANTCALL_DASHBOARD;
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/PROCEDURES/GET_GRANTCALL_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

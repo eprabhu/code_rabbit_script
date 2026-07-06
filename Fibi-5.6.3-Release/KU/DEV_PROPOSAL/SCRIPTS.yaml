@@ -1,0 +1,228 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10766-1
+      author: Nabeel Ahamed M.
+      labels: 'DML'
+      comment: Insert Statement for table eps_proposal_status.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO eps_proposal_status (STATUS_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, IS_ACTIVE) VALUES (38, 'Completed', utc_timestamp(), 'admin', 'Y');
+      rollback: 
+        DELETE FROM eps_proposal_status WHERE STATUS_CODE = 38;
+
+
+  - changeSet:
+      id: FIBI-10759-1
+      author: Vishnu BH
+      labels: 'DML'
+      comment: Remove duplicate Proposal Persons (role=3) per proposal; keep latest updated row, delete related child rows for duplicates.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_del_eps_proposal_person_id;
+              CREATE TEMPORARY TABLE tmp_del_eps_proposal_person_id (
+                PROPOSAL_PERSON_ID BIGINT PRIMARY KEY
+              );
+
+              INSERT INTO tmp_del_eps_proposal_person_id (PROPOSAL_PERSON_ID)
+              SELECT
+                p.PROPOSAL_PERSON_ID
+              FROM eps_proposal_persons p
+              JOIN (
+                SELECT
+                  x.PROPOSAL_ID,
+                  MAX(x.PROPOSAL_PERSON_ID) AS keep_id
+                FROM eps_proposal_persons x
+                JOIN (
+                  SELECT
+                    PROPOSAL_ID,
+                    MAX(UPDATE_TIMESTAMP) AS max_ts
+                  FROM eps_proposal_persons
+                  WHERE PROP_PERSON_ROLE_ID = 3
+                  GROUP BY PROPOSAL_ID
+                  HAVING COUNT(*) > 1
+                ) m
+                  ON x.PROPOSAL_ID = m.PROPOSAL_ID
+                 AND x.UPDATE_TIMESTAMP = m.max_ts
+                WHERE x.PROP_PERSON_ROLE_ID = 3
+                GROUP BY x.PROPOSAL_ID
+              ) k
+                ON p.PROPOSAL_ID = k.PROPOSAL_ID
+              WHERE p.PROP_PERSON_ROLE_ID = 3
+                AND p.PROPOSAL_PERSON_ID <> k.keep_id;
+
+              DELETE FROM FILE_DATA
+              WHERE ID IN (
+                SELECT a.FILE_DATA_ID
+                FROM eps_proposal_person_attachmnt a
+                JOIN tmp_del_eps_proposal_person_id d
+                  ON d.PROPOSAL_PERSON_ID = a.PROPOSAL_PERSON_ID
+              );
+
+              DELETE FROM eps_prop_person_units
+              WHERE PROPOSAL_PERSON_ID IN (
+                SELECT PROPOSAL_PERSON_ID FROM tmp_del_eps_proposal_person_id
+              );
+
+              DELETE FROM eps_proposal_person_degree
+              WHERE PROPOSAL_PERSON_ID IN (
+                SELECT PROPOSAL_PERSON_ID FROM tmp_del_eps_proposal_person_id
+              );
+
+              DELETE FROM eps_proposal_person_attachmnt
+              WHERE PROPOSAL_PERSON_ID IN (
+                SELECT PROPOSAL_PERSON_ID FROM tmp_del_eps_proposal_person_id
+              );
+
+              DELETE FROM eps_proposal_persons
+              WHERE PROPOSAL_PERSON_ID IN (
+                SELECT PROPOSAL_PERSON_ID FROM tmp_del_eps_proposal_person_id
+              );
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_del_eps_proposal_person_id;
+
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10863-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Development proposal module — delete Default dashboard filter criterion CRT_DEV_PROPOSAL_TYPE.
+      changes:
+        - sql:
+            sql: |
+              DELETE DFC
+              FROM DASHBOARD_FILTER_CRITERIA DFC
+              JOIN DASHBOARD_CRITERIA_LOOKUP DCL
+                ON DCL.CRITERIA_ID = DFC.CRITERIA_ID
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 3
+                AND DCL.CRITERIA_KEY = 'CRT_DEV_PROPOSAL_TYPE'
+                AND DFP.FILTER_NAME = 'Default'
+                AND DTT.MODULE_CODE = 3;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10863-2
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Development proposal module — delete Default dashboard filter column COL_DEV_PROPOSAL_TYPE.
+      changes:
+        - sql:
+            sql: |
+              DELETE DFC
+              FROM DASHBOARD_FILTER_COLUMN DFC
+              JOIN DASHBOARD_COLUMN_LOOKUP DCL
+                ON DCL.COLUMN_ID = DFC.COLUMN_ID
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 3
+                AND DCL.COLUMN_KEY = 'COL_DEV_PROPOSAL_TYPE'
+                AND DFP.FILTER_NAME = 'Default'
+                AND DTT.MODULE_CODE = 3;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10863-3
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Institute proposal module — delete Default dashboard filter column CRT_IP_FUNDING_SCHEME.
+      changes:
+        - sql:
+            sql: |
+              DELETE DFC
+              FROM DASHBOARD_FILTER_CRITERIA DFC
+              JOIN DASHBOARD_CRITERIA_LOOKUP DCL
+                ON DCL.CRITERIA_ID = DFC.CRITERIA_ID
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 2
+                AND DCL.CRITERIA_KEY = 'CRT_IP_FUNDING_SCHEME'
+                AND DFP.FILTER_NAME = 'Default'
+                AND DTT.MODULE_CODE = 2;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10863-4
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Institute proposal module — delete Default dashboard filter column COL_IP_FUNDING_SCHEME.
+      changes:
+        - sql:
+            sql: |
+              DELETE DFC
+              FROM DASHBOARD_FILTER_COLUMN DFC
+              JOIN DASHBOARD_COLUMN_LOOKUP DCL
+                ON DCL.COLUMN_ID = DFC.COLUMN_ID
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 2
+                AND DCL.COLUMN_KEY = 'COL_IP_FUNDING_SCHEME'
+                AND DFP.FILTER_NAME = 'Default'
+                AND DTT.MODULE_CODE = 2;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10881-1
+      author: Shyla
+      labels: 'DML'
+      comment: FIBI-10881 — Add KU Investigator (Non-PI) proposal person role.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `EPS_PROP_PERSON_ROLE` (`UNIT_DETAILS_REQUIRED`, `PROP_PERSON_ROLE_ID`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `CERTIFICATION_REQUIRED`, `PROP_PERSON_ROLE_CODE`, `SPONSOR_HIERARCHY_NAME`, `READ_ONLY_ROLE`, `IS_MULTI_PI`, `SORT_ID`, `IS_ACTIVE`, `SHOW_PROJECT_ROLE`, `INCLUDE_IN_CURRENT_AND_PENDING`)
+              VALUES ('Y', '14', 'KU - Investigator (Non-PI)', UTC_TIMESTAMP(), 'admin', 'N', 'NPI', 'DEFAULT', 'N', 'N', '3', 'Y', 'N', 'Y');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `EPS_PROP_PERSON_ROLE`
+              WHERE `PROP_PERSON_ROLE_ID` = '14';
+
+  - changeSet:
+      id: FIBI-10912-1
+      author: VIshnu BH
+      labels: 'DML'
+      comment: Enable Dev Proposal config elements/subsections and enable admin check parameter.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `dyn_element_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`UI_REFERENCE_ID` = 'proposal-gnrl-master-proposal');
+              
+              UPDATE `dyn_subsection_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SUB_SECTION_CODE` = '309');
+              
+              UPDATE `dyn_subsection_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SUB_SECTION_CODE` = '326');
+              
+              UPDATE `parameter`
+              SET `VALUE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`PARAMETER_NAME` = 'IS_ENABLED_ADMIN_CHK');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

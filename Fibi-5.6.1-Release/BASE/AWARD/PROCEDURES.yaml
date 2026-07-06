@@ -1,0 +1,82 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9126-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment: New Procedure for for syn the data from person table to award_master_dataset_rt table
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS AWARD_MASTER_PERSON_DATA_SYNC;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/AWARD_MASTER_PERSON_DATA_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10143-2
+      author: Suganya.S
+      labels: 'PROCEDURES'
+      comment: Advanced Search performance optimization
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10053-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment: Update the Procedure with add the Key Personnel Role Filter
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+
+  - changeSet:
+      id: FIBI-10053-2
+      author: Reshma Antony
+      labels: 'PROCEDURES,5.6.1-Release'
+      comment: Update the Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10065-1
+      author: Suganya.S
+      labels: 'PROCEDURES'
+      comment: Awards pending my actions tab performance optimization
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

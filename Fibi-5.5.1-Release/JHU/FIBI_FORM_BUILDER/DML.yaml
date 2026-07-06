@@ -1,0 +1,19 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: FIBI-9000-1
+        author: Suganya.S
+        labels: 'DML'
+        comment: Update custom_data_elements_data_type table
+        changes:
+            -sql:
+                sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE custom_data_elements_data_type SET IS_ACTIVE = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(),UPDATE_USER = 'admin' WHERE (`DATA_TYPE_CODE` = '6');
+                    SET SQL_SAFE_UPDATES = 1;
+        rollback:
+            -sql:
+                sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE custom_data_elements_data_type SET IS_ACTIVE = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(),UPDATE_USER = 'admin' WHERE (`DATA_TYPE_CODE` = '6');   
+                    SET SQL_SAFE_UPDATES = 1;

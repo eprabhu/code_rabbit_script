@@ -1,0 +1,1485 @@
+databaseChangeLog:
+  - changeSet:
+      id: FIBI-9047-1
+      author: Ajin.VS
+      labels: 'DDL'
+      comment: Alter WIDGET_LOOKUP table to add MODULE_CODE column with foreign key constraint
+      changes:
+        - sql:
+            sql: |
+              SET @SQL := IF(
+                EXISTS (
+                SELECT 1
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'WIDGET_LOOKUP'
+                AND COLUMN_NAME = 'MODULE_CODE'
+                ),
+                'DO 1',
+                'ALTER TABLE `WIDGET_LOOKUP`
+                    ADD COLUMN `MODULE_CODE` VARCHAR(5) NULL AFTER `IMAGE_PATH`,
+                    ADD INDEX `WIDGET_LOOKUP_IDX_1` (`MODULE_CODE` ASC) VISIBLE,
+                    ADD CONSTRAINT `WIDGET_LOOKUP_FK_1`
+                        FOREIGN KEY (`MODULE_CODE`)
+                        REFERENCES `DYN_MODULES_CONFIG` (`MODULE_CODE`)
+                        ON DELETE NO ACTION
+                        ON UPDATE NO ACTION;'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE `WIDGET_LOOKUP`
+              DROP FOREIGN KEY `WIDGET_LOOKUP_FK_1`,
+              DROP INDEX `WIDGET_LOOKUP_IDX_1`,
+              DROP COLUMN `MODULE_CODE`;
+
+  - changeSet:
+      id: FIBI-8180-1
+      author: Arun Ramesh
+      labels: 'DDL'
+      comment: Dynamic config table creation for elastic and integration sync.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS integration_sync_config (
+                  CONFIG_KEY          VARCHAR(100) PRIMARY KEY NOT NULL,
+                  CONFIG_CATEGORY     VARCHAR(100)   NULL,
+                  DISPLAY_NAME        VARCHAR(255)   NULL,
+                  IS_ACTIVE           VARCHAR(1)     NULL,
+                  SORT_ORDER          INT            NULL,
+                  UPDATE_TIMESTAMP    TIMESTAMP      NULL,
+                  UPDATE_USER         VARCHAR(50)    NULL
+              );
+      rollback:
+       - sql:
+          sql: |
+            DROP TABLE IF EXISTS integration_sync_config;
+
+  - changeSet:
+      id: FIBI-8180-2
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Dynamic config for elastic sync for base instance.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER) VALUES
+              ('awardfibi',  'elastic_sync', 'Award Elastic',                'Y', 1, utc_timestamp(), 'admin'),
+              ('fibiproposal',  'elastic_sync', 'Proposal Elastic',             'Y', 2, utc_timestamp(), 'admin'),
+              ('grantcall',  'elastic_sync', 'Grant Call Elastic',           'Y', 3, utc_timestamp(), 'admin'),
+              ('fibiperson',  'elastic_sync', 'Person Elastic',               'Y', 4, utc_timestamp(), 'admin'),
+              ('fibirolodex',  'elastic_sync', 'Rolodex Elastic',              'Y', 5, utc_timestamp(), 'admin'),
+              ('agreementfibi',  'elastic_sync', 'Agreement Elastic',            'Y', 6, utc_timestamp(), 'admin'),
+              ('instituteproposal',  'elastic_sync', 'Institute Proposal Elastic',   'Y', 7, utc_timestamp(), 'admin'),
+              ('externalreview',  'elastic_sync', 'External Review Elastic',      'Y', 8, utc_timestamp(), 'admin'),
+              ('fibireviewer',  'elastic_sync', 'Reviewer Elastic',             'Y', 9, utc_timestamp(), 'admin'),
+              ('servicerequest', 'elastic_sync', 'Service Request Elastic',      'Y', 10, utc_timestamp(), 'admin');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8181
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Dynamic config for integration sync for base instance.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO integration_sync_config 
+              (CONFIG_KEY, CONFIG_CATEGORY, DISPLAY_NAME, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER) VALUES
+              ('attachment_data_migration', 'integration_sync', 'Attachment Data Migration', 'Y', 1, utc_timestamp(), 'admin'),
+              ('fast_integration', 'integration_sync', 'Fast Integration Template Creation', 'N', 2, utc_timestamp(), 'admin'),
+              ('fast_integration_template', 'integration_sync', 'Fast Integration Template Response Processing', 'N', 3, utc_timestamp(), 'admin'),
+              ('fi_expense_transaction_rt_processing', 'integration_sync', 'Fast Integration Expense Transaction RT Processing', 'Y', 4, utc_timestamp(), 'admin'),
+              ('fi_revenue_transaction_rt_processing', 'integration_sync', 'Fast Integration Revenue Transaction RT Processing', 'N', 5, utc_timestamp(), 'admin'),
+              ('level1_expense_transaction_report', 'integration_sync', 'To export level 1 expense Transaction Report', 'N', 6, utc_timestamp(), 'admin'),
+              ('level2_expense_transaction_report', 'integration_sync', 'To export level 2 expense Transaction Report', 'N', 7, utc_timestamp(), 'admin'),
+              ('revenue_transaction_report', 'integration_sync', 'To export revenue Transaction Report', 'N', 8, utc_timestamp(), 'admin'),
+              ('level1_revenue_transaction_report', 'integration_sync', 'To export level 1 revenue Transaction Report', 'N', 9, utc_timestamp(), 'admin'),
+              ('level2_revenue_transaction_report', 'integration_sync', 'To export level 2 revenue Transaction Report', 'N', 10, utc_timestamp(), 'admin'),
+              ('gc_attachment_data_migration', 'integration_sync', 'Grant Call Attachment Data Migration', 'N', 11, utc_timestamp(), 'admin'),
+              ('sync_orcid', 'integration_sync', 'Sync Orcid', 'N', 12, utc_timestamp(), 'admin'),
+              ('workday_manpower', 'integration_sync', 'WorkDay Manpower', 'N', 13, utc_timestamp(), 'admin'),
+              ('workday_citizenship', 'integration_sync', 'WorkDay Citizenship', 'N', 14, utc_timestamp(), 'admin'),
+              ('workday_cost_allocation', 'integration_sync', 'WorkDay Cost Allocation', 'N', 15, utc_timestamp(), 'admin'),
+              ('workday_termination', 'integration_sync', 'WorkDay Termination', 'N', 16, utc_timestamp(), 'admin'),
+              ('workday_long_leave', 'integration_sync', 'WorkDay Long Leave', 'N', 17, utc_timestamp(), 'admin'),
+              ('workday_cost_reconciliation', 'integration_sync', 'WorkDay Cost Reconciliation', 'N', 18, utc_timestamp(), 'admin'),
+              ('workday_close_position', 'integration_sync', 'WorkDay Close Position', 'N', 19, utc_timestamp(), 'admin'),
+              ('workday_job_profile', 'integration_sync', 'WorkDay Job Profile', 'N', 20, utc_timestamp(), 'admin'),
+              ('export_manpower_details', 'integration_sync', 'Export Manpower Details', 'N', 21, utc_timestamp(), 'admin'),
+              ('designation_change', 'integration_sync', 'Designation Change', 'N', 22, utc_timestamp(), 'admin'),
+              ('student_ics_integration', 'integration_sync', 'Student ICS Integration', 'N', 23, utc_timestamp(), 'admin'),
+              ('encrypt_migrated_citizenship', 'integration_sync', 'Encrypt All Migrated Citizenship Nationality', 'N', 24, utc_timestamp(), 'admin'),
+              ('update_claim_duration', 'integration_sync', 'Update Claim Duration', 'N', 25, utc_timestamp(), 'admin'),
+              ('generate_claim_invoice_sap_file', 'integration_sync', 'Generate Claim Invoice Sap File', 'N', 26, utc_timestamp(), 'admin'),
+              ('process_claim_invoice_feed_response', 'integration_sync', 'Process Claim Invoice Feed Response', 'N', 27, utc_timestamp(), 'admin'),
+              ('sync_aderp_annual_budget', 'integration_sync', 'Sync ADERP Annual Budget', 'N', 28, utc_timestamp(), 'admin'),
+              ('scopus_integration', 'integration_sync', 'Scopus Integration', 'N', 29, utc_timestamp(), 'admin'),
+              ('profit_center', 'integration_sync', 'Profit Center', 'Y', 30, utc_timestamp(), 'admin'),
+              ('fund_center', 'integration_sync', 'Fund Center', 'Y', 31, utc_timestamp(), 'admin'),
+              ('cost_center', 'integration_sync', 'Cost Center', 'Y', 32, utc_timestamp(), 'admin'),
+              ('grant_code', 'integration_sync', 'Grant Code', 'Y', 33, utc_timestamp(), 'admin'),
+              ('job_requisition', 'integration_sync', 'Job Requisition', 'Y', 34, utc_timestamp(), 'admin'),
+              ('cost_allocation', 'integration_sync', 'Cost Allocation', 'Y', 35, utc_timestamp(), 'admin'),
+              ('cost_allocation_with_manual_date', 'integration_sync', 'Cost Allocation With Manual Dates', 'Y', 36, utc_timestamp(), 'admin'),
+              ('update_feed_status', 'integration_sync', 'Update Feed Status', 'Y', 37, utc_timestamp(), 'admin'),
+              ('sync_aderp_projects', 'integration_sync', 'Sync ADERP Projects', 'N', 38, utc_timestamp(), 'admin'),
+              ('sync_medusa_relationship', 'integration_sync', 'Sync Medusa Relationships', 'Y', 39, utc_timestamp(), 'admin'),
+              ('sync_person_training', 'integration_sync', 'Sync Person Training', 'N', 40, utc_timestamp(), 'admin'),
+              ('sync_irb', 'integration_sync', 'Sync IRB', 'N', 41, utc_timestamp(), 'admin');
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8766-1
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Update dashboard criteria config for SR linked module lookup
+      changes:
+        - sql:
+            sql: |
+              UPDATE dashboard_criteria_conf 
+              SET DESCRIPTION = 'For SR Linked module lookup', 
+                  TYPE = 'LOOK_UP_EXTERNAL', 
+                  CONFIG_JSON = '{"option": "EMPTY#EMPTY#true#true", "lookupType": "linkedModule" , "moduleCode":"20"}',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin' 
+              WHERE CRITERIA_CONF_ID = '30';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE dashboard_criteria_conf 
+              SET DESCRIPTION = 'For All module lookup', 
+                  TYPE = 'LOOK_UP', 
+                  CONFIG_JSON = '{"option": "AGREEMENT_LINK_MODULE#MODULE_CODE#true#true"}',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin' 
+              WHERE CRITERIA_CONF_ID = '30';
+
+  - changeSet:
+      id: FIBI-8766-2
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Insert dashboard criteria config for Agreement linked module lookup
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO dashboard_criteria_conf 
+              (CRITERIA_CONF_ID, DESCRIPTION, TYPE, CONFIG_JSON, UPDATE_TIMESTAMP, UPDATE_USER) 
+              VALUES 
+              ('31', 'For Agreement Linked module lookup', 'LOOK_UP_EXTERNAL', '{"option": "EMPTY#EMPTY#true#true", "lookupType": "linkedModule" , "moduleCode":"13"}', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dashboard_criteria_conf WHERE CRITERIA_CONF_ID = '31';
+
+  - changeSet:
+      id: FIBI-8766-3
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Update dashboard criteria lookup for Agreement associated linked module
+      changes:
+        - sql:
+            sql: |
+              UPDATE dashboard_criteria_lookup 
+              SET CRITERIA_CONF_ID = 31,
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin' 
+              WHERE CRITERIA_KEY = 'CRT_AG_ASSOC_LINKED_MODULE';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE dashboard_criteria_lookup 
+              SET CRITERIA_CONF_ID = 30,
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin' 
+              WHERE CRITERIA_KEY = 'CRT_AG_ASSOC_LINKED_MODULE';
+
+  - changeSet:
+      id: FIBI-8855-1
+      author: Arun Ramesh
+      labels: 'DDL'
+      comment: Add IS_DEFAULT column to ASSOC_RELATION_TYPE_MODULE_MAPPING if not exists
+      changes:
+        - sql:
+            sql: |
+              SET @SQL := IF(
+                (SELECT COUNT(*)
+                 FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING'
+                   AND COLUMN_NAME = 'IS_DEFAULT') = 0,
+                'ALTER TABLE ASSOC_RELATION_TYPE_MODULE_MAPPING ADD COLUMN IS_DEFAULT VARCHAR(1) DEFAULT ''N'';',
+                'DO 1'
+              );
+
+              PREPARE stmt FROM @SQL;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              SET @SQL := IF(
+                EXISTS(
+                  SELECT 1 FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = ''ASSOC_RELATION_TYPE_MODULE_MAPPING''
+                    AND COLUMN_NAME = ''IS_DEFAULT''
+                ),
+                'ALTER TABLE ASSOC_RELATION_TYPE_MODULE_MAPPING DROP COLUMN IS_DEFAULT;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @SQL;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-8855-2
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Set default flags for specific association mapping rows
+      changes:
+        - sql:
+            sql: |
+              UPDATE ASSOC_RELATION_TYPE_MODULE_MAPPING
+              SET IS_DEFAULT = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE ASSOC_RELATION_TYPE_CODE = '1'
+                AND MODULE_CODE = '13';
+
+              UPDATE ASSOC_RELATION_TYPE_MODULE_MAPPING
+              SET IS_DEFAULT = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE ASSOC_RELATION_TYPE_CODE = '1'
+                AND MODULE_CODE = '20';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE ASSOC_RELATION_TYPE_MODULE_MAPPING
+              SET IS_DEFAULT = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE ASSOC_RELATION_TYPE_CODE = '1'
+                AND MODULE_CODE IN ('13', '20');
+  - changeSet:
+      id: FIBI-8855-3
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Update code_table_configuration for Association Relation Type Module Mapping
+      changes:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration 
+              SET CONTENT = '{
+                "group": "General",
+                "codeTableName": "Association Relation Type Module Mapping",
+                "description": "List of all Association Relation Type Module Mapping",
+                "databaseTableName": "ASSOC_RELATION_TYPE_MODULE_MAPPING",
+                "fields": [
+                  {
+                    "columnName": "ASSOC_MAPPING_CODE",
+                    "displayName": "Association Mapping Code",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "length": 1,
+                    "canEmpty": false,
+                    "visible": true
+                  },
+                  {
+                    "columnName": "ASSOC_RELATION_TYPE_CODE",
+                    "displayName": "Association Relation Type",
+                    "dataType": "String",
+                    "isEditable": true,
+                    "length": 3,
+                    "canEmpty": false,
+                    "visible": false,
+                    "defaultValue": "DESCRIPTION_ASSOC_RELATION_TYPE_CODE",
+                    "filterType": "lookUp",
+                    "valueField": "ASSOC_RELATION_TYPE#ASSOC_RELATION_TYPE_CODE"
+                  },
+                  {
+                    "visible": true,
+                    "columnName": "DESCRIPTION_ASSOC_RELATION_TYPE_CODE",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "canEmpty": true,
+                    "displayName": "Association Relation Type",
+                    "isTransient": true
+                  },
+                  {
+                    "columnName": "MODULE_CODE",
+                    "displayName": "Applied Module",
+                    "dataType": "INTEGER",
+                    "isEditable": true,
+                    "length": 11,
+                    "canEmpty": false,
+                    "visible": false,
+                    "defaultValue": "DESCRIPTION_MODULE_CODE",
+                    "filterType": "lookUp",
+                    "valueField": "COEUS_MODULE#MODULE_CODE"
+                  },
+                  {
+                    "visible": true,
+                    "columnName": "DESCRIPTION_MODULE_CODE",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "canEmpty": true,
+                    "displayName": "Applied Module",
+                    "isTransient": true
+                  },
+                  {
+                    "columnName": "IS_DEFAULT",
+                    "displayName": "Is Default",
+                    "dataType": "String",
+                    "isEditable": true,
+                    "length": 1,
+                    "canEmpty": false,
+                    "visible": true,
+                    "filterType": "switch"
+                  },
+                  {
+                    "columnName": "UPDATE_TIMESTAMP",
+                    "displayName": "Update Timestamp",
+                    "dataType": "Date",
+                    "isEditable": false,
+                    "canEmpty": false,
+                    "visible": true
+                  },
+                  {
+                    "columnName": "UPDATE_USER",
+                    "displayName": "Update User",
+                    "dataType": "String",
+                    "isEditable": false,
+                    "length": 60,
+                    "canEmpty": false,
+                    "visible": true,
+                    "refColumnName": "PERSON#USER_NAME"
+                  }
+                ],
+                "primaryKey": ["ASSOC_MAPPING_CODE"],
+                "dependency": [
+                  {
+                    "displayName": "Association Relation Type",
+                    "table_name": "ASSOC_RELATION_TYPE",
+                    "columnName": "ASSOC_RELATION_TYPE_CODE",
+                    "showTableName": true
+                  },
+                  {
+                    "displayName": "Coeus Module",
+                    "table_name": "COEUS_MODULE",
+                    "columnName": "MODULE_CODE",
+                    "showTableName": true
+                  }
+                ],
+                "actions": "IUD"
+              }', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration
+              SET CONTENT = '{"group":"Agreements","codeTableName":"Association Relation Type Module Mapping","description":"List of all Association Relation Type Module Mapping","databaseTableName":"ASSOC_RELATION_TYPE_MODULE_MAPPING","fields":[{"columnName":"ASSOC_MAPPING_CODE","displayName":"Association Mapping Code","dataType":"String","isEditable":false,"length":1,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"ASSOC_RELATION_TYPE_CODE","displayName":"Association Relation Type","dataType":"String","isEditable":true,"length":3,"canEmpty":false,"visible":false,"defaultValue":"DESCRIPTION_ASSOC_RELATION_TYPE_CODE","filterType":"lookUp","valueField":"ASSOC_RELATION_TYPE#ASSOC_RELATION_TYPE_CODE"},{"visible":"true","columnName":"DESCRIPTION_ASSOC_RELATION_TYPE_CODE","dataType":"String","isEditable":"false","canEmpty":"true","displayName":"Association Relation Type","isTransient":"true"},{"columnName":"MODULE_CODE","displayName":"Applied Module","dataType":"INTEGER","isEditable":true,"length":11,"canEmpty":false,"visible":false,"defaultValue":"DESCRIPTION_MODULE_CODE","filterType":"lookUp","valueField":"COEUS_MODULE#MODULE_CODE"},{"visible":"true","columnName":"DESCRIPTION_MODULE_CODE","dataType":"String","isEditable":"false","canEmpty":"true","displayName":"Applied Module","isTransient":"true"},{"columnName":"UPDATE_TIMESTAMP","displayName":"Update Timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#USER_NAME","defaultValue":null}],"primaryKey":["ASSOC_MAPPING_CODE"],"dependency":[{"displayName":"Association Relation Type","table_name":"ASSOC_RELATION_TYPE","columnName":"ASSOC_RELATION_TYPE_CODE","showTableName":"true"},{"displayName":"Coeus Module","table_name":"COEUS_MODULE","columnName":"MODULE_CODE","showTableName":"true"}],"actions":"IUD"}', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+
+  - changeSet:
+      id: FIBI-8855-4
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Update description for Association Relation Type Module Mapping
+      changes:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration 
+              SET DESCRIPTION = 'List of all Association Relation Type Module Mapping. (If multiple default relationtypes are configured for one module the newly updated default value will be populated.)',
+              UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE code_table_configuration
+              SET DESCRIPTION = 'List of all Association Relation Type Module Mapping'
+              WHERE TABLE_NAME = 'ASSOC_RELATION_TYPE_MODULE_MAPPING';
+
+  - changeSet:
+      id: FIBI-9208-1
+      author: Shyla.M
+      labels: 'DDL'
+      comment: Added PAGE_LIMIT column in dashboard_tab_preference table
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE dashboard_tab_preference;
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                  FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'dashboard_tab_preference'
+                    AND COLUMN_NAME = 'PAGE_LIMIT') = 0,
+                  'ALTER TABLE dashboard_tab_preference ADD COLUMN `PAGE_LIMIT` INT NOT NULL DEFAULT 20 AFTER IS_PRIMARY_TAB;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE dashboard_tab_preference DROP COLUMN PAGE_LIMIT;             
+
+  - changeSet:
+      id: FIBI-8178-1
+      author: Solih N
+      labels: 'DDL'
+      comment: Add IS_ACTIVE and IS_MANDATORY columns to DYN_ELEMENT_CONFIG
+      changes:
+        - sql:
+            sql: |
+              SET @SQL := IF(
+                EXISTS (
+                  SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'DYN_ELEMENT_CONFIG'
+                    AND COLUMN_NAME = 'IS_ACTIVE'
+                ),
+                'DO 1',
+                'ALTER TABLE dyn_element_config ADD COLUMN IS_ACTIVE VARCHAR(1) NULL;'
+              );
+              PREPARE STMT FROM @SQL; EXECUTE STMT; DEALLOCATE PREPARE STMT;
+
+              SET @SQL := IF(
+                EXISTS (
+                  SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'DYN_ELEMENT_CONFIG'
+                    AND COLUMN_NAME = 'IS_MANDATORY'
+                ),
+                'DO 1',
+                'ALTER TABLE dyn_element_config ADD COLUMN IS_MANDATORY VARCHAR(1) NULL;'
+              );
+              PREPARE STMT FROM @SQL; 
+              EXECUTE STMT; 
+              DEALLOCATE PREPARE STMT;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE dyn_element_config DROP COLUMN IS_ACTIVE;
+
+              ALTER TABLE dyn_element_config DROP COLUMN IS_MANDATORY;
+
+  - changeSet:
+      id: FIBI-8178-2
+      author: Solih N
+      labels: 'DML'
+      comment: Update IS_ACTIVE and IS_MANDATORY for specified dynamic config rows
+      changes:
+        - sql:
+            sql: |
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE = '301' AND SECTION_CODE = 'DP301' AND UI_REFERENCE_ID IN ('prop-award-type', 'prop-sponsor');
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin' 
+              WHERE SUB_SECTION_CODE = '301' AND SECTION_CODE = 'DP301' AND UI_REFERENCE_ID IN ( 'proposal-gnrl-master-proposal', 'proposal-gnrl-antd-award-type', 'prop-sub-date', 'prop-funding-opp-number', 'prop-cfda-number', 'prop-internal-date');
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE = '201' AND SECTION_CODE = 'IP201' AND UI_REFERENCE_ID IN ( 'ip-master-proposal', 'prop-award-type', 'prop-funding-opp-number', 'prop-cfda-number', 'prop-sub-date', 'prop-internal-date');
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE SUB_SECTION_CODE = '101' AND SECTION_CODE = 'AW101' AND UI_REFERENCE_ID IN ( 'cfda-number', 'dfafs-number');
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'Y', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE UI_REFERENCE_ID = 'grant-abbrevation' AND SUB_SECTION_CODE = '1501' AND SECTION_CODE = 'GC1501';
+
+              UPDATE dyn_element_config SET IS_ACTIVE = 'Y', IS_MANDATORY = 'N', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin'
+              WHERE UI_REFERENCE_ID = 'F&A-rate-type' AND SUB_SECTION_CODE = '102' AND SECTION_CODE = 'AW104';
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8178-3
+      author: Solih N
+      labels: 'DML'
+      comment: Idempotent inserts for discipline cluster config
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO dyn_element_config
+                (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, UPDATE_USER, UPDATE_TIMESTAMP, IS_ACTIVE, IS_MANDATORY)
+              SELECT 'ip-discipline-cluster', 'IP Discipline Cluster input field', '201', 'IP201', 'admin', utc_timestamp(), 'N', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM dyn_element_config
+                WHERE UI_REFERENCE_ID = 'ip-discipline-cluster'
+                  AND SUB_SECTION_CODE = '201'
+                  AND SECTION_CODE = 'IP201'
+              );
+
+              INSERT INTO dyn_element_config
+                (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, UPDATE_USER, UPDATE_TIMESTAMP, IS_ACTIVE, IS_MANDATORY)
+              SELECT 'prop-discipline-cluster', 'Proposal Discipline cluster input field', '301', 'DP301', 'admin', utc_timestamp(), 'N', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM dyn_element_config
+                WHERE UI_REFERENCE_ID = 'prop-discipline-cluster'
+                  AND SUB_SECTION_CODE = '301'
+                  AND SECTION_CODE = 'DP301'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dyn_element_config
+              WHERE (UI_REFERENCE_ID, SUB_SECTION_CODE, SECTION_CODE) IN (
+                ('ip-discipline-cluster',  '201', 'IP201'),
+                ('prop-discipline-cluster','301', 'DP301')
+              )
+              AND UPDATE_USER = 'admin';
+
+  - changeSet:
+      id: FIBI-8183-1
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert Common Settings module configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_MODULES_CONFIG (MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'COM', 'Common Settings', 'Y', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_MODULES_CONFIG
+                WHERE MODULE_CODE = 'COM'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_MODULES_CONFIG
+              WHERE MODULE_CODE = 'COM'
+              AND UPDATE_USER = 'admin';
+
+  - changeSet:
+      id: FIBI-8183-2
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert section configurations for Common Settings and More Action sections
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'COM101', 'COM', 'Preferences ', 'Y', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SECTION_CONFIG
+                WHERE SECTION_CODE = 'COM101'
+              );
+
+              INSERT INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'COM102', 'COM', 'FAQ', 'Y', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SECTION_CONFIG
+                WHERE SECTION_CODE = 'COM102'
+              );
+
+              INSERT INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'COM103', 'COM', 'Accessibility', 'Y', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SECTION_CONFIG
+                WHERE SECTION_CODE = 'COM103'
+              );
+
+              INSERT INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'AW130', 'AW01', 'More Action', 'Y', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SECTION_CONFIG
+                WHERE SECTION_CODE = 'AW130'
+              );
+
+              INSERT INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'PR1610', 'PR16', 'More Action', 'Y', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SECTION_CONFIG
+                WHERE SECTION_CODE = 'PR1610'
+              );
+
+              INSERT INTO DYN_SECTION_CONFIG (SECTION_CODE, MODULE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT 'DP370', 'DP03', 'More Action', 'Y', UTC_TIMESTAMP(), 'admin'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SECTION_CONFIG
+                WHERE SECTION_CODE = 'DP370'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SECTION_CONFIG
+              WHERE SECTION_CODE IN ('COM101', 'COM102', 'COM103', 'AW130', 'PR1610', 'DP370')
+              AND UPDATE_USER = 'admin';
+
+  - changeSet:
+      id: FIBI-8183-3
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert subsection configurations for Preferences, Accessibility, and More Action sections
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4001', 'COM101', 'Themes', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4001' AND SECTION_CODE = 'COM101'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4002', 'COM101', 'Notifications', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4002' AND SECTION_CODE = 'COM101'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4003', 'COM101', 'Change password', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4003' AND SECTION_CODE = 'COM101'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4004', 'COM101', 'Integration', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4004' AND SECTION_CODE = 'COM101'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4005', 'COM103', 'Contrast', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4005' AND SECTION_CODE = 'COM103'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4007', 'COM103', 'Color Scheme', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4007' AND SECTION_CODE = 'COM103'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4008', 'COM103', 'Font Size', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4008' AND SECTION_CODE = 'COM103'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4006', 'AW130', 'Hold For Funding Agency Review', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4006' AND SECTION_CODE = 'AW130'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4009', 'AW130', 'Rates', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4009' AND SECTION_CODE = 'AW130'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4010', 'AW130', 'Generate Award Notice', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4010' AND SECTION_CODE = 'AW130'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4011', 'DP370', 'Import From Template', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4011' AND SECTION_CODE = 'DP370'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4012', 'PR1610', 'Import from IGMS template', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4012' AND SECTION_CODE = 'PR1610'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SUBSECTION_CONFIG
+              WHERE (SUB_SECTION_CODE, SECTION_CODE) IN (
+                ('4001', 'COM101'),
+                ('4002', 'COM101'),
+                ('4003', 'COM101'),
+                ('4004', 'COM101'),
+                ('4005', 'COM103'),
+                ('4007', 'COM103'),
+                ('4008', 'COM103'),
+                ('4006', 'AW130'),
+                ('4009', 'AW130'),
+                ('4010', 'AW130'),
+                ('4011', 'DP370'),
+                ('4012', 'PR1610')
+              )
+              AND UPDATE_USER = 'admin';
+
+  - changeSet:
+      id: FIBI-9378-1
+      author: Shyla M
+      labels: DML
+      comment: Add DATE_TIME format in dashboard_column_conf table.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO dashboard_column_conf
+                (COLUMN_CONF_ID, FORMAT_TYPE, FORMAT_STRING, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES
+                (18, 'DATE_TIME', NULL, UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dashboard_column_conf
+              WHERE COLUMN_CONF_ID = 18;
+
+  - changeSet:
+      id: FIBI-8115-1
+      author: Adarsh
+      labels: DML
+      comment: Insert into notification type
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO NOTIFICATION_TYPE (NOTIFICATION_TYPE_ID, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, SUBJECT, MESSAGE, PROMPT_USER, IS_ACTIVE, CREATE_USER, CREATE_TIMESTAMP, UPDATE_USER, UPDATE_TIMESTAMP, IS_SYSTEM_SPECIFIC, SHOW_TEMPLATE_IN_MODULE, SENT_TO_INITIATOR) 
+              VALUES ('2402', '3', '0', 'Grant call Internal Deadline Approaching Reminder', 'Reminder: Internal Deadline Approaching – {GRANT_CALL_NAME}', '<p>Dear {PRINCIPAL_INVESTIGATOR},</p><p>This is a reminder that the internal deadline for the following grant call is approaching.</p><p>The details are as follows:</p><p>Grant Call : {GRANT_CALL_NAME}</p><p>Proposal Title : {PROPOSAL_TITLE}</p><p>Proposal ID : {MODULE_ITEM_KEY}</p><p>Internal Deadline : {INTERNAL_DEADLINE}</p><p>Please ensure that all required proposal information and documentation are completed and submitted by the internal deadline to allow sufficient time for review and institutional approval.</p><p>Please go to {APPLICATION_URL} to view the details.</p><p>Thank you.</p><p>Note: This is a system-generated email. Please do not reply to this email.</p>', 'N', 'Y', 'admin', UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'N', 'N', 'Y');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM NOTIFICATION_TYPE
+              WHERE NOTIFICATION_TYPE_ID = '2402'
+
+  - changeSet:
+      id: FIBI-8115-2
+      author: Adarsh
+      labels: DML
+      comment: Insert into NOTIFICATION_RECIPIENT 
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO NOTIFICATION_RECIPIENT
+              (
+                  NOTIFICATION_TYPE_ID,
+                  ROLE_TYPE_CODE,
+                  CREATE_USER,
+                  CREATE_TIMESTAMP,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  RECIPIENT_TYPE,
+                  RECIPIENT_NAME
+              )
+              SELECT
+                  '2402',
+                  '5',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  'TO',
+                  'Principal Investigators'
+              FROM dual
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM NOTIFICATION_RECIPIENT
+                  WHERE NOTIFICATION_TYPE_ID = '2402'
+                    AND ROLE_TYPE_CODE = '5'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM NOTIFICATION_RECIPIENT
+              WHERE NOTIFICATION_TYPE_ID = '2402'
+              AND ROLE_TYPE_CODE = '5'
+              AND RECIPIENT_TYPE = 'TO'
+              AND RECIPIENT_NAME = 'Principal Investigators';
+
+  - changeSet:
+      id: FIBI-8115-3
+      author: Adarsh
+      labels: DML
+      comment: Insert into REMINDER_NOTIFICATION
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO REMINDER_NOTIFICATION
+              (
+                  REMINDER_NOTIFICATION_ID,
+                  REMINDER_NAME,
+                  NOTIFICATION_TYPE_ID,
+                  DAYS_TO_DUE_DATE,
+                  PROCEDURE_NAME,
+                  IS_ACTVE,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  PLACEHOLDER_VALUES
+              )
+              SELECT
+                  (SELECT COALESCE(MAX(REMINDER_NOTIFICATION_ID), 0) + 1 FROM REMINDER_NOTIFICATION),
+                  'Grant call Internal Deadline Approaching Reminder',
+                  '2402',
+                  '2',
+                  'GRANT_CALL_DUE_DATE_REMINDER',
+                  'Y',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  'INTERNAL_DEADLINE,MODULE_ITEM_KEY'
+              FROM dual
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM REMINDER_NOTIFICATION
+                  WHERE REMINDER_NAME = 'Grant call Internal Deadline Approaching Reminder'
+                  AND NOTIFICATION_TYPE_ID = '2402'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM REMINDER_NOTIFICATION
+              AND NOTIFICATION_TYPE_ID = '2402'
+              AND PROCEDURE_NAME = 'GRANT_CALL_DUE_DATE_REMINDER';
+
+  - changeSet:
+      id: FIBI-9312-1
+      author: Sreejith T
+      labels: 'DDL'
+      comment: New column, MANDATORY_SECTION, in the report_class table to determine whether the fields in the "Summary of Progress" and "Future Plans" sections are mandatory, based on the specific report class.
+      changes:
+        - sql:
+            sql: |
+             ANALYZE TABLE report_class;
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = 'report_class' 
+                    AND COLUMN_NAME = 'MANDATORY_SECTION') = 0,
+                  
+                  'ALTER TABLE report_class ADD COLUMN MANDATORY_SECTION VARCHAR(1) DEFAULT NULL COMMENT ''Controls whether Summary of Progress (S), Future Plans (F), or both (B) sections are mandatory in the Progress Report Detail page'';',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+             ANALYZE TABLE report_class;
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = 'report_class' 
+                    AND COLUMN_NAME = 'MANDATORY_SECTION') > 0,
+                  
+                  'ALTER TABLE report_class DROP COLUMN MANDATORY_SECTION;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-9312-2
+      author: Sreejith T
+      labels: 'DML'
+      comment: Update query for base configuration 
+      changes:
+        - sql:
+            sql: |
+              UPDATE `report_class` SET `MANDATORY_SECTION` = 'B', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`REPORT_CLASS_CODE` = '2'); 
+              UPDATE `report_class` SET `MANDATORY_SECTION` = 'S', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`REPORT_CLASS_CODE` = '1'); 
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `report_class` SET `MANDATORY_SECTION` = NULL, `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`REPORT_CLASS_CODE` = '2'); 
+              UPDATE `report_class` SET `MANDATORY_SECTION` = NULL, `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`REPORT_CLASS_CODE` = '1'); 
+
+  - changeSet:
+      id: FIBI-9312-3
+      author: Sreejith T
+      labels: 'DDL'
+      comment: Increase the length of the DESCRIPTION column in the code_table_configuration table
+      changes:
+        - sql:
+            sql: |
+             ANALYZE TABLE code_table_configuration;
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = 'code_table_configuration' 
+                    AND COLUMN_NAME = 'DESCRIPTION'
+                    AND COLUMN_TYPE = 'varchar(1500)') = 0,
+                  
+                  'ALTER TABLE `code_table_configuration` MODIFY COLUMN `DESCRIPTION` VARCHAR(1500) DEFAULT NULL;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+             ANALYZE TABLE code_table_configuration;
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = 'code_table_configuration' 
+                    AND COLUMN_NAME = 'DESCRIPTION'
+                    AND COLUMN_TYPE = 'varchar(1000)') = 0,
+                  
+                  'ALTER TABLE `code_table_configuration` MODIFY COLUMN `DESCRIPTION` VARCHAR(1000) DEFAULT NULL;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+      id: FIBI-9312-4
+      author: Sreejith T
+      labels: 'DML'
+      comment: Update report class table help text information and content
+      changes:
+        - sql:
+            sql: |
+              UPDATE `code_table_configuration` SET `DESCRIPTION` = ' List of all report classes in Award module.\n\nNotes-\n1) Mode of report:\n  • A- Attachment only (Report uploaded as an attachment in award reporting requirement tab).\n  • R- Report only (Create report via progress report module).\n  • E- Either Attachment or Report (User can chose either one of the above options).\n \n2) Copy Report from Previous:\n  • Enabling this flag permits users to generate a new report in a sequential manner by duplicating a report from the latest approved version of the same report class and report type.\n  • This option is applicable only for reports created via progress report module.\n \n3) Copy From:\n  • Designate a report class in the \"Copy From\" field to indicate the specific report class that should be duplicated when generating a new report.\n  • This flag is considered only when \"Copy Report from Previous\" is OFF \n\n4) Mandatory Section:\n  • Designate a value in the \"Mandatory Section\" field to indicate which sections on the Progress Report Detail page, "Summary of Progress" and/or "Future Plans", are required for the selected report class.\n  • The possible values for the Mandatory Section field are:\n     S – Summary of Progress only\n     F – Future Plans only\n     B – Both Sections\n     Leaving this field empty applies no mandatory rules to the sections\n', `CONTENT` = '{\n  \"group\": \"Award\",\n  \"codeTableName\": \"ReportClass\",\n  \"description\": \"ListofallreportclassesinAwardmodule\",\n  \"databaseTableName\": \"REPORT_CLASS\",\n  \"fields\": [\n    {\n      \"columnName\": \"REPORT_CLASS_CODE\",\n      \"displayName\": \"Report Class Code\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"DESCRIPTION\",\n      \"displayName\": \"Description\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 200,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"IS_ATTACHMENT_OR_REPORT\",\n      \"displayName\": \"Mode of Report\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"systemDropdown\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": [\n        {\n          \"code\": \"A\",\n          \"description\": \"Attachment Only\"\n        },\n        {\n          \"code\": \"R\",\n          \"description\": \"Report Only\"\n        },\n        {\n          \"code\": \"E\",\n          \"description\": \"Either Attachment Or Report\"\n        }\n      ],\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"COPY_REPORT\",\n      \"displayName\": \"Copy Report from Previous\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"switch\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"COPY_FROM\",\n      \"displayName\": \"Copy From\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"REPORT_CLASS#REPORT_CLASS_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"MANDATORY_SECTION\",\n      \"displayName\": \"Mandatory Section\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"systemDropdown\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": [\n        {\n          \"code\": \"S\",\n          \"description\": \"Summary of Progress Only\"\n        },\n        {\n          \"code\": \"F\",\n          \"description\": \"Future Plans Only\"\n        },\n        {\n          \"code\": \"B\",\n          \"description\": \"Both Sections\"\n        }\n      ],\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_TIMESTAMP\",\n      \"displayName\": \"Update Timestamp\",\n      \"dataType\": \"Date\",\n      \"isEditable\": false,\n      \"length\": null,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_USER\",\n      \"displayName\": \"Update User\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"length\": 60,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": \"PERSON#USER_NAME\",\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"IS_ACTIVE\",\n      \"displayName\": \"Is Active\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"switch\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    }\n  ],\n  \"primaryKey\": [\n    \"REPORT_CLASS_CODE\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"SponsorReport\",\n      \"table_name\": \"sponsor_report\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"VaildReportClass\",\n      \"table_name\": \"valid_report_class\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"AwardReportTerms\",\n      \"table_name\": \"award_report_terms\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"AwardReportReminder\",\n      \"table_name\": \"award_report_reminder\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"ValidReportClass\",\n      \"table_name\": \"valid_report_class\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    }\n  ],\n  \"actions\": null\n}', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`TABLE_NAME` = 'REPORT_CLASS');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `code_table_configuration` SET `DESCRIPTION` = ' List of all report classes in Award module.\n\nNotes-\n1) Mode of report:\n  • A- Attachment only (Report uploaded as an attachment in award reporting requirement tab).\n  • R- Report only (Create report via progress report module).\n  • E- Either Attachment or Report (User can chose either one of the above options).\n \n2) Copy Report from Previous:\n  • Enabling this flag permits users to generate a new report in a sequential manner by duplicating a report from the latest approved version of the same report class and report type.\n  • This option is applicable only for reports created via progress report module.\n \n3) Copy From:\n  • Designate a report class in the \"Copy From\" field to indicate the specific report class that should be duplicated when generating a new report.\n  • This flag is considered only when \"Copy Report from Previous\" is OFF ', `CONTENT` = '{\n  \"group\": \"Award\",\n  \"codeTableName\": \"ReportClass\",\n  \"description\": \"ListofallreportclassesinAwardmodule\",\n  \"databaseTableName\": \"REPORT_CLASS\",\n  \"fields\": [\n    {\n      \"columnName\": \"REPORT_CLASS_CODE\",\n      \"displayName\": \"Report Class Code\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"DESCRIPTION\",\n      \"displayName\": \"Description\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 200,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"IS_ATTACHMENT_OR_REPORT\",\n      \"displayName\": \"Mode of Report\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"systemDropdown\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": [\n        {\n          \"code\": \"A\",\n          \"description\": \"Attachment Only\"\n        },\n        {\n          \"code\": \"R\",\n          \"description\": \"Report Only\"\n        },\n        {\n          \"code\": \"E\",\n          \"description\": \"Either Attachment Or Report\"\n        }\n      ],\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"COPY_REPORT\",\n      \"displayName\": \"Copy Report from Previous\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"switch\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"COPY_FROM\",\n      \"displayName\": \"Copy From\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 3,\n      \"canEmpty\": true,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"lookUp\",\n      \"valueField\": \"REPORT_CLASS#REPORT_CLASS_CODE\",\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_TIMESTAMP\",\n      \"displayName\": \"Update Timestamp\",\n      \"dataType\": \"Date\",\n      \"isEditable\": false,\n      \"length\": null,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"UPDATE_USER\",\n      \"displayName\": \"Update User\",\n      \"dataType\": \"String\",\n      \"isEditable\": false,\n      \"length\": 60,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": null,\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": \"PERSON#USER_NAME\",\n      \"defaultValue\": null\n    },\n    {\n      \"columnName\": \"IS_ACTIVE\",\n      \"displayName\": \"Is Active\",\n      \"dataType\": \"String\",\n      \"isEditable\": true,\n      \"length\": 1,\n      \"canEmpty\": false,\n      \"visible\": true,\n      \"valueChanged\": null,\n      \"index\": null,\n      \"filterType\": \"switch\",\n      \"valueField\": null,\n      \"isTransient\": null,\n      \"values\": null,\n      \"refColumnName\": null,\n      \"defaultValue\": null\n    }\n  ],\n  \"primaryKey\": [\n    \"REPORT_CLASS_CODE\"\n  ],\n  \"dependency\": [\n    {\n      \"displayName\": \"SponsorReport\",\n      \"table_name\": \"sponsor_report\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"VaildReportClass\",\n      \"table_name\": \"valid_report_class\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"AwardReportTerms\",\n      \"table_name\": \"award_report_terms\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"AwardReportReminder\",\n      \"table_name\": \"award_report_reminder\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    },\n    {\n      \"displayName\": \"ValidReportClass\",\n      \"table_name\": \"valid_report_class\",\n      \"columnName\": \"REPORT_CLASS_CODE\"\n    }\n  ],\n  \"actions\": null\n}', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`TABLE_NAME` = 'REPORT_CLASS');
+
+  - changeSet:
+      id: FIBI-7901-1
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER PRE_REVIEW_ATTACHMENT_FILE table
+      changes:
+        - sql:
+            sql: |
+              -- FILE_PATH
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'PRE_REVIEW_ATTACHMENT_FILE' AND COLUMN_NAME = 'FILE_PATH') = 0,
+                  'ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE ADD COLUMN FILE_PATH VARCHAR(225);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE DROP COLUMN FILE_PATH;
+
+  - changeSet:
+      id: FIBI-7901-2
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER PRE_REVIEW_ATTACHMENT_FILE table
+      changes:
+        - sql:
+            sql: |
+              -- ORIGINAL_FILE_NAME
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'PRE_REVIEW_ATTACHMENT_FILE' AND COLUMN_NAME = 'ORIGINAL_FILE_NAME') = 0,
+                  'ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE ADD COLUMN ORIGINAL_FILE_NAME VARCHAR(225) NULL AFTER `FILE_PATH`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE DROP COLUMN ORIGINAL_FILE_NAME; 
+
+  - changeSet:
+      id: FIBI-7901-3
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER PRE_REVIEW_ATTACHMENT_FILE table
+      changes:
+        - sql:
+            sql: |
+              -- FILE_NAME
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'PRE_REVIEW_ATTACHMENT_FILE' AND COLUMN_NAME = 'FILE_NAME') = 0,
+                  'ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE ADD COLUMN FILE_NAME VARCHAR(225) NULL AFTER `ORIGINAL_FILE_NAME`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE DROP COLUMN FILE_NAME;         
+
+  - changeSet:
+      id: FIBI-7901-4
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER PRE_REVIEW_ATTACHMENT_FILE table
+      changes:
+        - sql:
+            sql: |
+              -- IS_ARCHIVED
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'PRE_REVIEW_ATTACHMENT_FILE' AND COLUMN_NAME = 'IS_ARCHIVED') = 0,
+                  'ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE ADD COLUMN IS_ARCHIVED VARCHAR(225) NULL AFTER `FILE_NAME`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE DROP COLUMN IS_ARCHIVED;                                          
+
+  - changeSet:
+      id: FIBI-7901-5
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER PRE_REVIEW_ATTACHMENT_FILE table
+      changes:
+        - sql:
+            sql: |
+              -- UPDATE_TIMESTAMP
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'PRE_REVIEW_ATTACHMENT_FILE' AND COLUMN_NAME = 'UPDATE_TIMESTAMP') = 0,
+                  'ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE ADD COLUMN UPDATE_TIMESTAMP VARCHAR(225) NULL AFTER `IS_ARCHIVED`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE DROP COLUMN UPDATE_TIMESTAMP;
+
+  - changeSet:
+      id: FIBI-7901-6
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER PRE_REVIEW_ATTACHMENT_FILE table
+      changes:
+        - sql:
+            sql: |
+              -- UPDATE_USER
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'PRE_REVIEW_ATTACHMENT_FILE' AND COLUMN_NAME = 'UPDATE_USER') = 0,
+                  'ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE ADD COLUMN UPDATE_USER VARCHAR(225) NULL AFTER `UPDATE_TIMESTAMP`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE PRE_REVIEW_ATTACHMENT_FILE DROP COLUMN UPDATE_USER;        
+
+
+  - changeSet:
+      id: FIBI-7901-7
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER WORKFLOW_ATTACHMENT table
+      changes:
+        - sql:
+            sql: |
+              -- FILE_PATH
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'WORKFLOW_ATTACHMENT' AND COLUMN_NAME = 'FILE_PATH') = 0,
+                  'ALTER TABLE WORKFLOW_ATTACHMENT ADD COLUMN FILE_PATH VARCHAR(225);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE WORKFLOW_ATTACHMENT DROP COLUMN FILE_PATH;             
+
+  - changeSet:
+      id: FIBI-7901-8
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER WORKFLOW_ATTACHMENT table
+      changes:
+        - sql:
+            sql: |
+              -- IS_ARCHIVED
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'WORKFLOW_ATTACHMENT' AND COLUMN_NAME = 'IS_ARCHIVED') = 0,
+                  'ALTER TABLE WORKFLOW_ATTACHMENT ADD COLUMN IS_ARCHIVED VARCHAR(225) NULL AFTER `FILE_NAME`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE WORKFLOW_ATTACHMENT DROP COLUMN IS_ARCHIVED;      
+
+  - changeSet:
+      id: FIBI-7901-9
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER QUEST_ANSWER_ATTACHMENT table
+      changes:
+        - sql:
+            sql: |
+              -- FILE_PATH
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QUEST_ANSWER_ATTACHMENT' AND COLUMN_NAME = 'FILE_PATH') = 0,
+                  'ALTER TABLE QUEST_ANSWER_ATTACHMENT ADD COLUMN FILE_PATH VARCHAR(225) NULL AFTER `UPDATE_USER`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE QUEST_ANSWER_ATTACHMENT DROP COLUMN FILE_PATH;                        
+
+  - changeSet:
+      id: FIBI-7901-10
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER QUEST_ANSWER_ATTACHMENT table
+      changes:
+        - sql:
+            sql: |
+              -- IS_ARCHIVED
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QUEST_ANSWER_ATTACHMENT' AND COLUMN_NAME = 'IS_ARCHIVED') = 0,
+                  'ALTER TABLE QUEST_ANSWER_ATTACHMENT ADD COLUMN IS_ARCHIVED VARCHAR(225) NULL AFTER `FILE_PATH`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE QUEST_ANSWER_ATTACHMENT DROP COLUMN IS_ARCHIVED;       
+
+  - changeSet:
+      id: FIBI-7901-11
+      author: Vishnu BH
+      labels: 'DDL'
+      comment: ALTER QUEST_ANSWER_ATTACHMENT table
+      changes:
+        - sql:
+            sql: |
+              -- FILE_DATA_ID
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QUEST_ANSWER_ATTACHMENT' AND COLUMN_NAME = 'FILE_DATA_ID') = 0,
+                  'ALTER TABLE QUEST_ANSWER_ATTACHMENT ADD COLUMN FILE_DATA_ID VARCHAR(225);',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE QUEST_ANSWER_ATTACHMENT DROP COLUMN FILE_DATA_ID;
+
+
+  - changeSet:              
+      id: FIBI-8179-1
+      author: Sreejith T
+      labels: 'DDL'
+      comment: New table ‘ELASTICSEARCH_INDEX_CONFIG’ to store elastic configurations
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS ELASTICSEARCH_INDEX_CONFIG (
+                ES_CONFIG_ID varchar(100) NOT NULL COMMENT 'Field to identify different configurations',
+                INDEX_NAME varchar(100) NOT NULL COMMENT 'Name of the index',
+                CONTEXT_FIELD varchar(100) DEFAULT NULL COMMENT 'Field specifies the key to which the value will be bound',
+                DESCRIPTION varchar(1000) DEFAULT NULL COMMENT 'Description of the elasticsearch index configuration',
+                FORMAT_TEMPLATE varchar(1000) DEFAULT NULL COMMENT 'Format string for displaying results',
+                CARD_FORMAT json DEFAULT NULL COMMENT 'Fields displayed in the selected item card layout.',
+                PLACEHOLDERS varchar(500) DEFAULT NULL COMMENT 'Placeholder text for input field',
+                SEARCH_FIELDS json DEFAULT NULL COMMENT 'Fields that will be used for search functionality and for display purposes',
+                FORMAT_FIELDS json DEFAULT NULL COMMENT 'Fields that will be used for display purposes',
+                FIELD_BOOSTS json DEFAULT NULL COMMENT 'Boost settings for prioritized fields',
+                ICONS json DEFAULT NULL COMMENT 'HTML/Icon mappings for fields',
+                EXCLUDE_HTML json DEFAULT NULL COMMENT 'Fields excluded from rendering as HTML in the search result',
+                EXTRA_CONDITIONS json DEFAULT NULL COMMENT 'Additional query conditions',
+                RESULT_SIZE int DEFAULT NULL COMMENT 'Number of results to return',
+                INDEX_SETTINGS json DEFAULT NULL COMMENT 'Elasticsearch index settings for live and bulk document sync',
+                UPDATE_USER varchar(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP datetime DEFAULT NULL,
+                PRIMARY KEY (ES_CONFIG_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS ELASTICSEARCH_INDEX_CONFIG;
+
+  - changeSet:
+      id: FIBI-8179-2
+      author: Sreejith T
+      labels: 'DML'
+      comment: Elastic configurations for base instance.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('agreement','agreementfibi','agreement_request_id','Configuration for searching agreements','agreement_request_id | title | agreement_type | unit_display_name | agreement_status | principal_person_full_name | aa_person_full_name | sponsor_display_name | requestor_full_name',NULL,'Search: Agreement #, Research Title, Type, Lead Unit, Status, PI, Administrator, Sponsor/Organization, Requestor','{\"title\": {}, \"agreement_type\": {}, \"agreement_status\": {}, \"unit_display_name\": {}, \"aa_person_full_name\": {}, \"requestor_full_name\": {}, \"agreement_request_id\": {}, \"sponsor_display_name\": {}, \"principal_person_full_name\": {}}',NULL,'{}','{}','[]','{}',20,'{\"index\": {\"mappings\": {\"properties\": {\"title\": {\"type\": \"text\", \"analyzer\": \"title_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"title_search\"}, \"@version\": {\"type\": \"integer\"}, \"category\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"unit_name\": {\"type\": \"text\", \"index\": \"false\"}, \"@timestamp\": {\"type\": \"date\"}, \"status_code\": {\"type\": \"integer\", \"index\": \"false\"}, \"unit_number\": {\"type\": \"text\", \"index\": \"false\"}, \"sponsor_name\": {\"type\": \"text\", \"index\": \"false\"}, \"agreement_type\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"agreement_status\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"unit_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"agreement_end_date\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"aa_person_full_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"requestor_full_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"agreement_request_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"agreement_start_date\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sponsor_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"principal_person_full_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"title_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}, \"title_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{agreement_request_id}\", \"queryString\": \"select t1.agreement_request_id, t1.agreement_type, t1.title, t1.unit_number, t1.unit_name, t1.unit_display_name, t1.aa_person_full_name, t1.principal_person_full_name, t1.requestor_full_name,t1.agreement_status,t1.agreement_start_date,t1.agreement_end_date,t1.sponsor_display_name from agreement_v t1 where AGREEMENT_SEQUENCE_STATUS = \'ACTIVE\'\", \"extraCondition\": \" and t1.agreement_request_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('award','awardfibi','award_number','Configuration for searching awards','award_number | account_number | title | sponsor_display_name | unit_display_name | pi_name | grant_call_name | funding_scheme | sp_awd_number','[\"title\", \"pi_name\", \"sp_awd_number\", \"account_number\", \"funding_scheme\", \"grant_call_name\", \"unit_display_name\", \"sponsor_display_name\"]','Search: Award #, Account No, Title, Lead Unit, Sponsor, Principal Investigator, Title of Grant Call, Funding Scheme, Sponsor Award Number','{\"title\": {}, \"pi_name\": {}, \"award_number\": {}, \"sp_awd_number\": {}, \"account_number\": {}, \"funding_scheme\": {}, \"grant_call_name\": {}, \"unit_display_name\": {}, \"sponsor_display_name\": {}}',NULL,'{}','{}','[\"title\"]','{}',20,'{\"index\": {\"mappings\": {\"properties\": {\"title\": {\"type\": \"text\", \"analyzer\": \"title_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"title_search\"}, \"status\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"search_analyzer\": \"standard\"}, \"pi_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sponsor\": {\"type\": \"text\", \"index\": \"false\"}, \"@version\": {\"type\": \"integer\"}, \"award_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"search_analyzer\": \"whitespace\"}, \"@timestamp\": {\"type\": \"date\"}, \"status_code\": {\"type\": \"integer\", \"index\": \"false\"}, \"award_number\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"whitespace\"}, \"account_number\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"search_analyzer\": \"whitespace\"}, \"funding_scheme\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"lead_unit_name\": {\"type\": \"text\", \"index\": \"false\"}, \"lead_unit_number\": {\"type\": \"text\", \"index\": \"false\"}, \"unit_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sponsor_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"obligation_expiration_date\": {\"type\": \"text\", \"analyzer\": \"standard\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"title_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}, \"title_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 1}}, \"documentId\": \"%{award_id}\", \"queryString\": \"SELECT t1.award_id, t1.award_number, t1.status, t1.pi_name, t1.sponsor,t1.sponsor_display_name, t1.account_number, t1.lead_unit_number, t1.lead_unit_name, t1.title,t1.status_code,t1.obligation_expiration_date,t1.grant_call_title as grant_call_name,t1.sp_awd_number,t1.funding_scheme, t1.unit_display_name FROM ELASTIC_AWARD_V t1\", \"extraCondition\": \" where t1.award_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('coi','coifibi','coi_disclosure_number','Configuration for searching COI disclosures','coi_disclosure_number | full_name | disclosure_disposition | disclosure_status | module_item_key',NULL,NULL,'{\"full_name\": {}, \"module_item_key\": {}, \"disclosure_status\": {}, \"coi_disclosure_number\": {}, \"disclosure_disposition\": {}}',NULL,'{}','{}','[]','{}',20,NULL,'admin', utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('external_reviewer','externalreview',NULL,'Configuration for searching external reviewers',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'{\"index\": {\"mappings\": {\"properties\": {\"pi_name\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"@version\": {\"type\": \"integer\", \"index\": false}, \"full_name\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"name_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"name_search\"}, \"review_id\": {\"type\": \"text\", \"index\": true, \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}}, \"@timestamp\": {\"type\": \"date\", \"index\": false}, \"module_code\": {\"type\": \"integer\", \"index\": false}, \"status_code\": {\"type\": \"integer\", \"index\": false}, \"created_date\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"request_date\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"requestor_id\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"sub_item_key\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"deadline_date\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"review_number\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"submodule_code\": {\"type\": \"integer\", \"index\": false}, \"completion_date\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"module_item_key\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"status_description\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{review_id}\", \"queryString\": \"select t1.EXT_REVIEW_ID as review_id, CONCAT(t1.MODULE_ITEM_KEY,\'-\',lpad(t1.VERSION_NUMBER,3,0)) as review_number,t1.REQUEST_DATE as request_date,t1.DESCRIPTION as external_review_title,t1.DEADLINE_DATE as deadline_date,t1.COMPLETION_DATE as completion_date,t1.MODULE_ITEM_CODE as module_code,t1.MODULE_SUB_ITEM_CODE as submodule_code,t1.MODULE_ITEM_KEY as module_item_key,t1.MODULE_SUB_ITEM_KEY as sub_item_key,t1.REVIEW_REQUESTOR_ID as requestor_id,t1.REQUEST_DATE as created_date,t1.EXT_REVIEW_STATUS_CODE as status_code,t3.DESCRIPTION as status_description,t2.FULL_NAME as full_name from ext_review t1 LEFT OUTER JOIN person t2 on t1.REVIEW_REQUESTOR_ID = t2.PERSON_ID LEFT OUTER JOIN ext_review_status t3 on t1.EXT_REVIEW_STATUS_CODE = t3.EXT_REVIEW_STATUS_CODE WHERE t1.EXT_REVIEW_STATUS_CODE NOT IN (1)\", \"extraCondition\": \" and t1.EXT_REVIEW_ID = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('grant_call','grantcall','title','Configuration for searching grant calls','grant_header_id | title | grant_type | sponsor_display_name | funding_scheme | status','[\"title\", \"status\", \"grant_type\", \"funding_scheme\", \"sponsor_display_name\"]','Search: Grant Call #, Title, Type, Status, Funding Agency, Name of Funding Scheme','{\"title\": {}, \"status\": {}, \"grant_type\": {}, \"funding_scheme\": {}, \"grant_header_id\": {}, \"sponsor_display_name\": {}}',NULL,'{}','{}','[]','{}',20,'{\"index\": {\"mappings\": {\"properties\": {\"title\": {\"type\": \"text\", \"analyzer\": \"title_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"title_search\"}, \"sponsor\": {\"type\": \"text\", \"index\": \"false\"}, \"grant_type\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"funding_scheme\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"grant_header_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"sponsor_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 1}}, \"analyzer\": {\"title_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}, \"title_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{grant_header_id}\", \"queryString\": \"SELECT CAST(T1.GRANT_HEADER_ID AS CHAR(10)) GRANT_HEADER_ID,T1.NAME AS TITLE,T2.DESCRIPTION AS GRANT_TYPE,T3.SPONSOR_NAME AS SPONSOR,T3.DISPLAY_NAME AS SPONSOR_DISPLAY_NAME,T7.DESCRIPTION AS FUNDING_SCHEME,T5.DESCRIPTION AS STATUS FROM GRANT_CALL_HEADER T1 LEFT OUTER JOIN GRANT_CALL_TYPE T2 ON T1.GRANT_TYPE_CODE = T2.GRANT_TYPE_CODE LEFT OUTER JOIN SPONSOR T3 ON T1.SPONSOR_CODE = T3.SPONSOR_CODE LEFT OUTER JOIN GRANT_CALL_STATUS T5 ON T5.GRANT_STATUS_CODE = T1.GRANT_STATUS_CODE LEFT OUTER JOIN SPONSOR_FUNDING_SCHEME T6 ON T1.FUNDING_SCHEME_ID = T6.FUNDING_SCHEME_ID LEFT OUTER JOIN FUNDING_SCHEME T7 ON T6.FUNDING_SCHEME_CODE = T7.FUNDING_SCHEME_CODE\", \"extraCondition\": \" where T1.grant_header_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('iacuc','iacucfibi','protocol_number','Configuration for searching IACUC protocols','protocol_number | title | lead_unit_name | status | person_name | protocol_type',NULL,NULL,'{\"title\": {}, \"status\": {}, \"person_name\": {}, \"protocol_type\": {}, \"lead_unit_name\": {}, \"protocol_number\": {}, \"lead_unit_number\": {}}',NULL,'{}','{}','[]','{}',20,NULL,'admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('institute_proposal','instituteproposal','title','Configuration for searching institute proposals','proposal_number | title | sponsor_display_name | unit_display_name | activity_type | proposal_type | pi_full_name | status | funding_scheme','[\"title\", \"status\", \"pi_full_name\", \"activity_type\", \"proposal_type\", \"funding_scheme\", \"sponsor_display_name\"]','Search: Institute Proposal #, Proposal ID, Title, Lead Unit, Principal Investigator, Category, Type, Status, Funding Scheme, Sponsor','{\"title\": {}, \"status\": {}, \"proposal_id\": {}, \"pi_full_name\": {}, \"activity_type\": {}, \"proposal_type\": {}, \"funding_scheme\": {}, \"proposal_number\": {}, \"unit_display_name\": {}, \"sponsor_display_name\": {}}',NULL,'{}','{}','[]','{\"must_not\": {\"term\": {\"status_code\": 4}}}',20,'{\"index\": {\"mappings\": {\"properties\": {\"title\": {\"type\": \"text\", \"analyzer\": \"title_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"title_search\"}, \"status\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sponsor\": {\"type\": \"text\", \"index\": \"false\"}, \"@version\": {\"type\": \"integer\"}, \"@timestamp\": {\"type\": \"date\"}, \"status_code\": {\"type\": \"integer\"}, \"protocol_type\": {\"type\": \"text\", \"index\": \"false\"}, \"funding_scheme\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"lead_unit_name\": {\"type\": \"text\", \"index\": \"false\"}, \"proposal_number\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"lead_unit_number\": {\"type\": \"text\", \"index\": \"false\"}, \"unit_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sponsor_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"title_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}, \"title_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{proposal_id}\", \"queryString\": \"SELECT convert(t1.PROPOSAL_ID, char(20)) as proposal_id,t1.PROPOSAL_NUMBER,t1.TITLE,t1.HOME_UNIT_NUMBER as lead_unit_number,t1.STATUS,t1.LEAD_UNIT as lead_unit_name,t1.SPONSOR,t1.SPONSOR_DISPLAY_NAME,t1.STATUS_CODE,t1.ACTIVITY_TYPE_CODE,t1.ACTIVITY_TYPE,t1.PROPOSAL_TYPE,t1.PROPOSAL_TYPE_CODE,t1.PI_FULL_NAME,t1.funding_scheme, t1.UNIT_DISPLAY_NAME FROM ELASTIC_INSTITUTE_PROPOSAL_V t1\", \"extraCondition\": \" where t1.proposal_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('irb','irbfibi','protocol_number','Configuration for searching IRB protocols','protocol_number | title | lead_unit_name | status | person_name',NULL,NULL,'{\"title\": {}, \"status\": {}, \"person_name\": {}, \"lead_unit_name\": {}, \"protocol_number\": {}, \"lead_unit_number\": {}}',NULL,'{}','{}','[]','{}',20,NULL,'admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('organization','fibirolodex','organization','Configuration for searching organizations','rolodex_id - full_name | organization | email_address | address',NULL,NULL,'{\"address\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"organization\": {}, \"email_address\": {}}','{\"address\": {}, \"full_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"organization\": {}, \"email_address\": {}}','{}','{\"full_name\": \"<i aria-hidden=\\\"true\\\" class=\\\"fa fa-user-circle text-danger mr-2\\\"></i>\", \"organization\": \"<span><img src=\\\"DEPLOY_MAPassets/images/org-icon-6.svg\\\" class=\\\"mr-2\\\"></span>\"}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"last_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"first_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"rolodex_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"designation\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"middle_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"organization\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"phone_number\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"email_address\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{rolodex_id}\", \"queryString\": \"SELECT cast(T1.rolodex_id as char(10)) as rolodex_id,IFNULL(T2.organization_name,T1.organization_name) AS organization,T1.last_name,T1.first_name,T1.middle_name,T1.email_address,T1.phone_number,T1.FULL_NAME,T1.designation,T3.full_name AS create_user, concat(coalesce(T1.ADDRESS_LINE_1,\'\') , if (T1.ADDRESS_LINE_1 IS NULL OR T1.ADDRESS_LINE_2 IS NULL ,\'\',\', \'), (coalesce(T1.ADDRESS_LINE_2,\'\')),if (T1.ADDRESS_LINE_3 IS NULL OR T1.ADDRESS_LINE_2 IS NULL,\'\',\', \'),coalesce(T1.ADDRESS_LINE_3,\'\')) as address,T1.city,T4.country_name as country FROM ROLODEX T1 LEFT OUTER JOIN ORGANIZATION T2 ON T1.ORGANIZATION = T2.ORGANIZATION_ID LEFT OUTER JOIN PERSON T3 ON T1.create_user = T3.user_name LEFT OUTER JOIN COUNTRY T4 ON T1.COUNTRY_CODE=T4.COUNTRY_CODE WHERE T1.IS_ACTIVE = \'Y\'\", \"extraCondition\": \" and t1.rolodex_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('person','fibiperson','full_name','Configuration for searching persons','prncpl_id - full_name | prncpl_nm | unit_display_name | email_addr',NULL,NULL,'{\"full_name\": {}, \"phone_nbr\": {}, \"prncpl_id\": {}, \"prncpl_nm\": {}, \"email_addr\": {}, \"is_faculty\": {}, \"addr_line_1\": {}, \"is_research_staff\": {}, \"unit_display_name\": {}}',NULL,'{\"full_name\": 5}','{}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"phone_nbr\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"prncpl_id\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"prncpl_nm\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"name_search\"}, \"unit_name\": {\"type\": \"text\", \"index\": \"false\"}, \"email_addr\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"addr_line_1\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"unit_number\": {\"type\": \"text\", \"index\": \"false\"}, \"primary_title\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"unit_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{prncpl_id}\", \"queryString\": \"SELECT t1.person_id as prncpl_id,t1.full_name,t1.user_name as prncpl_nm,t1.email_address as email_addr,t1.home_unit as unit_number,t2.unit_name,t1.address_line_1 as addr_line_1 ,t1.mobile_phone_number as phone_nbr,t1.directory_title,t1.primary_title, t1.IS_EXTERNAL_USER as external, t2.DISPLAY_NAME as unit_display_name FROM PERSON t1 LEFT OUTER JOIN UNIT t2 ON t1.HOME_UNIT = t2.UNIT_NUMBER WHERE t1.STATUS =\'A\'\", \"extraCondition\": \" and t1.person_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('proposal','fibiproposal','proposal_id','Configuration for searching proposals','proposal_id | title | full_name | category | type | status | sponsor_display_name | unit_display_name | funding_scheme','[\"type\", \"title\", \"status\", \"category\", \"full_name\", \"funding_scheme\", \"unit_display_name\", \"sponsor_display_name\"]','Search: Proposal #, Title, Principal Investigator, Category, Type, Status, Sponsor, Lead Unit, Funding Scheme','{\"type\": {}, \"title\": {}, \"status\": {}, \"category\": {}, \"full_name\": {}, \"proposal_id\": {}, \"funding_scheme\": {}, \"unit_display_name\": {}, \"sponsor_display_name\": {}}',NULL,'{}','{}','[\"title\"]','{\"must_not\": {\"term\": {\"status_code\": \"35\"}}}',20,'{\"index\": {\"mappings\": {\"properties\": {\"type\": {\"type\": \"text\", \"analyzer\": \"standard\", \"search_analyzer\": \"standard\"}, \"title\": {\"type\": \"text\", \"analyzer\": \"title_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"title_search\"}, \"status\": {\"type\": \"text\", \"analyzer\": \"standard\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sponsor\": {\"type\": \"text\", \"index\": \"false\"}, \"category\": {\"type\": \"text\", \"analyzer\": \"standard\", \"search_analyzer\": \"standard\"}, \"full_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"proposal_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"funding_scheme\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"lead_unit_name\": {\"type\": \"text\", \"index\": \"false\"}, \"lead_unit_number\": {\"type\": \"text\", \"index\": \"false\"}, \"unit_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sponsor_display_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 1}}, \"analyzer\": {\"title_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}, \"title_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 1}}, \"documentId\": \"%{proposal_id}\", \"queryString\": \"SELECT cast(t1.proposal_id as char(10)) as proposal_id,t1.title,t1.full_name,t1.category,t1.type,t1.status,t1.sponsor,t1.sponsor_display_name,t1.lead_unit_name ,t1.lead_unit_number,t1.funding_scheme, t1.unit_display_name FROM ELASTIC_FIBI_PROPOSAL_V t1\", \"extraCondition\": \" where proposal_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('reviewer','fibireviewer','full_name','Configuration for searching reviewers','full_name | email_addr | Academic Rank : academic_rank | H-Index: hindex',NULL,'Search: Reviewer #, Full Name, Country, Email Address, Affiliation Institution, Specialism Keywords, Academic Rank, H-Index','{\"hindex\": {}, \"aff_code\": {}, \"full_name\": {}, \"last_name\": {}, \"prncpl_id\": {}, \"prncpl_nm\": {}, \"email_addr\": {}, \"country_code\": {}, \"country_name\": {}, \"academic_rank\": {}, \"sk_description\": {}, \"aff_description\": {}}',NULL,'{}','{}','[]','{\"must_not\": {\"match_phrase\": {\"reviewer_status\": \"I\"}}}',20,'{\"index\": {\"mappings\": {\"properties\": {\"hindex\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}, \"aff_code\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}, \"full_name\": {\"type\": \"text\", \"index\": true, \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"name_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"name_search\"}, \"last_name\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}, \"prncpl_id\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"search_analyzer\": \"keyword\"}, \"prncpl_nm\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}, \"email_addr\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"country_code\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}, \"country_name\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}, \"academic_rank\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"sk_description\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"whitespace\", \"search_analyzer\": \"standard\"}, \"aff_description\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 60, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{prncpl_id}\", \"queryString\": \"SELECT t1.external_reviewer_id AS prncpl_id, t1.full_name, t1.user_name AS prncpl_nm, t1.email_address_primary AS email_addr, t1.affilation_instituition_code AS aff_code, t1.country_code AS country_code, t2.description AS aff_description, t3.country_name AS country_name, t5.description AS academic_rank, t6.hi_index AS hindex FROM external_reviewer t1 LEFT OUTER JOIN ext_reviewer_affiliation t2 ON t1.affilation_instituition_code = t2.affilation_instituition_code LEFT OUTER JOIN country t3 ON t1.country_code = t3.country_code LEFT OUTER JOIN external_reviewer_rights t4 ON t1.external_reviewer_id = t4.external_reviewer_id LEFT OUTER JOIN ext_reviewer_academic_rank t5 ON t1.academic_rank_code = t5.academic_rank_code LEFT OUTER JOIN external_reviewer_ext t6 ON t6.external_reviewer_id = t1.external_reviewer_id WHERE t4.reviewer_rights_id = \'1\'\", \"extraCondition\": \" and t1.external_reviewer_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('rolodex','fibirolodex','full_name','Configuration for searching rolodex','rolodex_id - full_name | organization | email_address',NULL,NULL,'{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": 5}','{\"organization\": \"<span><img src=\\\"DEPLOY_MAPassets/images/org-icon-6.svg\\\" class=\\\"mr-2\\\"></span>\"}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"last_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"first_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"rolodex_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"designation\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"middle_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"organization\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"phone_number\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"email_address\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{rolodex_id}\", \"queryString\": \"SELECT cast(T1.rolodex_id as char(10)) as rolodex_id,IFNULL(T2.organization_name,T1.organization_name) AS organization,T1.last_name,T1.first_name,T1.middle_name,T1.email_address,T1.phone_number,T1.FULL_NAME,T1.designation,T3.full_name AS create_user, concat(coalesce(T1.ADDRESS_LINE_1,\'\') , if (T1.ADDRESS_LINE_1 IS NULL OR T1.ADDRESS_LINE_2 IS NULL ,\'\',\', \'), (coalesce(T1.ADDRESS_LINE_2,\'\')),if (T1.ADDRESS_LINE_3 IS NULL OR T1.ADDRESS_LINE_2 IS NULL,\'\',\', \'),coalesce(T1.ADDRESS_LINE_3,\'\')) as address,T1.city,T4.country_name as country FROM ROLODEX T1 LEFT OUTER JOIN ORGANIZATION T2 ON T1.ORGANIZATION = T2.ORGANIZATION_ID LEFT OUTER JOIN PERSON T3 ON T1.create_user = T3.user_name LEFT OUTER JOIN COUNTRY T4 ON T1.COUNTRY_CODE=T4.COUNTRY_CODE WHERE T1.IS_ACTIVE = \'Y\'\", \"extraCondition\": \" and t1.rolodex_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('service_request','servicerequest','subject','Configuration for searching service requests','sr_header_id | subject | sr_type',NULL,'Search: ID, Subject, Priority, Unit, Type, Status, Reporter, Assignee','{\"sr_type\": {}, \"subject\": {}, \"sr_status\": {}, \"sr_priority\": {}, \"sr_header_id\": {}, \"unit_display_name\": {}, \"assignee_full_name\": {}, \"reporter_full_name\": {}}',NULL,'{\"subject\": 5}','{}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"sr_type\": {\"type\": \"text\", \"analyzer\": \"standard\", \"search_analyzer\": \"standard\"}, \"subject\": {\"type\": \"text\", \"analyzer\": \"subject_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"subject_search\"}, \"sr_status\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"unit_name\": {\"type\": \"text\", \"index\": \"false\"}, \"sr_priority\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"sr_header_id\": {\"type\": \"text\", \"index\": true}, \"sr_priority_id\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"sr_status_code\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"unit_display_name\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"whitespace\"}, \"assignee_full_name\": {\"type\": \"text\", \"index\": true, \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"reporter_full_name\": {\"type\": \"text\", \"index\": true, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"keyword\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 60, \"min_gram\": 2}}, \"analyzer\": {\"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}, \"subject_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"subject_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{sr_header_id}\", \"queryString\": \"SELECT t1.sr_header_id as sr_header_id,t1.subject as subject,t2.unit_name as unit_name,t2.display_name as unit_display_name,t3.full_name as assignee_full_name,t4.full_name as reporter_full_name,t5.description as sr_type,t6.description as sr_priority,t6.PRIORITY_ID as sr_priority_id,t7.STATUS_CODE as sr_status_code,t7.description as sr_status FROM sr_header t1 LEFT OUTER JOIN unit t2 ON t1.unit_number = t2.unit_number LEFT OUTER JOIN person t3 ON t1.assignee_person_id = t3.person_id LEFT OUTER JOIN person t4 ON t1.reporter_person_id = t4.person_id LEFT OUTER JOIN sr_type t5 ON t1.type_code = t5.type_code LEFT OUTER JOIN sr_priority t6 ON t1.priority_id = t6.priority_id LEFT OUTER JOIN sr_status t7 ON t1.status_code = t7.status_code\", \"extraCondition\": \" where t1.sr_header_id = ?\"}','admin',utc_timestamp());
+              INSERT IGNORE INTO `elasticsearch_index_config` (`ES_CONFIG_ID`,`INDEX_NAME`,`CONTEXT_FIELD`,`DESCRIPTION`,`FORMAT_TEMPLATE`,`CARD_FORMAT`,`PLACEHOLDERS`,`SEARCH_FIELDS`,`FORMAT_FIELDS`,`FIELD_BOOSTS`,`ICONS`,`EXCLUDE_HTML`,`EXTRA_CONDITIONS`,`RESULT_SIZE`,`INDEX_SETTINGS`,`UPDATE_USER`,`UPDATE_TIMESTAMP`) VALUES ('rolodex_organization','fibirolodex','full_name','Configuration for searching rolodex organization','rolodex_id - full_name | organization | email_address',NULL,NULL,'{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": {}, \"last_name\": {}, \"first_name\": {}, \"rolodex_id\": {}, \"create_user\": {}, \"middle_name\": {}, \"organization\": {}, \"email_address\": {}}','{\"full_name\": 5}','{\"organization\": \"<span><img src=\\\"DEPLOY_MAPassets/images/org-icon-6.svg\\\" class=\\\"mr-2\\\"></span>\"}','[]','{}',50,'{\"index\": {\"mappings\": {\"properties\": {\"full_name\": {\"type\": \"text\", \"analyzer\": \"name_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"name_search\"}, \"last_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"first_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"rolodex_id\": {\"type\": \"text\", \"fields\": {\"sort\": {\"type\": \"keyword\", \"index\": true}}, \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"with_positions_offsets\", \"search_analyzer\": \"standard\"}, \"designation\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"middle_name\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"organization\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"phone_number\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}, \"email_address\": {\"type\": \"text\", \"analyzer\": \"ngram_analyzer\", \"term_vector\": \"yes\", \"search_analyzer\": \"standard\"}}}, \"settings\": {\"analysis\": {\"filter\": {\"ngram_filter\": {\"type\": \"edge_ngram\", \"max_gram\": 20, \"min_gram\": 2}}, \"analyzer\": {\"name_search\": {\"tokenizer\": \"standard\", \"char_filter\": [\"my_mapping\"]}, \"name_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\", \"char_filter\": [\"my_mapping\"]}, \"ngram_analyzer\": {\"type\": \"custom\", \"filter\": [\"lowercase\", \"ngram_filter\"], \"tokenizer\": \"whitespace\"}}, \"char_filter\": {\"my_mapping\": {\"type\": \"pattern_replace\", \"pattern\": \"[-/\\\\\\\\_.+&\':#@,*()\\\\\\\"]\", \"replacement\": \" \"}}}, \"number_of_shards\": 5}}, \"documentId\": \"%{rolodex_id}\", \"queryString\": \"SELECT cast(T1.rolodex_id as char(10)) as rolodex_id,IFNULL(T2.organization_name,T1.organization_name) AS organization,T1.last_name,T1.first_name,T1.middle_name,T1.email_address,T1.phone_number,T1.FULL_NAME,T1.designation,T3.full_name AS create_user, concat(coalesce(T1.ADDRESS_LINE_1,\'\') , if (T1.ADDRESS_LINE_1 IS NULL OR T1.ADDRESS_LINE_2 IS NULL ,\'\',\', \'), (coalesce(T1.ADDRESS_LINE_2,\'\')),if (T1.ADDRESS_LINE_3 IS NULL OR T1.ADDRESS_LINE_2 IS NULL,\'\',\', \'),coalesce(T1.ADDRESS_LINE_3,\'\')) as address,T1.city,T4.country_name as country FROM ROLODEX T1 LEFT OUTER JOIN ORGANIZATION T2 ON T1.ORGANIZATION = T2.ORGANIZATION_ID LEFT OUTER JOIN PERSON T3 ON T1.create_user = T3.user_name LEFT OUTER JOIN COUNTRY T4 ON T1.COUNTRY_CODE=T4.COUNTRY_CODE WHERE T1.IS_ACTIVE = \'Y\'\", \"extraCondition\": \" and t1.rolodex_id = ?\"}','admin',utc_timestamp());
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `elasticsearch_index_config` WHERE `ES_CONFIG_ID` IN ('agreement', 'award', 'coi', 'external_reviewer', 'grant_call', 'iacuc', 'institute_proposal', 'irb', 'organization', 'person', 'proposal', 'reviewer', 'rolodex', 'rolodex_organization', 'service_request');
+
+  - changeSet:
+      id: FIBI-9033-1
+      author: Solih N
+      labels: 'DML'
+      comment: Insert parameters for questionnaire export button and default sponsor
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO PARAMETER (
+                PARAMETER_NAME,
+                VALUE,
+                DESCRIPTION,
+                UPDATE_TIMESTAMP,
+                UPDATE_USER
+              )
+              VALUES (
+                'ENABLE_QUESTIONNAIRE_EXPORT',
+                'Y',
+                'This parameter specifies whether the questionnaire export button should be shown or hidden.',
+                UTC_TIMESTAMP(),
+                'admin'
+              );
+              
+              INSERT IGNORE INTO PARAMETER (
+                PARAMETER_NAME,
+                VALUE,
+                DESCRIPTION,
+                UPDATE_TIMESTAMP,
+                UPDATE_USER
+              )
+              VALUES (
+                'PROPOSAL_AWARD_WIDGET_DEFAULT_SPONSOR',
+                '000100',
+                'This parameter is used for applying the default sponsor.',
+                UTC_TIMESTAMP(),
+                'admin'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM PARAMETER
+              WHERE PARAMETER_NAME = 'ENABLE_QUESTIONNAIRE_EXPORT';     
+              DELETE FROM PARAMETER
+              WHERE PARAMETER_NAME = 'PROPOSAL_AWARD_WIDGET_DEFAULT_SPONSOR';
+
+  - changeSet:
+      id: FIBI-9033-2
+      author: Solih N
+      labels: 'DML'
+      comment: Insert Proposal training sync element configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_ELEMENT_CONFIG (
+                UI_REFERENCE_ID, 
+                DESCRIPTION, 
+                SUB_SECTION_CODE, 
+                SECTION_CODE, 
+                UPDATE_USER, 
+                UPDATE_TIMESTAMP,
+                IS_ACTIVE
+              ) 
+              VALUES (
+                'prop-training-sync-action',
+                'Proposal training sync button',
+                '301',
+                'DP301',
+                'admin',
+                UTC_TIMESTAMP(),
+                'N'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG 
+              WHERE UI_REFERENCE_ID = 'prop-training-sync-action' 
+                AND SUB_SECTION_CODE = '301' 
+                AND SECTION_CODE = 'DP301';
+
+  - changeSet:
+      id: FIBI-9035-1
+      author: Hridya E K
+      labels: 'DML'
+      comment: Insert Award sub section configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4013', 'AW130', 'Back to Approval In Progress', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4013' AND SECTION_CODE = 'AW130'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4014', 'AW130', 'Copy Award', 'N', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4014' AND SECTION_CODE = 'AW130'
+              );
+
+              INSERT INTO DYN_SUBSECTION_CONFIG (SUB_SECTION_CODE, SECTION_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, INCLUDE_CUSTOM_DATA)
+              SELECT '4015', 'AW130', 'Delete Award', 'Y', UTC_TIMESTAMP(), 'admin', 'N'
+              FROM DUAL
+              WHERE NOT EXISTS (
+                SELECT 1 FROM DYN_SUBSECTION_CONFIG
+                WHERE SUB_SECTION_CODE = '4015' AND SECTION_CODE = 'AW130'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_SUBSECTION_CONFIG 
+              WHERE SUB_SECTION_CODE = '4013' AND SECTION_CODE = 'AW130';
+
+              DELETE FROM DYN_SUBSECTION_CONFIG 
+              WHERE SUB_SECTION_CODE = '4014' AND SECTION_CODE = 'AW130';
+
+              DELETE FROM DYN_SUBSECTION_CONFIG 
+              WHERE SUB_SECTION_CODE = '4015' AND SECTION_CODE = 'AW130';
+
+  - changeSet:
+      id: FIBI-9035-2
+      author: Hridya E K
+      labels: 'DML'
+      comment: Insert Proposal training element configuration
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_ELEMENT_CONFIG (
+                UI_REFERENCE_ID, 
+                DESCRIPTION, 
+                SUB_SECTION_CODE, 
+                SECTION_CODE, 
+                UPDATE_USER, 
+                UPDATE_TIMESTAMP,
+                IS_ACTIVE
+              ) 
+              VALUES (
+                'prop-key-person-training',
+                'Proposal key person training section',
+                '302',
+                'DP301',
+                'admin',
+                UTC_TIMESTAMP(),
+                'Y'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG 
+              WHERE UI_REFERENCE_ID = 'prop-key-person-training' 
+                AND SUB_SECTION_CODE = '302' 
+                AND SECTION_CODE = 'DP301';
+
+  - changeSet:
+      id: FIBI-9151-1
+      author: Arun Ramesh
+      labels: 'DML'
+      comment: Delete Workday Cost Allocation Notif job from scheduler and Quartz tables
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              
+              DELETE FROM qrtz_cron_triggers WHERE TRIGGER_NAME = 'Workday Cost Allocation Notif';
+              DELETE FROM qrtz_triggers WHERE TRIGGER_NAME = 'Workday Cost Allocation Notif';
+              DELETE FROM qrtz_job_details WHERE JOB_NAME = 'Workday Cost Allocation Notif';
+              DELETE FROM scheduler_job_info_history WHERE JOB_ID = 28;
+              DELETE FROM scheduler_job_info WHERE JOB_ID = 28;
+              
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9151-2
+      author: Arun Ramesh
+      labels: 'DDL'
+      comment: Drop WORKDAY_PARTIAL_ALLOC_REPORT procedure
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS WORKDAY_PARTIAL_ALLOC_REPORT;
+      rollback: empty
+
+  - changeSet:
+      id: FC-1826-1
+      author: Manesh MS
+      labels: 'DDL'
+      comment: Create script for MAIL_ATTACHMENT table. Save attachments by message id from fibi-core. Fetch attachments in fibi-notification-service to send mail with attachments.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS `MAIL_ATTACHMENTS` (
+                `ID` int NOT NULL AUTO_INCREMENT,
+                `MESSAGE_ID` varchar(255) NOT NULL,
+                `FILE_NAME` varchar(255) NOT NULL,
+                `CONTENT_TYPE` varchar(100) DEFAULT NULL,
+                `FILE_DATA` longblob,
+                `CREATE_TIMESTAMP` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`ID`)
+              );
+      rollback:
+        - sql:
+              sql: |
+                DROP TABLE IF EXISTS MAIL_ATTACHMENTS;

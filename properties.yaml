@@ -1,0 +1,7 @@
+config:
+  branch: "QA/Release"
+  credential_id: "mysql-password-dev"
+  jobname_uniqueid: "QA/Release"
+  mail_id: "manesh.ms@polussolutions.com,farsana.khadar@polussolutions.com,arjun.kr@polussolutions.com,suganya.s@polussolutions.com,prabhu.e@polussolutions.com"
+  url: "jdbc:mysql://192.168.1.228:3306/5_0_1"
+  changeLogFile: "RELEASE.yaml"

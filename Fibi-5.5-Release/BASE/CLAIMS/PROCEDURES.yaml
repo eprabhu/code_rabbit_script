@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS INSERT_CLAIM_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/CLAIMS/PROCEDURES/INSERT_CLAIM_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

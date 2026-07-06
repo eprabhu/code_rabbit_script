@@ -1,0 +1,268 @@
+  databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8115-1
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create new table for landing page Quick links
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS LANDING_QUICK_LINKS ( 
+              QUICK_LINK_ID INT NOT NULL AUTO_INCREMENT,
+              URL VARCHAR(2000) DEFAULT NULL,
+              NAME VARCHAR(200) DEFAULT NULL,
+              DESCRIPTION VARCHAR(2000) DEFAULT NULL,
+              TYPE VARCHAR(1) DEFAULT NULL,
+              START_DATE DATETIME DEFAULT NULL,
+              END_DATE DATETIME DEFAULT NULL,
+              UPDATE_TIMESTAMP DATETIME DEFAULT NULL,
+              UPDATE_USER VARCHAR(40) DEFAULT NULL,
+              SORT_ORDER INT DEFAULT NULL,
+              PRIMARY KEY (QUICK_LINK_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE LANDING_QUICK_LINKS;
+
+  - changeSet:
+      id: FIBI-8115-2
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create new table for landing modules
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS LANDING_MODULES (  
+                MODULE_ID INT NOT NULL AUTO_INCREMENT,
+                ICON VARCHAR(50) DEFAULT NULL,
+                TITLE VARCHAR(255) DEFAULT NULL,
+                DESCRIPTION VARCHAR(2000) DEFAULT NULL,
+                HELP_TEXT VARCHAR(2000) DEFAULT NULL,
+                MODULE_REDIRECT_URL VARCHAR(2000) DEFAULT NULL,
+                BACKEND_URL VARCHAR(2000) DEFAULT NULL,
+                SORT_ORDER INT DEFAULT NULL,
+                IS_ACTIVE VARCHAR(1) DEFAULT NULL,
+                UPDATE_USER VARCHAR(40) DEFAULT NULL,
+                UPDATE_TIMESTAMP DATETIME DEFAULT NULL,
+                PRIMARY KEY (MODULE_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE LANDING_MODULES;
+
+  - changeSet:
+      id: FIBI-8115-3
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create new table for landing announcements
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS LANDING_ANNOUNCEMENT ( 
+                SYSTEM_NOTIFICATION_ID INT NOT NULL AUTO_INCREMENT,
+                PUBLISHED_START_DATE DATE DEFAULT NULL,
+                PUBLISHED_END_DATE DATE DEFAULT NULL,
+                MESSAGE VARCHAR(4000) DEFAULT NULL,
+                SORT_ORDER INT DEFAULT NULL,
+                IS_ACTIVE VARCHAR(1) DEFAULT NULL,
+                UPDATE_USER VARCHAR(40) DEFAULT NULL,
+                UPDATE_TIMESTAMP DATETIME DEFAULT NULL,
+                PRIORITY VARCHAR(1) DEFAULT NULL,
+                PRIMARY KEY (SYSTEM_NOTIFICATION_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE LANDING_ANNOUNCEMENT;
+
+  - changeSet:
+      id: FIBI-8115-4
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create new table for landing branding
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS LANDING_BRANDING (  
+              BRANDING_ID INT NOT NULL AUTO_INCREMENT,
+              TITLE VARCHAR(255) DEFAULT NULL,
+              REDIRECT_URL VARCHAR(2000) DEFAULT NULL,
+              FILE_DATA_ID VARCHAR(255) DEFAULT NULL,
+              FILE_NAME VARCHAR(300) DEFAULT NULL,
+              MIME_TYPE VARCHAR(255) DEFAULT NULL,
+              UPDATE_TIMESTAMP DATETIME DEFAULT NULL,
+              UPDATE_USER VARCHAR(40) DEFAULT NULL,
+              PRIMARY KEY (BRANDING_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE LANDING_BRANDING;
+
+  - changeSet:
+      id: FIBI-8115-5
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create new table for landing file data
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS LANDING_FILE_DATA (  
+              FILE_DATA_ID VARCHAR(36) NOT NULL,
+              DATA LONGBLOB,
+              FILE_PATH VARCHAR(255) DEFAULT NULL,
+              FILE_NAME VARCHAR(500) DEFAULT NULL,
+              IS_ARCHIVED CHAR(1) DEFAULT NULL,
+              UPDATE_TIMESTAMP DATETIME DEFAULT NULL,
+              UPDATE_USER VARCHAR(60) DEFAULT NULL,
+              PRIMARY KEY (FILE_DATA_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE LANDING_FILE_DATA;
+
+  - changeSet:
+      id: FIBI-8115-6
+      author: Adarsh
+      labels: 'DDL'
+      comment: Create new table for landing widgets
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS LANDING_WIDGETS (  
+              WIDGET_ID INT NOT NULL AUTO_INCREMENT,
+              NAME VARCHAR(100) DEFAULT NULL,
+              ICON VARCHAR(50) DEFAULT NULL,
+              SORT_ORDER INT DEFAULT NULL,
+              META_DATA JSON NULL DEFAULT NULL,
+              IS_ACTIVE VARCHAR(1) DEFAULT NULL,
+              UPDATE_USER VARCHAR(40) DEFAULT NULL,
+              UPDATE_TIMESTAMP DATETIME DEFAULT NULL,
+              PRIMARY KEY (WIDGET_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE LANDING_WIDGETS;
+          
+  - changeSet:
+      id: FIBI-8115-7
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert into parameter table 
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO PARAMETER (PARAMETER_NAME, VALUE, UPDATE_TIMESTAMP, UPDATE_USER, DESCRIPTION) VALUES ('IS_FIBI_LANDING_PORTAL_ENABLED', 'Y', UTC_TIMESTAMP(), 'admin', 'To enable fibi landing page');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM PARAMETER WHERE PARAMETER_NAME = 'IS_FIBI_LANDING_PORTAL_ENABLED';
+
+  - changeSet:
+      id: FIBI-8115-8
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert into rights table 
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO RIGHTS (RIGHT_ID,RIGHT_NAME, DESCRIPTION,UPDATE_USER,UPDATE_TIMESTAMP,RIGHTS_TYPE_CODE)
+              SELECT 
+              COALESCE(MAX(RIGHT_ID), 0) + 1,
+                  'MANAGE_FIBI_LANDING',
+                  'Manage Fibi Landing',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '1'
+              FROM RIGHTS
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM RIGHTS
+                  WHERE RIGHT_NAME = 'MANAGE_FIBI_LANDING'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MANAGE_FIBI_LANDING';
+
+  - changeSet:
+      id: FIBI-8115-9
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert into FAQ_CATEGORY table 
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO FAQ_CATEGORY (CATEGORY_CODE,DESCRIPTION,UPDATE_TIMESTAMP,UPDATE_USER,CATEGORY_TYPE_CODE,FAQ) VALUES (20,'Landing',UTC_TIMESTAMP(),'admin',NULL,NULL); 
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM FAQ_CATEGORY WHERE CATEGORY_CODE = 20 AND DESCRIPTION = 'Landing';
+
+  - changeSet:
+      id: FIBI-8115-10
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert into LANDING_MODULES table 
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO LANDING_MODULES 
+              (MODULE_ID, ICON, TITLE, DESCRIPTION, HELP_TEXT, MODULE_REDIRECT_URL, BACKEND_URL, SORT_ORDER, IS_ACTIVE, UPDATE_USER, UPDATE_TIMESTAMP) VALUES
+              (1, 'fa-gift', 'FIBI Grants Management', 'FIBI Grants Management helps you manage research grants, proposals, and funding applications. Track grant submissions, monitor funding status, and manage grant-related documentation.', NULL, NULL, NULL, 1, 'Y', 'admin', UTC_TIMESTAMP()),
+              (2, 'fa-shield', 'FIBI Compliance', 'FIBI Compliance ensures adherence to regulatory and institutional standards. Monitor compliance requirements, track certifications, and manage compliance documentation.', NULL, NULL, NULL, 2, 'Y', 'admin', UTC_TIMESTAMP()),
+              (3, 'fa-users', 'IRB', 'IRB (Institutional Review Board) manages human subjects research protocols. Submit protocols, track approvals, and ensure ethical compliance for research involving human participants.', NULL, NULL, NULL, 3, 'Y', 'admin', UTC_TIMESTAMP()),
+              (4, 'fa-flask', 'IACUC', 'IACUC (Institutional Animal Care and Use Committee) manages animal research protocols. Submit protocols, track approvals, and ensure compliance with animal welfare regulations.', NULL, NULL, NULL, 4, 'Y', 'admin', UTC_TIMESTAMP()),
+              (5, 'fa-file-text', 'COI', 'COI (Conflict of Interest) helps manage financial and non-financial conflicts of interest. Submit disclosures, track reviews, and ensure transparency in research activities.', NULL, NULL, NULL, 5, 'Y', 'admin', UTC_TIMESTAMP()),
+              (6, 'fa-handshake-o', 'FIBI Agreements', 'FIBI Agreements manages contracts, agreements, and legal documents. Track agreement status, manage renewals, and maintain documentation for institutional agreements.', NULL, NULL, NULL, 6, 'Y', 'admin', UTC_TIMESTAMP()),
+              (7, 'fa-wrench', 'FIBI Service Requests', 'FIBI Service Requests allows you to submit and track institutional service requests. Create requests, monitor status, and communicate with service providers.', NULL, NULL, NULL, 7, 'Y', 'admin', UTC_TIMESTAMP()),
+              (8, 'fa-book', 'Leto', 'Leto provides access to various reports and analytics. Generate reports, view analytics, and access institutional data through the Leto reporting system.', NULL, NULL, NULL, 8, 'Y', 'admin', UTC_TIMESTAMP());
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM LANDING_MODULES WHERE MODULE_ID IN (1, 2, 3, 4, 5, 6, 7, 8);
+
+  - changeSet:
+      id: FIBI-8115-11
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert into LANDING_QUICK_LINKS table 
+      changes:
+        - sql:
+            sql: |
+               INSERT IGNORE INTO LANDING_QUICK_LINKS (QUICK_LINK_ID, URL, NAME, DESCRIPTION, TYPE, START_DATE, END_DATE, UPDATE_TIMESTAMP, UPDATE_USER, SORT_ORDER) VALUES
+                (9, NULL, 'Create Proposal',NULL, NULL, NULL, NULL, UTC_TIMESTAMP(), 'admin', 0),
+                (10, NULL, 'Create Agreement', NULL, NULL, NULL, NULL, UTC_TIMESTAMP(), 'admin', 0),
+                (11, NULL, 'Create Award', NULL, NULL, NULL, NULL, UTC_TIMESTAMP(), 'admin', 0),
+                (12, NULL, 'Create Grant Call', NULL, NULL, NULL, NULL, UTC_TIMESTAMP(), 'admin', 0);
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM LANDING_QUICK_LINKS WHERE QUICK_LINK_ID IN (9, 10, 11, 12);
+
+  - changeSet:
+      id: FIBI-8115-12
+      author: Adarsh
+      labels: 'DML'
+      comment: Insert into LANDING_WIDGETS table 
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO LANDING_WIDGETS (WIDGET_ID, NAME, ICON, SORT_ORDER, IS_ACTIVE, META_DATA, UPDATE_USER, UPDATE_TIMESTAMP) VALUES
+              (1, 'Announcements', 'campaign', 1, 'Y', NULL, 'admin', UTC_TIMESTAMP()),
+              (2, 'Institutional Branding', 'description', 2, 'Y', NULL, 'admin', UTC_TIMESTAMP()),
+              (3, 'Quick Links', 'open_in_new', 3, 'Y', NULL, 'admin', UTC_TIMESTAMP()),
+              (4, 'FIBI Modules', 'apps', 4, 'Y', NULL, 'admin', UTC_TIMESTAMP()),
+              (5, 'FAQ', 'help', 5, 'Y', NULL, 'admin', UTC_TIMESTAMP()),
+              (6, 'Action List', 'list', 6, 'Y', NULL, 'admin', UTC_TIMESTAMP()),
+              (7, 'Need Help', 'question_mark', 7, 'Y', '{"helpEmail":"support@institution.com","emailTemplate":""}', 'admin', UTC_TIMESTAMP()); 
+      rollback:
+        - sql:
+            sql: |
+             DELETE FROM LANDING_WIDGETS WHERE WIDGET_ID IN (1, 2, 3, 4, 5, 6, 7);
+

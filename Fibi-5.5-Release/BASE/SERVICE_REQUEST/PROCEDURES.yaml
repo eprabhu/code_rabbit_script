@@ -1,0 +1,87 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7865-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8731-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS COPY_SERVICE_REQUEST;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_COUNT;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT_IN_DETAIL;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/COPY_SERVICE_REQUEST.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

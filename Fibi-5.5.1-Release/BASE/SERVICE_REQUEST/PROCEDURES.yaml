@@ -1,0 +1,60 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: FIBI-7923-1
+        author: Suganya.S
+        labels: 'PROCEDURES'
+        comment: New Procedure
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP PROCEDURE IF EXISTS MIG_SR_CMT_ATTCH_DATA;
+            - sqlFile:
+                path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/MIG_SR_CMT_ATTCH_DATA.sql
+                relativeToChangeLogFile: false
+                splitStatements: false
+        rollback: empty
+    
+    - changeSet:
+        id: FIBI-8333-1
+        author: Suganya.S
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_HISTORY;
+            - sqlFile:
+                path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_HISTORY.sql
+                relativeToChangelogFile: false
+                splitStatements: false
+        rollback: empty
+        
+    - changeSet:
+        id: FIBI-8877-1
+        author: Suganya.S
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP PROCEDURE IF EXISTS DELETE_SERVICE_REQUEST_BY_ID;
+            - sqlFile:
+                path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/DELETE_SERVICE_REQUEST_BY_ID.sql
+                relativeToChangelogFile: false
+                splitStatements: false
+        rollback: empty
+    - changeSet:
+        id: FIBI-9155-1
+        author: Suganya.S
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+            - sqlFile:
+                path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+                relativeToChangeLogFile: false
+                splitStatements: false
+        rollback: empty

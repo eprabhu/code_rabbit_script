@@ -1,0 +1,76 @@
+databaseChangeLog: 
+ 
+  - changeSet: 
+      id: FIBI-7260-1
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_ADMIN_ASSIGNEE_WIDGET_LOOKUPS; 
+        - sqlFile: 
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_ADMIN_ASSIGNEE_WIDGET_LOOKUPS.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+          rollback: empty
+
+  - changeSet: 
+      id: FIBI-7260-2
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_AGMT_ADMIN_ASSIGNEE_OVERVIEW_DETAILS; 
+        - sqlFile: 
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGMT_ADMIN_ASSIGNEE_OVERVIEW_DETAILS.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7260-3
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_DYN_JSON; 
+        - sqlFile: 
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_DYN_JSON.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7260-4
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_JSON_CNT; 
+        - sqlFile: 
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_JSON_CNT.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
+
+  - changeSet: 
+      id: FIBI-7260-5
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_ASSIGNEES_FOR_ADMINISTRATOR; 
+        - sqlFile: 
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_ASSIGNEES_FOR_ADMINISTRATOR.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty

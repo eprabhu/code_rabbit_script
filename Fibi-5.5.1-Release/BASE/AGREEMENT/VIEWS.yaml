@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: FIBI-8766-1
+        author: Suganya.S
+        labels: 'VIEWS'
+        comment: Modified View
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP VIEW IF EXISTS AG_ASSOC_DETAIL_V;
+            - sqlFile:
+                path: ROUTINES/BASE/AGREEMENT/VIEWS/AG_ASSOC_DETAIL_V.sql
+                relativeToChangeLogFile: false
+                splitStatements: false
+        rollback: empty

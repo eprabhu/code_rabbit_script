@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6-Release/MIT/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/MIT/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.6-Release/MIT/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.6-Release/MIT/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'

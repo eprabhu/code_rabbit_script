@@ -1,0 +1,125 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8312-1
+      author: Kiran
+      labels: DDL
+      comment: Create AFFILIATION_TYPE table
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AFFILIATION_TYPE (
+                AFFILIATION_TYPE_CODE varchar(3) NOT NULL,
+                DESCRIPTION varchar(500) DEFAULT NULL,
+                IS_ACTIVE varchar(1) DEFAULT NULL,
+                UPDATE_TIMESTAMP datetime DEFAULT NULL,
+                UPDATED_BY varchar(40) DEFAULT NULL,
+                PRIMARY KEY (AFFILIATION_TYPE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: DROP TABLE IF EXISTS AFFILIATION_TYPE;
+
+  - changeSet:
+      id: FIBI-8312-2
+      author: Kiran
+      labels: DDL
+      comment: Create PERSON_AFFILIATED_UNITS table
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS PERSON_AFFILIATED_UNITS (
+                PERSON_AFFILIATED_UNIT_ID int NOT NULL AUTO_INCREMENT,
+                PERSON_ID varchar(40) NOT NULL,
+                UNIT_NUMBER varchar(50) NOT NULL,
+                AFFILIATION_TYPE_CODE varchar(3) NOT NULL,
+                AFFILIATION_START_DATE date DEFAULT NULL,
+                AFFILIATION_END_DATE date DEFAULT NULL,
+                DESCRIPTION varchar(500) DEFAULT NULL,
+                IS_ACTIVE varchar(1) DEFAULT NULL,
+                UPDATED_BY varchar(40) DEFAULT NULL,
+                UPDATE_TIMESTAMP datetime DEFAULT NULL,
+                PRIMARY KEY (PERSON_AFFILIATED_UNIT_ID),
+                KEY PERSON_AFFILIATED_UNITS_IDX1 (PERSON_ID),
+                KEY PERSON_AFFILIATED_UNITS_IDX2 (UNIT_NUMBER),
+                CONSTRAINT PERSON_AFFILIATED_UNITS_FK1 FOREIGN KEY (PERSON_ID)
+                  REFERENCES PERSON (PERSON_ID),
+                CONSTRAINT PERSON_AFFILIATED_UNITS_FK2 FOREIGN KEY (UNIT_NUMBER)
+                  REFERENCES UNIT (UNIT_NUMBER),
+                CONSTRAINT PERSON_AFFILIATED_UNITS_FK3 FOREIGN KEY (AFFILIATION_TYPE_CODE)
+                  REFERENCES AFFILIATION_TYPE (AFFILIATION_TYPE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: DROP TABLE IF EXISTS PERSON_AFFILIATED_UNITS;
+
+  - changeSet:
+      id: FIBI-8312-3
+      author: Kiran
+      labels: DML
+      comment: Insert default AFFILIATION_TYPE 'Departmental Affiliation'
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO AFFILIATION_TYPE
+              (AFFILIATION_TYPE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATED_BY)
+              SELECT '1', 'Departmental Affiliation', 'Y', UTC_TIMESTAMP(), 'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM AFFILIATION_TYPE
+                  WHERE AFFILIATION_TYPE_CODE = '1'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AFFILIATION_TYPE WHERE AFFILIATION_TYPE_CODE = '1';
+
+  - changeSet:
+      id: FIBI-8312-4
+      author: Kiran
+      labels: DML
+      comment: Insert RIGHT MAINTAIN_DISCLOSURES_FROM_AFFILIATED_UNITS
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO RIGHTS
+              (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT COALESCE(MAX(RIGHT_ID), 0) + 1,
+                     'MAINTAIN_DISCLOSURES_FROM_AFFILIATED_UNITS',
+                     'To maintain disclosures from affiliated units',
+                     'admin', UTC_TIMESTAMP(), '1'
+              FROM RIGHTS
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM RIGHTS
+                  WHERE RIGHT_NAME = 'MAINTAIN_DISCLOSURES_FROM_AFFILIATED_UNITS'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_DISCLOSURES_FROM_AFFILIATED_UNITS';
+
+  - changeSet:
+      id: FIBI-8312-5
+      author: Kiran
+      labels: DML
+      comment: Insert RIGHT MAINTAIN_AFFILIATED_UNITS
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO RIGHTS
+              (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT COALESCE(MAX(RIGHT_ID), 0) + 1,
+                     'MAINTAIN_AFFILIATED_UNITS',
+                     'To maintain affiliated units of a person',
+                     'admin', UTC_TIMESTAMP(), '1'
+              FROM RIGHTS
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM RIGHTS
+                  WHERE RIGHT_NAME = 'MAINTAIN_AFFILIATED_UNITS'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_AFFILIATED_UNITS';

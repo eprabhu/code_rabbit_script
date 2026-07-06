@@ -1,0 +1,150 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9314-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD;
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_COUNT;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8341-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment: New Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9995-1
+      author: Adarsh 
+      labels: 'PROCEDURES'
+      comment: Update procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10037-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update on Procedure GET_PROPOSAL_DASHBOARD_V1
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10036-1
+      author: Adarsh 
+      labels: 'PROCEDURES'
+      comment: Update on Procedure GET_PROPOSAL_DASHBOARD_V1
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10025-1
+      author: Nabeel Ahamed M 
+      labels: 'PROCEDURES'
+      comment: Update on Procedure GET_PROPOSAL_DASHBOARD_V1
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10036-2
+      author: Adarsh
+      labels: 'PROCEDURES'
+      comment: Update on Procedure GET_PROPOSAL_DASHBOARD_V1
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10054-1
+      author: Shyla 
+      labels: 'PROCEDURES'
+      comment: Update procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10143-3
+      author: Suganya.S
+      labels: 'PROCEDURES'
+      comment: Advanced Search performance optimization
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

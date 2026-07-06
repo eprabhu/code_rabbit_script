@@ -1,0 +1,50 @@
+-- `RESET_AUTO_INCREMENT_SR`; 
+
+CREATE PROCEDURE `RESET_AUTO_INCREMENT_SR`()
+BEGIN
+	  SELECT @max := IFNULL(MAX(SR_HEADER_ID),0)+ 1 FROM SR_HEADER;
+      SET @alter_statement = concat('ALTER TABLE SR_HEADER AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(ACTION_LOG_ID),0)+1 FROM SR_ACTION_LOG;
+      SET @alter_statement = concat('ALTER TABLE SR_ACTION_LOG AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(ATTACHMENT_ID),0)+1 FROM SR_ATTACHMENT;
+      SET @alter_statement = concat('ALTER TABLE SR_ATTACHMENT AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(COMMENT_ID),0)+1 FROM SR_COMMENTS;
+      SET @alter_statement = concat('ALTER TABLE SR_COMMENTS AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(SR_HEADER_FIELD_ID),0)+1 FROM SR_HEADER_FIELD;
+      SET @alter_statement = concat('ALTER TABLE SR_HEADER_FIELD AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(SR_HEADER_HISTORY_ID),0)+1 FROM SR_HEADER_HISTORY;
+      SET @alter_statement = concat('ALTER TABLE SR_HEADER_HISTORY AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(PROCESS_FLOW_ID),0)+1 FROM SR_PROCESS_FLOW;
+      SET @alter_statement = concat('ALTER TABLE SR_PROCESS_FLOW AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(SR_PROJECT_ID),0)+1 FROM SR_PROJECT;
+      SET @alter_statement = concat('ALTER TABLE SR_PROJECT AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(REPORTER_CHANGE_HISTORY_ID),0)+1 FROM SR_REPORTER_CHANGE_HISTORY;
+      SET @alter_statement = concat('ALTER TABLE SR_REPORTER_CHANGE_HISTORY AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(SR_STATUS_HISTORY_ID),0)+1 FROM SR_STATUS_HISTORY;
+      SET @alter_statement = concat('ALTER TABLE SR_STATUS_HISTORY AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+	  SELECT @max := IFNULL(MAX(WATCHER_ID),0)+1 FROM SR_WATCHER;
+      SET @alter_statement = concat('ALTER TABLE SR_WATCHER AUTO_INCREMENT = ', @max);
+      PREPARE stmt FROM @alter_statement;
+      EXECUTE stmt;
+      DEALLOCATE PREPARE stmt;
+END

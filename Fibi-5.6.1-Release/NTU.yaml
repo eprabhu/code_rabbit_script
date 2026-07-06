@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.1-Release/NTU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6.1-Release/NTU/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6.1-Release/NTU/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'

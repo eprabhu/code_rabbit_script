@@ -1,0 +1,80 @@
+CREATE FUNCTION `FN_CHECK_CREATE_AGREEMENT_PERMISSION`(
+    AV_LOGIN_PERSON_ID VARCHAR(90),
+    AV_ANSWER          VARCHAR(4000),
+    AV_MODULE          VARCHAR(20)
+
+) RETURNS int
+BEGIN
+
+    DECLARE LI_COUNT INT DEFAULT 0;
+    DECLARE LS_UNIT_NUMBER VARCHAR(50);
+
+    IF AV_MODULE = 'IP' THEN
+        SELECT HOME_UNIT_NUMBER
+        INTO LS_UNIT_NUMBER
+        FROM PROPOSAL
+        WHERE PROPOSAL_ID = AV_ANSWER
+        LIMIT 1;
+    ELSEIF AV_MODULE = 'AWARD' THEN
+        SELECT LEAD_UNIT_NUMBER
+        INTO LS_UNIT_NUMBER
+        FROM AWARD
+        WHERE AWARD_NUMBER = AV_ANSWER
+          AND (
+                AWARD_SEQUENCE_STATUS = 'ACTIVE'
+                OR (
+                    AWARD_SEQUENCE_STATUS = 'PENDING'
+                    AND AWARD_DOCUMENT_TYPE_CODE = 1
+                )
+              )
+        LIMIT 1;
+    ELSEIF AV_MODULE = 'AGREEMENT' THEN
+        SELECT AH.UNIT_NUMBER
+        INTO LS_UNIT_NUMBER
+        FROM AGREEMENT_HEADER AH
+        INNER JOIN AGREEMENT_SPONSOR ASP
+                ON ASP.AGREEMENT_REQUEST_ID = AH.AGREEMENT_REQUEST_ID
+        WHERE ASP.AGREEMENT_SPONSOR_TYPE_CODE = 1
+          AND AH.AGREEMENT_REQUEST_ID = AV_ANSWER
+        LIMIT 1;
+    END IF;
+
+    IF LS_UNIT_NUMBER IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    SELECT COUNT(1)
+    INTO LI_COUNT
+    FROM PERSON_ROLES PR
+    INNER JOIN (
+        SELECT RR.ROLE_ID
+        FROM ROLE_RIGHTS RR
+        INNER JOIN RIGHTS RT
+                ON RT.RIGHT_ID = RR.RIGHT_ID
+        WHERE RT.RIGHT_NAME = 'CREATE_AGREEMENT'
+    ) RLE
+        ON RLE.ROLE_ID = PR.ROLE_ID
+    WHERE PR.PERSON_ID = AV_LOGIN_PERSON_ID
+      AND (
+            (
+                PR.DESCEND_FLAG = 'Y'
+                AND LS_UNIT_NUMBER IN (
+                    SELECT CHILD_UNIT_NUMBER
+                    FROM UNIT_WITH_CHILDREN
+                    WHERE UNIT_NUMBER = PR.UNIT_NUMBER
+                )
+            )
+            OR
+            (
+                PR.DESCEND_FLAG = 'N'
+                AND PR.UNIT_NUMBER = LS_UNIT_NUMBER
+            )
+          );
+
+    IF LI_COUNT > 0 THEN
+        RETURN 1;
+    END IF;
+
+    RETURN 0;
+
+END

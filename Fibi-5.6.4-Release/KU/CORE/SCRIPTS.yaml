@@ -1,0 +1,63 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-11092
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Update scheduler job cron expressions for KU.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `scheduler_job_info`
+              SET `CRON_EXPRESSION` = CASE `JOB_ID`
+                  WHEN 38 THEN '0 30 0 * * ?'
+                  WHEN 16 THEN '0 */31 * * * ?'
+                  WHEN 15 THEN '0 */31 * * * ?'
+                  WHEN 36 THEN '0 22 * * * ?'
+              END,
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (38, 16, 15, 36);
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `scheduler_job_info`
+              SET `CRON_EXPRESSION` = CASE `JOB_ID`
+                  WHEN 38 THEN '0 30 0 * ?'
+                  WHEN 16 THEN '0 */31 * * ?'
+                  WHEN 15 THEN '0 */31 * * ?'
+                  WHEN 36 THEN '0 22 * * ?'
+              END,
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (38, 16, 15, 36);
+              SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-11231
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Disable admin check for KU.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `parameter`
+              SET `VALUE` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`PARAMETER_NAME` = 'IS_ENABLED_ADMIN_CHK');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `parameter`
+              SET `VALUE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`PARAMETER_NAME` = 'IS_ENABLED_ADMIN_CHK');
+              SET SQL_SAFE_UPDATES = 1;

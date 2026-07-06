@@ -1,0 +1,106 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7756-1
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS award_manpower_payroll_v
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_payroll_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6824-1
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS award_manpower_compr_report_v
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_compr_report_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8076-1
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS award_manpower_payroll_v
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_payroll_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8076-2
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS award_manpower_report_v
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_report_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8464-1
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS award_manpower_report_v
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_report_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8464-2
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS award_manpower_report_v
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_report_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8464-3
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS award_manpower_report_v
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_report_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

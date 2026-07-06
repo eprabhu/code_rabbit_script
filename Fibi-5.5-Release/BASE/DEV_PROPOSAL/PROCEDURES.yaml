@@ -1,0 +1,77 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7818-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_COUNT
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7818-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS COPY_MERGE_EPS_PROPOSAL_DATA;
+                DROP PROCEDURE IF EXISTS COPY_MERGE_EPS_PROPOSAL_PERSON_DATA;
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD;
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DASHBOARD_COUNT;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/COPY_MERGE_EPS_PROPOSAL_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/COPY_MERGE_EPS_PROPOSAL_PERSON_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8708-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS COPY_MERGE_EPS_PROPOSAL_DATA
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/COPY_MERGE_EPS_PROPOSAL_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

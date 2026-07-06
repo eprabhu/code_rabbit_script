@@ -1,0 +1,15 @@
+﻿databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10795
+      author: Robin
+      labels: 'DML'
+      comment: New Scheduler script
+      changes:
+        - sql:
+            sql: |
+                INSERT INTO SCHEDULER_JOB_INFO (CRON_EXPRESSION, IS_CRON_JOB, JOB_CLASS, JOB_GROUP, JOB_NAME, DESCRIPTION, CRON_STATUS, UPDATE_USER, UPDATE_TIMESTAMP, IS_ACTIVE) SELECT '0 30 19 * * ?', 'Y', 'com.polus.agreement.quartzscheduler.AgreementStatusUpdateScheduler', 'agreement', 'Agreement Status Update', 'This job is to update the agreement complete status', 'SCHEDULED', 'admin', NOW(), 'Y' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM SCHEDULER_JOB_INFO WHERE JOB_NAME = 'Agreement Status Update');
+      rollback: 
+                SET SQL_SAFE_UPDATES = 0;
+                DELETE FROM scheduler_job_info WHERE JOB_GROUP = 'agreement' AND JOB_NAME = 'Agreement Status Update' AND JOB_CLASS = 'com.polus.agreement.quartzscheduler.AgreementStatusUpdateScheduler';
+                SET SQL_SAFE_UPDATES = 1;

@@ -1,0 +1,62 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10940-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modify GET_WIDGET_DATA_IN_DETAIL
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10944-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modify GET_WIDGET_DATA_IN_DETAIL
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10944-2
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modify GET_WIDGET_DATA_IN_DETAIL
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-11223-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modify GET_RESEARCH_SUMMARY_DETAILS
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+

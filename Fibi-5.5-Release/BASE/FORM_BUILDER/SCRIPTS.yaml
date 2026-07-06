@@ -1,0 +1,265 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7286-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new right 'MAINTAIN_FORMBUILDER' into RIGHTS table.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO RIGHTS (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT R.ID, 'MAINTAIN_FORMBUILDER', 'To access and modify form builder', 'admin', UTC_TIMESTAMP(), '1'
+              FROM (SELECT MAX(RIGHT_ID) + 1 AS ID FROM RIGHTS) AS R
+              WHERE NOT EXISTS (SELECT 1 FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_FORMBUILDER');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_FORMBUILDER';
+
+  - changeSet:
+      id: FIBI-7525-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Alter column OPTION_NAME to LONGTEXT in FB_COMP_CUSTOM_ELEMENT_OPTIONS table.
+      changes:
+        - sql:
+            sql: |
+                ANALYZE TABLE FB_COMP_CUSTOM_ELEMENT_OPTIONS;
+                SET @SQL := IF(
+                    (
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE()
+                          AND TABLE_NAME = 'FB_COMP_CUSTOM_ELEMENT_OPTIONS'
+                          AND COLUMN_NAME = 'OPTION_NAME'
+                          AND DATA_TYPE = 'LONGTEXT'
+                    ) = 0,
+                    'ALTER TABLE FB_COMP_CUSTOM_ELEMENT_OPTIONS MODIFY COLUMN OPTION_NAME LONGTEXT;',
+                    'DO 1'
+                );
+                PREPARE STMT FROM @SQL;
+                EXECUTE STMT;
+                DEALLOCATE PREPARE STMT;
+      rollback:
+        - sql:
+            sql: |
+                ANALYZE TABLE FB_COMP_CUSTOM_ELEMENT_OPTIONS;
+                SET @SQL := IF(
+                    (
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FB_COMP_CUSTOM_ELEMENT_OPTIONS'
+                        AND COLUMN_NAME = 'OPTION_NAME'
+                        AND DATA_TYPE = 'LONGTEXT'
+                    ) = 1,
+                    'ALTER TABLE FB_COMP_CUSTOM_ELEMENT_OPTIONS MODIFY COLUMN OPTION_NAME VARCHAR(1000);',
+                    'DO 1'
+                );
+                PREPARE STMT FROM @SQL;
+                EXECUTE STMT;
+                DEALLOCATE PREPARE STMT;
+
+  - changeSet:
+      id: FIBI-7525-2
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Alter column VALUE to LONGTEXT in FB_COMP_CUSTOM_ELEMENT_ANSWER table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER;
+              SET @SQL := IF(
+                  (
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FB_COMP_CUSTOM_ELEMENT_ANSWER'
+                        AND COLUMN_NAME = 'DESCRIPTION'
+                        AND DATA_TYPE = 'LONGTEXT'
+                  ) = 0,
+                  'ALTER TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER MODIFY COLUMN DESCRIPTION LONGTEXT;',
+                  'DO 1'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+      rollback:
+        - sql:
+            sql: |
+              ANALYZE TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER;
+              SET @SQL := IF(
+                  (
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FB_COMP_CUSTOM_ELEMENT_ANSWER'
+                        AND COLUMN_NAME = 'DESCRIPTION'
+                        AND DATA_TYPE = 'LONGTEXT'
+                  ) = 1,
+                  'ALTER TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER MODIFY COLUMN DESCRIPTION VARCHAR(4000);',
+                  'DO 1'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+
+  - changeSet:
+      id: FIBI-7525-3
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Alter column VALUE to LONGTEXT in FB_COMP_CUSTOM_ELEMENT_ANSWER table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER;
+              SET @SQL := IF(
+                  (
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FB_COMP_CUSTOM_ELEMENT_ANSWER'
+                        AND COLUMN_NAME = 'VALUE'
+                        AND DATA_TYPE = 'LONGTEXT'
+                  ) = 0,
+                  'ALTER TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER MODIFY COLUMN VALUE LONGTEXT;',
+                  'DO 1'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+      rollback:
+        - sql:
+            sql: |
+              ANALYZE TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER;
+              SET @SQL := IF(
+                  (
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FB_COMP_CUSTOM_ELEMENT_ANSWER'
+                        AND COLUMN_NAME = 'VALUE'
+                        AND DATA_TYPE = 'LONGTEXT'
+                  ) = 1,
+                  'ALTER TABLE FB_COMP_CUSTOM_ELEMENT_ANSWER MODIFY COLUMN VALUE VARCHAR(4000);',
+                  'DO 1'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+
+  - changeSet:
+      id: FIBI-7372-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Insert new component type 'CR' (Currency) into FORM_SECTION_COMPONENT_TYPE table.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO FORM_SECTION_COMPONENT_TYPE (COMPONENT_TYPE_CODE, DESCRIPTION, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, SORT_ORDER) VALUES ('CR','Currency','Y',UTC_TIMESTAMP(),'admin',19);
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM FORM_SECTION_COMPONENT_TYPE WHERE COMPONENT_TYPE_CODE = 'CR';
+
+  - changeSet:
+      id: FIBI-7567-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Create FB_FILE_DATA and FB_ATTACHMENTS tables.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FB_FILE_DATA (
+                      FB_FILE_DATA_ID VARCHAR(36),
+                      DATA LONGBLOB,
+                      FILE_PATH VARCHAR(500),
+                      ORIGINAL_FILE_NAME VARCHAR(255),
+                      FILE_NAME VARCHAR(255),
+                      IS_ARCHIVED BOOLEAN DEFAULT FALSE,
+                      CREATE_TIMESTAMP DATETIME NOT NULL,
+                      CREATE_USER VARCHAR(60) NOT NULL,
+                      UPDATE_TIMESTAMP DATETIME NOT NULL,
+                      UPDATE_USER VARCHAR(60) NOT NULL,
+                      CONSTRAINT FB_FILE_DATA_PK PRIMARY KEY (FB_FILE_DATA_ID)
+                  );
+              CREATE TABLE IF NOT EXISTS FB_ATTACHMENTS (
+                      FB_ATT_ID INT AUTO_INCREMENT,
+                      MODULE_ITEM_CODE INT NOT NULL,
+                      MODULE_ITEM_KEY VARCHAR(20) NOT NULL,
+                      MODULE_SUB_ITEM_CODE INT NOT NULL,
+                      MODULE_SUB_ITEM_KEY VARCHAR(20) NOT NULL,
+                      FILE_ID VARCHAR(36) NOT NULL,
+                      FILE_NAME VARCHAR(255) NOT NULL,
+                      DESCRIPTION VARCHAR(2000) NULL,
+                      CREATE_TIMESTAMP DATETIME NOT NULL,
+                      CREATE_USER VARCHAR(60) NOT NULL,
+                      UPDATE_TIMESTAMP DATETIME NOT NULL,
+                      UPDATE_USER VARCHAR(60) NOT NULL,
+                      CONSTRAINT FB_ATTACHMENTS_PK PRIMARY KEY (FB_ATT_ID),
+                      CONSTRAINT FB_ATTACHMENTS_FILE_DATA_FK1 FOREIGN KEY (FILE_ID) REFERENCES FB_FILE_DATA (FB_FILE_DATA_ID)
+                  );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FB_ATTACHMENTS;
+              DROP TABLE IF EXISTS FB_FILE_DATA;
+
+  - changeSet:
+      id: FIBI-7567-2
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Add IS_CAPTURE_DESCRIPTION column to FORM_BUILDER_SECTION_COMPONENT table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE FORM_BUILDER_SECTION_COMPONENT;
+              SET @SQL := IF(
+                  (
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FORM_BUILDER_SECTION_COMPONENT'
+                        AND COLUMN_NAME = 'IS_CAPTURE_DESCRIPTION'
+                  ) = 0,
+                  'ALTER TABLE FORM_BUILDER_SECTION_COMPONENT ADD COLUMN IS_CAPTURE_DESCRIPTION VARCHAR(1);',
+                  'DO 1'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+      rollback:
+        - sql:
+            sql: |
+              ANALYZE TABLE FORM_BUILDER_SECTION_COMPONENT;
+              SET @SQL := IF(
+                  (
+                      SELECT COUNT(*)
+                      FROM INFORMATION_SCHEMA.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'FORM_BUILDER_SECTION_COMPONENT'
+                        AND COLUMN_NAME = 'IS_CAPTURE_DESCRIPTION'
+                  ) = 1,
+                  'ALTER TABLE FORM_BUILDER_SECTION_COMPONENT DROP COLUMN IS_CAPTURE_DESCRIPTION;',
+                  'DO 1'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+
+  - changeSet:
+      id: FIBI-7368-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update IS_MANDATORY in quest_question table based on FORM_BUILDER_SECTION_COMPONENT table.
+      changes:
+        - sql:
+            sql: |
+              UPDATE quest_question QQ
+              JOIN form_builder_section_component FC
+              ON FC.COMPONENT_REF_ID = QQ.QUESTIONNAIRE_ID
+              AND FC.COMPONENT_TYPE_CODE = 'QN'
+              AND FC.IS_MANDATORY = 'Y'
+              SET QQ.IS_MANDATORY = 'Y';
+      rollback: empty

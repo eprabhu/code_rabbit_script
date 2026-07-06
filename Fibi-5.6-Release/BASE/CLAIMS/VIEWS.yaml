@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7562-1
+      author: Mohamed Fazil
+      labels: 'DDL'
+      comment: Create CLAIM_TYPE_V view
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS `CLAIM_TYPE_V`;
+        - sqlFile:
+            path: ROUTINES/BASE/CLAIMS/VIEWS/claim_type_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback:
+        - sql:
+            sql: DROP VIEW IF EXISTS `CLAIM_TYPE_V`;

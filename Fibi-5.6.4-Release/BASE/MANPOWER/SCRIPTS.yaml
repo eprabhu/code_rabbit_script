@@ -1,0 +1,172 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9683-1
+        author: Hridya.E K
+        labels: 'DML'
+        comment:  Insert new placeholders in arg_value_lookup.
+        changes:
+          - sql:
+              sql: |
+                    INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT 
+                    (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP), 
+                    'PLACEHOLDER_AWARD', 
+                    'RECONCILIATION_TIMESTAMP', 
+                    'For setting Reconciliation run timestamp', 
+                    UTC_TIMESTAMP(), 
+                    'admin'
+                        WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM arg_value_lookup
+                    WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD' 
+                    AND ARGUMENT_VALUE = 'RECONCILIATION_TIMESTAMP'
+                    );
+
+                    INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'WBS_NUMBER',
+                        'For setting WBS number',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                              AND ARGUMENT_VALUE = 'WBS_NUMBER'
+                        );
+
+                        INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'BUDGET_AMOUNT',
+                        'For setting budget amount',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                              AND ARGUMENT_VALUE = 'BUDGET_AMOUNT'
+                        );
+
+                        INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'COST_ELEMENT',
+                        'For setting cost element',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                              AND ARGUMENT_VALUE = 'COST_ELEMENT'
+                        );
+
+                        INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'ACTUAL_HEAD_COUNT',
+                        'For setting actual head count',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                              AND ARGUMENT_VALUE = 'ACTUAL_HEAD_COUNT'
+                        );
+
+                        INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'APPROVED_HEAD_COUNT',
+                        'For setting approved head count',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                              AND ARGUMENT_VALUE = 'APPROVED_HEAD_COUNT'
+                        );
+
+                        INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'EXPENSE_AMOUNT',
+                        'For setting expense amount',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                        AND ARGUMENT_VALUE = 'EXPENSE_AMOUNT'
+                        );
+
+                        INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'L2_COMMITTED_AMOUNT',
+                        'For setting L2 committed amount',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                              AND ARGUMENT_VALUE = 'L2_COMMITTED_AMOUNT'
+                        );
+
+                        INSERT INTO ARG_VALUE_LOOKUP (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                        SELECT
+                        (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM ARG_VALUE_LOOKUP),
+                        'PLACEHOLDER_AWARD',
+                        'UNCOMMITTED_AMOUNT',
+                        'For setting uncommitted amount',
+                        UTC_TIMESTAMP(),
+                        'admin'
+                        WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ARG_VALUE_LOOKUP
+                        WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD'
+                              AND ARGUMENT_VALUE = 'UNCOMMITTED_AMOUNT'
+                        );
+
+        rollback:
+          - sql:
+              sql: |
+                    DELETE FROM ARG_VALUE_LOOKUP
+                    WHERE ARGUMENT_NAME = 'PLACEHOLDER_AWARD' AND ARGUMENT_VALUE IN (
+                    'RECONCILIATION_TIMESTAMP', 'WBS_NUMBER', 'BUDGET_AMOUNT', 'COST_ELEMENT', 'ACTUAL_HEAD_COUNT', 'APPROVED_HEAD_COUNT', 'EXPENSE_AMOUNT', 'L2_COMMITTED_AMOUNT', 'UNCOMMITTED_AMOUNT'
+                    );;
+
+  - changeSet:
+        id: FIBI-9683-2
+        author: Hridya.E K
+        labels: 'DML'
+        comment:   Update notification message
+        changes:
+          - sql:
+              sql: |
+                    UPDATE NOTIFICATION_TYPE SET MESSAGE = '<p>Dear user,</p><p>The following is the reconciliation report.</p><p>Reconciliation Report ran on {RECONCILIATION_TIMESTAMP}. Discrepancies if any are attached in the mail.</p><p>{RECONCILATION_CONTENT}</p><p> </p><p><strong>Note </strong><span style="background-color:rgb(255,255,255);color:rgb(0,0,0);">: This is a system-generated email. Please do not reply to this email.</span></p>', UPDATE_USER ='admin'  WHERE (`NOTIFICATION_TYPE_ID` = '673');
+
+                    UPDATE NOTIFICATION_TYPE SET MESSAGE = '<p>Dear {PRINCIPAL_INVESTIGATOR},</p><p>Project Details :</p><p>Award Number : {AWARD_NUMBER}</p><p>Account Number : {ACCOUNT_NUMBER}</p><p>Award Title : {AWARD_TITLE}</p><p>Name of Principal Investigator : {PRINCIPAL_INVESTIGATOR}</p><p>Lead Unit : {LEAD_UNIT}</p><p>Manpower committed amount exceeds from the budget amount.</p><p>Detail of manpower request :</p><p>WBS Number : {WBS_NUMBER}<br>Budget Amount : {BUDGET_AMOUNT}<br>Cost Element : {COST_ELEMENT}<br>Actual Head Count : {ACTUAL_HEAD_COUNT}<br>Approved Head Count : {APPROVED_HEAD_COUNT}<br>Expense Amount : {EXPENSE_AMOUNT}<br>L2 Committed Amount : {L2_COMMITTED_AMOUNT}<br>Uncommitted Amount : {UNCOMMITTED_AMOUNT}</p><p>Please go to {URL} to view the task and award details.</p><p>Thank you.</p><p><strong>Note </strong>: This is a system-generated email. Please do not reply to this email.</p>' WHERE (`NOTIFICATION_TYPE_ID` = '648');
+
+            
+        rollback:
+          - sql:
+              sql: |
+                    UPDATE NOTIFICATION_TYPE SET MESSAGE = '<p>Dear user,</p><p>The following is the reconciliation report.</p><p>{RECONCILATION_CONTENT}</p><p>&nbsp;</p><p><strong>Note </strong><span style="background-color:rgb(255,255,255);color:rgb(0,0,0);">: This is a system-generated email. Please do not reply to this email.</span></p>' WHERE (`NOTIFICATION_TYPE_ID` = '673');
+
+                    UPDATE NOTIFICATION_TYPE SET MESSAGE = '<p>Dear {PRINCIPAL_INVESTIGATOR},</p><p>Project Details :</p><p>Award Number : {AWARD_NUMBER}</p><p>Account Number : {ACCOUNT_NUMBER}</p><p>Award Title : {AWARD_TITLE}</p><p>Name of Principal Investigator : {PRINCIPAL_INVESTIGATOR}</p><p>Lead Unit : {LEAD_UNIT}</p><p>Manpower committed amount exceeds from the budget amount.</p><p>Detail of manpower request :&nbsp;</p><p>{MANPOWER_CONTENT}</p><p>Please go to {URL} to view the task and award details.</p><p>Thank you.</p><p><strong>Note </strong>: This is a system-generated email. Please do not reply to this email.</p>' WHERE (`NOTIFICATION_TYPE_ID` = '648');

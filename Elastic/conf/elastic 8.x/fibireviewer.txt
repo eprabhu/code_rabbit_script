@@ -1,0 +1,179 @@
+
+1. To delete and index from the elastic server (update the IP as required a dummy IP for refernce is added).
+
+    	curl -XDELETE http://192.168.1.182:9200/fibireviewer/  
+
+2. To create an Index in elastic server , the command will create an index in elastic server named "fibireviewer".
+(update the IP as required a dummy IP for refernce is added).
+
+	curl -XPUT 'http://192.168.1.182:9200/fibireviewer/' -H 'Content-Type: application/json' -d '{"settings":{"number_of_shards":5,"analysis":{"filter":{"ngram_filter":{"type":"edge_ngram","min_gram":2,"max_gram":60}},"analyzer":{"ngram_analyzer":{"type":"custom","tokenizer":"whitespace","filter":["lowercase","ngram_filter"]}}}},"mappings":{"properties":{"prncpl_id":{"type":"text","index":true},"full_name":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard","fields":{"sort":{"type":"keyword","index":true}}},"prncpl_nm":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"},"email_addr":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"whitespace"},"country_name":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"},
+	"aff_description":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"},"country_code":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"},"aff_code":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"},"academic_rank":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"sk_description":{"type":"text","analyzer":"whitespace","search_analyzer":"standard","index":true},"last_name":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"},"hindex":{"type":"text","index":true,"term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"keyword"}}}}'
+
+3. logstash configuration that need to used to sync elastic index from Database
+    1.jdbc_driver_library = path to library for jar for mysqlconnector ( eg:/root/conf/mysql-connector.jar) 
+    2.jdbc_connection_string = The URL for the Database that need to be used.
+    3.hosts = the ip address of the elastic search sever thats used for data sync.
+    4.Other properties dont need to be changed. only add DB password and user details. 
+
+	input {
+	  jdbc {
+		jdbc_driver_library => "/root/conf/mysql-connector.jar"
+		jdbc_driver_class => "Java::com.mysql.jdbc.Driver"
+		jdbc_connection_string => "jdbc:mysql://192.168.1.6:3306/fibi_base?useSSL=false&useTimezone=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+		jdbc_user => "root"
+		jdbc_password =>"Polus@123"
+		jdbc_validate_connection => true
+		statement => "SELECT  t1.external_reviewer_id AS prncpl_id,
+						t1.full_name,
+						t1.user_name AS prncpl_nm,
+						t1.email_address_primary AS email_addr,
+						t1.affilation_instituition_code AS aff_code,
+						t7.description AS academic_rank,
+						t1.country_code AS country_code,
+						t2.description AS aff_description,
+						t3.country_name AS country_name,
+						GROUP_CONCAT(t6.description SEPARATOR ' ') AS sk_description,
+						t1.last_name AS last_name,
+						t1.status AS reviewer_status,
+								  t8.hi_index AS hindex
+					  FROM
+						external_reviewer t1
+						LEFT OUTER JOIN ext_reviewer_affiliation t2 ON t1.affilation_instituition_code = t2.affilation_instituition_code
+						LEFT OUTER JOIN country t3 ON t1.country_code = t3.country_code
+						LEFT OUTER JOIN external_reviewer_rights t4 ON t1.external_reviewer_id = t4.external_reviewer_id
+						LEFT OUTER JOIN external_reviewer_specialization t5 ON T1.external_reviewer_id = t5.external_reviewer_id
+						LEFT OUTER JOIN ext_specialism_keyword t6 ON t5.specialization_code = t6.specialism_keyword_code
+						LEFT OUTER JOIN ext_reviewer_academic_rank t7 ON t1.academic_rank_code = t7.academic_rank_code
+						LEFT OUTER JOIN external_reviewer_ext t8 on t8.external_reviewer_id = t1.external_reviewer_id
+					  WHERE
+						t4.reviewer_rights_id = '1' group by prncpl_id, full_name,prncpl_nm, email_addr, aff_code, country_code, aff_description, country_name;"
+		}
+	}
+	output {
+		elasticsearch {
+			index => "fibireviewer"
+			document_id => "%{prncpl_id}"
+			hosts => "localhost:9200"
+		}
+	}
+
+	
+
+
+4. The JSON object used for Developers and miantainers so that its easy to identify the propoerties used to create an index
+
+
+ {
+  "settings": {
+    "number_of_shards": 5,
+    "analysis": {
+      "filter": {
+        "ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 60
+        }
+      },
+      "analyzer": {
+        "ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": [
+            "lowercase",
+            "ngram_filter"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "prncpl_id": {
+        "type": "text",
+        "index": true
+      },
+      "full_name": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard",
+        "fields": {
+          "sort": {
+            "type": "keyword",
+            "index": true
+          }
+        }
+      },
+      "prncpl_nm": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      },
+      "email_addr": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace"
+      },
+      "country_name": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      },
+      "aff_description": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      },
+      "country_code": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      },
+      "aff_code": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      },
+      "academic_rank": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "sk_description": {
+        "type": "text",
+        "analyzer": "whitespace",
+        "search_analyzer": "standard",
+        "index": true
+      },
+      "last_name": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      },
+      "hindex": {
+        "type": "text",
+        "index": true,
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "keyword"
+      }
+    }
+  }
+}

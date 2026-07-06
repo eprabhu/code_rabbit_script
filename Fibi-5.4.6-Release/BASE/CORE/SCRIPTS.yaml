@@ -1,0 +1,491 @@
+databaseChangeLog:
+  - changeSet:
+        id: FIBI-7420-1
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Add Lookup Window for State in FIBI
+        changes:
+          - sql:
+              sql: |
+                INSERT INTO lookup_window (LOOKUP_WINDOW_NAME, DESCRIPTION, TABLE_NAME, COLUMN_NAME, OTHERS_DISPLAY_COLUMNS, UPDATE_TIMESTAMP, UPDATE_USER, DATA_TYPE_CODE)
+                SELECT 'State', 'State', 'States', 'fibiState', 'DESCRIPTION', UTC_TIMESTAMP(), 'admin', '7'
+                WHERE NOT EXISTS (
+                  SELECT 1 FROM lookup_window
+                  WHERE LOOKUP_WINDOW_NAME = 'State'
+                );
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM lookup_window WHERE LOOKUP_WINDOW_NAME = 'State' AND TABLE_NAME = 'States' AND COLUMN_NAME = 'fibiState';
+
+  - changeSet:
+        id: FIBI-7432-1
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Add Business Rule Function for checking Abstract filled in proposal
+        changes:
+          - sql:
+              sql: |
+
+                    INSERT INTO BUSINESS_RULE_FUNCTION (FUNCTION_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, DB_FUNCTION_NAME, UPDATE_TIMESTAMP, UPDATE_USER)
+                    SELECT 'For checking Abstract filled in proposal',3, 0, 'For checking Abstract filled in proposal', 'FN_CHK_ABSTRACT_MANDATORY', UTC_TIMESTAMP(), 'admin'
+                    WHERE NOT EXISTS (
+                      SELECT 1 FROM BUSINESS_RULE_FUNCTION WHERE FUNCTION_NAME = 'For checking Abstract filled in proposal'
+                    );
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM BUSINESS_RULE_FUNCTION_ARG WHERE FUNCTION_NAME = 'For checking Abstract filled in proposal';
+  - changeSet:
+        id: FIBI-7432-2
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Add Business Rule Function for checking Abstract filled in proposal
+        changes:
+          - sql:
+              sql: |
+
+                    INSERT INTO BUSINESS_RULE_FUNCTION_ARG (FUNCTION_NAME, ARGUMENT_SEQUENCE_NUMBER, ARGUMENT_NAME, UPDATE_TIMESTAMP, UPDATE_USER)
+                    SELECT 'For checking Abstract filled in proposal', 1, 'PROPOSAL_ID', UTC_TIMESTAMP(), 'admin'
+                    WHERE NOT EXISTS (
+                      SELECT 1 FROM BUSINESS_RULE_FUNCTION_ARG
+                      WHERE FUNCTION_NAME = 'For checking Abstract filled in proposal'
+                    );
+        rollback:
+          - sql:
+              sql: |
+               DELETE FROM BUSINESS_RULE_FUNCTION WHERE FUNCTION_NAME = 'For checking Abstract filled in proposal';
+
+  - changeSet:
+        id: FIBI-6793-1
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Added States in Lookup window table
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO lookup_window (LOOKUP_WINDOW_NAME, DESCRIPTION, TABLE_NAME, COLUMN_NAME, OTHERS_DISPLAY_COLUMNS, 
+                UPDATE_TIMESTAMP, UPDATE_USER, DATA_TYPE_CODE) 
+                VALUES ('State', 'State', 'States', 'fibiState', 'DESCRIPTION', UTC_TIMESTAMP(), 'admin', '7');
+                   
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM lookup_window WHERE LOOKUP_WINDOW_NAME = 'State' AND TABLE_NAME = 'States' AND COLUMN_NAME = 'fibiState';
+
+  - changeSet:
+        id: FIBI-7559-1
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Update content for accountype in code table configuration
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE CODE_TABLE_CONFIGURATION SET CONTENT = '{"group":"Award","codeTableName":"Account Type","description":
+                "List of all account types in Award module","databaseTableName":"ACCOUNT_TYPE","fields":[{"columnName"
+                :"ACCOUNT_TYPE_CODE","displayName":"Account Type","dataType":"String","isEditable":false,"length":3,"canEmpty"
+                :false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient"
+                :null,"values":null,"refColumnName":null,"defaultValue":null},
+                {"columnName":"DESCRIPTION","displayName":"Description","dataType":"String","isEditable":true,
+                "length":200,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,
+                "valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},
+                {"columnName":"UPDATE_TIMESTAMP","displayName":"update timestamp","dataType":"Date",
+                "isEditable":false,"length":null,"canEmpty":false,"visible":true,"valueChanged":null,
+                "index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName"
+                :null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":
+                "String","isEditable":false,"length":60,"canEmpty":false,"visible":true,"valueChanged":null,"index"
+                :null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":
+                "PERSON#USER_NAME","defaultValue":null},{"columnName":"IS_ACTIVE","displayName":"Is Active","dataType":"String","isEditable":true,"length":1,
+                "canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":"switch","valueField":null,"isTransient":null,"values":null,
+                "refColumnName":null,"defaultValue":null}],"primaryKey":["ACCOUNT_TYPE_CODE"],"dependency":[{"displayName":"Award",
+                "table_name":"AWARD","columnName":"ACCOUNT_TYPE_CODE"}],"actions":null}' ,UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (TABLE_NAME = 'ACCOUNT_TYPE');
+                 SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-7568-9
+        author: Prabhu.E
+        labels: 'DML'
+        comment:  Add Notification Type for Agreement Due Date Reminder
+        changes:
+          - sql:
+              sql: |
+                  UPDATE code_table_configuration
+                  SET CONTENT = '{\"group\":\"General\",\"codeTableName\":\"Reminder Notifications\",\"description\":\"List of Reminder Notifications\",\"databaseTableName\":\"REMINDER_NOTIFICATION\",\"fields\":[{\"columnName\":\"REMINDER_NOTIFICATION_ID\",\"displayName\":\"ID\",\"dataType\":\"INTEGER\",\"isEditable\":false,\"length\":6,\"canEmpty\":false,\"visible\":false,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"REMINDER_NAME\",\"displayName\":\"Reminder Name\",\"dataType\":\"String\",\"isEditable\":true,\"length\":60,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"NOTIFICATION_TYPE_ID\",\"displayName\":\"Notification\",\"dataType\":\"INTEGER\",\"isEditable\":true,\"length\":5,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DAYS_TO_DUE_DATE\",\"displayName\":\"Days to Date\",\"dataType\":\"INTEGER\",\"isEditable\":true,\"length\":5,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"PROCEDURE_NAME\",\"displayName\":\"Procedure Name\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"REMINDER_TYPE_FLAG\",\"displayName\":\"Reminder Type\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"JOB_GROUP\",\"displayName\":\"Job Group\",\"dataType\":\"String\",\"isEditable\":true,\"length\":15,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"PLACEHOLDER_VALUES\",\"displayName\":\"Placeholders\",\"dataType\":\"String\",\"isEditable\":true,\"length\":4000,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"IS_ACTVE\",\"displayName\":\"Is Active\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update Timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null}],\"primaryKey\":[\"REMINDER_NOTIFICATION_ID\"],\"dependency\":[],\"actions\":null}',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+                  WHERE TABLE_NAME = 'REMINDER_NOTIFICATION' AND CONTENT <> '{\"group\":\"General\",\"codeTableName\":\"Reminder Notifications\",\"description\":\"List of Reminder Notifications\",\"databaseTableName\":\"REMINDER_NOTIFICATION\",\"fields\":[{\"columnName\":\"REMINDER_NOTIFICATION_ID\",\"displayName\":\"ID\",\"dataType\":\"INTEGER\",\"isEditable\":false,\"length\":6,\"canEmpty\":false,\"visible\":false,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"REMINDER_NAME\",\"displayName\":\"Reminder Name\",\"dataType\":\"String\",\"isEditable\":true,\"length\":60,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"NOTIFICATION_TYPE_ID\",\"displayName\":\"Notification\",\"dataType\":\"INTEGER\",\"isEditable\":true,\"length\":5,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"DAYS_TO_DUE_DATE\",\"displayName\":\"Days to Date\",\"dataType\":\"INTEGER\",\"isEditable\":true,\"length\":5,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"PROCEDURE_NAME\",\"displayName\":\"Procedure Name\",\"dataType\":\"String\",\"isEditable\":true,\"length\":200,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"REMINDER_TYPE_FLAG\",\"displayName\":\"Reminder Type\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"JOB_GROUP\",\"displayName\":\"Job Group\",\"dataType\":\"String\",\"isEditable\":true,\"length\":15,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"PLACEHOLDER_VALUES\",\"displayName\":\"Placeholders\",\"dataType\":\"String\",\"isEditable\":true,\"length\":4000,\"canEmpty\":true,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"IS_ACTVE\",\"displayName\":\"Is Active\",\"dataType\":\"String\",\"isEditable\":true,\"length\":1,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":\"switch\",\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_TIMESTAMP\",\"displayName\":\"Update Timestamp\",\"dataType\":\"Date\",\"isEditable\":false,\"length\":null,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":null,\"defaultValue\":null},{\"columnName\":\"UPDATE_USER\",\"displayName\":\"Update User\",\"dataType\":\"String\",\"isEditable\":false,\"length\":60,\"canEmpty\":false,\"visible\":true,\"valueChanged\":null,\"index\":null,\"filterType\":null,\"valueField\":null,\"isTransient\":null,\"values\":null,\"refColumnName\":\"PERSON#USER_NAME\",\"defaultValue\":null}],\"primaryKey\":[\"REMINDER_NOTIFICATION_ID\"],\"dependency\":[],\"actions\":null}';
+
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-7568-10
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Add Notification Type for Agreement Due Date Reminder
+      changes:
+        - sql:
+            sql: |
+              Analyze table REMINDER_NOTIFICATION;
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'REMINDER_NOTIFICATION' AND COLUMN_NAME = 'REMINDER_TYPE_FLAG') = 0,
+                  
+                  'ALTER TABLE REMINDER_NOTIFICATION ADD COLUMN REMINDER_TYPE_FLAG VARCHAR(3);',
+                  
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: ALTER TABLE REMINDER_NOTIFICATION DROP COLUMN REMINDER_TYPE_FLAG
+
+  - changeSet:
+      id: FIBI-7568-11
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Add Notification Type for Agreement Due Date Reminder
+      changes:
+        - sql:
+            sql: |
+              Analyze table REMINDER_NOTIFICATION;
+              SET @sql1 := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'REMINDER_NOTIFICATION' AND COLUMN_NAME = 'JOB_GROUP') = 0,
+                  
+                  'ALTER TABLE REMINDER_NOTIFICATION ADD COLUMN JOB_GROUP VARCHAR(15);',
+                  
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql1;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: ALTER TABLE REMINDER_NOTIFICATION ADD COLUMN JOB_GROUP VARCHAR(15)
+
+  - changeSet:
+        id: FIBI-7568-1
+        author: Prabhu.E
+        labels: 'DML'
+        comment:  Add Notification Type for Agreement Due Date Reminder
+        changes:
+          - sql:
+              sql: |
+                SET @max_notification_type_id = 1445;
+                INSERT IGNORE INTO NOTIFICATION_TYPE (NOTIFICATION_TYPE_ID,MODULE_CODE,SUB_MODULE_CODE,DESCRIPTION,SUBJECT,MESSAGE,PROMPT_USER,IS_ACTIVE,CREATE_USER,CREATE_TIMESTAMP,UPDATE_USER,UPDATE_TIMESTAMP,IS_SYSTEM_SPECIFIC) VALUES (@max_notification_type_id,13,0,'Agreement Due Date Reminder Notification','Agreement Due Date Reminder Notification','<p>Dear {ASSIGNEE},<br>This is a notification regarding the following agreement assigned to you.<br>Agreement Title: {AGREEMENT_TITLE}<br>Contract Value: {CONTRACT_VALUE}<br>Agreement Type: {AGREEMENT_TYPE}<br>Agreement Start Date: {AGREEMENT_START_DATE}<br>Agreement End Date: {AGREEMENT_END_DATE}<br>Location Assigned : {NEGOTIATION_LOCATION}<br>Location Status: {NEGOTIATION_STATUS}<br>Location Assigned Date : {LOCATION_ASSIGNED_DATE}<br>Due Date: {REVIEW_END_DATE}</p><p>Please click {APPLICATION_URL} to review the application and take necessary action.<br>Note: This is a system generated mail.<br>Please do not reply to this mail.</p>','N','Y','admin',UTC_TIMESTAMP(),'admin',UTC_TIMESTAMP(),'N');
+
+        rollback: 
+          - sql:
+              sql: |
+                DELETE FROM NOTIFICATION_TYPE WHERE NOTIFICATION_TYPE_ID = 1445 AND MODULE_CODE = 13 AND SUB_MODULE_CODE = 0;
+  - changeSet:
+        id: FIBI-7568-2
+        author: Prabhu.E
+        labels: 'DML'
+        comment:  Add Reminder Notification for Agreement Location Remainder (On Review End Date)
+        changes:
+          - sql:
+              sql: |
+                    INSERT INTO REMINDER_NOTIFICATION (REMINDER_NOTIFICATION_ID, JOB_GROUP, REMINDER_NAME,NOTIFICATION_TYPE_ID,DAYS_TO_DUE_DATE,PROCEDURE_NAME,IS_ACTVE,UPDATE_USER,UPDATE_TIMESTAMP,PLACEHOLDER_VALUES,REMINDER_TYPE_FLAG)
+                    SELECT 
+                        (SELECT IFNULL(MAX(REMINDER_NOTIFICATION_ID), 0) + 1 FROM REMINDER_NOTIFICATION),
+                        'agreement',
+                        'Agreement Location Remainder (On Review End Date)',
+                        @max_notification_type_id,
+                        0,
+                        'AGT_LOC_REVIEW_END_DATE_REMAINDER',
+                        'Y',
+                        'admin',
+                        UTC_TIMESTAMP(),
+                        'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE',
+                        'A'
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM REMINDER_NOTIFICATION 
+                        WHERE 
+                            REMINDER_NAME = 'Agreement Location Remainder (On Review End Date)'
+                            AND NOTIFICATION_TYPE_ID = @max_notification_type_id
+                            AND DAYS_TO_DUE_DATE = 0
+                            AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_END_DATE_REMAINDER'
+                            AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                            AND REMINDER_TYPE_FLAG = 'A'
+                            AND JOB_GROUP = 'agreement'
+                            AND EXISTS (
+                                SELECT 1 FROM NOTIFICATION_TYPE 
+                                WHERE NOTIFICATION_TYPE_ID = @max_notification_type_id
+                            )
+                    );
+        rollback: 
+          - sql:
+              sql: |
+                DELETE FROM REMINDER_NOTIFICATION 
+                WHERE REMINDER_NAME = 'Agreement Location Remainder (On Review End Date)' 
+                AND NOTIFICATION_TYPE_ID = @max_notification_type_id 
+                AND DAYS_TO_DUE_DATE = 0 
+                AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_END_DATE_REMAINDER' 
+                AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                AND REMINDER_TYPE_FLAG = 'A'  
+  - changeSet:
+        id: FIBI-7568-3
+        author: Prabhu.E
+        labels: 'DML'
+        comment:  Add Reminder Notification for Agreement Location Remainder (1 Day Before Review End Date)
+        changes:
+          - sql:
+              sql: |
+                 INSERT INTO REMINDER_NOTIFICATION (REMINDER_NOTIFICATION_ID, JOB_GROUP,REMINDER_NAME,NOTIFICATION_TYPE_ID,DAYS_TO_DUE_DATE,PROCEDURE_NAME,IS_ACTVE,UPDATE_USER,UPDATE_TIMESTAMP,PLACEHOLDER_VALUES,REMINDER_TYPE_FLAG)
+                        SELECT 
+                            (SELECT MAX(REMINDER_NOTIFICATION_ID) + 1 FROM REMINDER_NOTIFICATION),
+                            'agreement',
+                            'Agreement Location Remainder (1 Day Before Review End Date)',
+                            @max_notification_type_id,
+                            1,
+                            'AGT_LOC_REVIEW_END_DATE_REMAINDER',
+                            'Y',
+                            'admin',
+                            UTC_TIMESTAMP(),
+                            'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE',
+                            'A'
+                        WHERE NOT EXISTS (
+                            SELECT 1 
+                            FROM REMINDER_NOTIFICATION 
+                            WHERE 
+                                REMINDER_NAME = 'Agreement Location Remainder (1 Day Before Review End Date)'
+                                AND NOTIFICATION_TYPE_ID = @max_notification_type_id
+                                AND DAYS_TO_DUE_DATE = 1
+                                AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_END_DATE_REMAINDER'
+                                AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                                AND REMINDER_TYPE_FLAG = 'A'
+                                AND JOB_GROUP = 'agreement'
+                                AND EXISTS (
+                                    SELECT 1 FROM NOTIFICATION_TYPE 
+                                    WHERE NOTIFICATION_TYPE_ID = @max_notification_type_id
+                                )
+                        );
+        rollback: 
+          - sql:
+              sql: |
+                DELETE FROM REMINDER_NOTIFICATION 
+                WHERE REMINDER_NAME = 'Agreement Location Remainder (1 Day Before Review End Date)' 
+                AND NOTIFICATION_TYPE_ID = @max_notification_type_id 
+                AND DAYS_TO_DUE_DATE = 1 
+                AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_END_DATE_REMAINDER' 
+                AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                AND REMINDER_TYPE_FLAG = 'A'  
+
+  - changeSet:
+        id: FIBI-7568-4
+        author: Prabhu.E
+        labels: 'DML'
+        comment:  Add Reminder Notification for Agreement Location Remainder (5 Day After Review End Date)
+        changes:
+          - sql:
+              sql: |
+
+                INSERT INTO REMINDER_NOTIFICATION (REMINDER_NOTIFICATION_ID, JOB_GROUP,REMINDER_NAME,NOTIFICATION_TYPE_ID,DAYS_TO_DUE_DATE,PROCEDURE_NAME,IS_ACTVE,UPDATE_USER,UPDATE_TIMESTAMP,PLACEHOLDER_VALUES,REMINDER_TYPE_FLAG)
+                SELECT 
+                    (SELECT MAX(REMINDER_NOTIFICATION_ID) + 1 FROM REMINDER_NOTIFICATION),
+                    'agreement',
+                    'Agreement Location Remainder (5 Day After Review End Date)',
+                    @max_notification_type_id,
+                    -5,
+                    'AGT_LOC_REVIEW_END_DATE_REMAINDER',
+                    'Y',
+                    'admin',
+                    UTC_TIMESTAMP(),
+                    'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE',
+                    'A'
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM REMINDER_NOTIFICATION 
+                    WHERE 
+                        REMINDER_NAME = 'Agreement Location Remainder (One Day Before Review End Date)'
+                        AND NOTIFICATION_TYPE_ID = @max_notification_type_id
+                        AND DAYS_TO_DUE_DATE = -5
+                        AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_END_DATE_REMAINDER'
+                        AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                        AND REMINDER_TYPE_FLAG = 'A'
+                        AND JOB_GROUP = 'agreement'
+                        AND EXISTS (
+                            SELECT 1 FROM NOTIFICATION_TYPE 
+                            WHERE NOTIFICATION_TYPE_ID = @max_notification_type_id
+                        )
+                );
+        rollback: 
+          - sql:
+              sql: |
+                DELETE FROM REMINDER_NOTIFICATION 
+                WHERE REMINDER_NAME = 'Agreement Location Remainder (5 Day After Review End Date)' 
+                AND NOTIFICATION_TYPE_ID = @max_notification_type_id 
+                AND DAYS_TO_DUE_DATE = -5 
+                AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_END_DATE_REMAINDER' 
+                AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                AND REMINDER_TYPE_FLAG = 'A'
+
+  - changeSet:
+        id: FIBI-7568-5
+        author: Prabhu.E
+        labels: 'DML'
+        comment:  Add Reminder Notification for Agreement Location Remainder (5 Day After Review Start Date)
+        changes:
+          - sql:
+              sql: |
+
+                INSERT INTO REMINDER_NOTIFICATION (REMINDER_NOTIFICATION_ID, JOB_GROUP,REMINDER_NAME,NOTIFICATION_TYPE_ID,DAYS_TO_DUE_DATE,PROCEDURE_NAME,IS_ACTVE,UPDATE_USER,UPDATE_TIMESTAMP,PLACEHOLDER_VALUES,REMINDER_TYPE_FLAG)
+                SELECT 
+                    (SELECT MAX(REMINDER_NOTIFICATION_ID) + 1 FROM REMINDER_NOTIFICATION),
+                    'agreement',
+                    'Agreement Location Remainder (5 Day After Review Start Date)',
+                    @max_notification_type_id,
+                    -5,
+                    'AGT_LOC_REVIEW_START_DATE_REMAINDER',
+                    'Y',
+                    'admin',
+                    UTC_TIMESTAMP(),
+                    'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE',
+                    'A'
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM REMINDER_NOTIFICATION 
+                    WHERE 
+                        REMINDER_NAME = 'Agreement Location Remainder - Based on Review Start Date'
+                        AND NOTIFICATION_TYPE_ID = @max_notification_type_id
+                        AND DAYS_TO_DUE_DATE = -5
+                        AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_START_DATE_REMAINDER'
+                        AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                        AND REMINDER_TYPE_FLAG = 'A'
+                        AND JOB_GROUP = 'agreement'
+                        AND EXISTS (
+                            SELECT 1 FROM NOTIFICATION_TYPE 
+                            WHERE NOTIFICATION_TYPE_ID = @max_notification_type_id
+                        )
+                );
+        rollback: 
+          - sql:
+              sql: |
+                DELETE FROM REMINDER_NOTIFICATION 
+                WHERE REMINDER_NAME = 'Agreement Location Remainder (5 Day After Review Start Date)' 
+                AND NOTIFICATION_TYPE_ID = @max_notification_type_id 
+                AND DAYS_TO_DUE_DATE = -5 
+                AND PROCEDURE_NAME = 'AGT_LOC_REVIEW_START_DATE_REMAINDER' 
+                AND PLACEHOLDER_VALUES = 'ASSIGNEE,NEGOTIATION_LOCATION,NEGOTIATION_STATUS,LOCATION_ASSIGNED_DATE,REVIEW_END_DATE,MESSAGE_TYPE_CODE,SUBJECT_TYPE_CODE,USER_MESSAGE'
+                AND REMINDER_TYPE_FLAG = 'A'
+
+  - changeSet:
+        id: FIBI-7568-6
+        author: Prabhu.E
+        labels: 'DML'
+        comment:  Add Argument Value Lookup for Location Assigned Date
+        changes:
+          - sql:
+              sql: |
+
+                SET @max_notification_type_id = NULL;
+
+
+                INSERT INTO arg_value_lookup (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                SELECT 
+                    (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM arg_value_lookup), 
+                    'PLACEHOLDER_AGREEMENT', 
+                    'LOCATION_ASSIGNED_DATE', 
+                    'For setting location assigned date', 
+                    UTC_TIMESTAMP(), 
+                    'admin'
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM arg_value_lookup
+                    WHERE ARGUMENT_NAME = 'PLACEHOLDER_AGREEMENT' 
+                    AND ARGUMENT_VALUE = 'LOCATION_ASSIGNED_DATE'
+                );
+
+        rollback: 
+          - sql:
+              sql: |
+                DELETE FROM arg_value_lookup
+                WHERE ARGUMENT_NAME = 'PLACEHOLDER_AGREEMENT'
+                AND ARGUMENT_VALUE = 'LOCATION_ASSIGNED_DATE';
+
+  - changeSet:
+        id: FIBI-7568-7
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Add Argument Value Lookup for Review End Date
+        changes:
+          - sql:
+              sql: |
+               INSERT INTO arg_value_lookup (ARG_VALUE_LOOKUP_ID, ARGUMENT_NAME, ARGUMENT_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER)
+                SELECT 
+                    (SELECT MAX(ARG_VALUE_LOOKUP_ID) + 1 FROM arg_value_lookup), 
+                    'PLACEHOLDER_AGREEMENT', 
+                    'REVIEW_END_DATE', 
+                    'For setting location review end date', 
+                    UTC_TIMESTAMP(), 
+                    'admin'
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM arg_value_lookup
+                    WHERE ARGUMENT_NAME = 'PLACEHOLDER_AGREEMENT' 
+                    AND ARGUMENT_VALUE = 'REVIEW_END_DATE'
+                );
+        rollback: 
+          - sql:
+              sql: |
+                DELETE FROM arg_value_lookup
+                WHERE ARGUMENT_NAME = 'PLACEHOLDER_AGREEMENT'
+                AND ARGUMENT_VALUE = 'REVIEW_END_DATE'; 
+  - changeSet:
+        id: FIBI-7568-8
+        author: Prabhu.E
+        labels: 'DML'
+        comment: Add Scheduler Job for Agreement Reminder Notification
+        changes:
+          - sql:
+              sql: |
+              
+                INSERT INTO scheduler_job_info (
+                    CRON_EXPRESSION,
+                    IS_CRON_JOB,
+                    JOB_CLASS,
+                    JOB_GROUP,
+                    JOB_NAME,
+                    REPEAT_TIME,
+                    DESCRIPTION,
+                    CRON_STATUS,
+                    UPDATE_USER,
+                    UPDATE_TIMESTAMP,
+                    PREVIOUS_FIRE_TIME,
+                    LAST_FIRE_END_TIME,
+                    IS_ACTIVE
+                )
+                SELECT
+                    '0 0 0 * * ?',
+                    'Y',
+                    'com.polus.core.quartzscheduler.scheduler.reminder.ReminderNotificationScheduler',
+                    'agreement',
+                    'Agreement Reminder Notification',
+                    NULL,
+                    'This job is to sent reminders',
+                    'SCHEDULED',
+                    'admin',
+                    UTC_TIMESTAMP(),
+                    NULL,
+                    NULL,
+                    'Y'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM scheduler_job_info
+                    WHERE JOB_GROUP = 'agreement'
+                      AND JOB_NAME = 'Agreement Reminder Notification'
+                      AND JOB_CLASS = 'com.polus.core.quartzscheduler.scheduler.reminder.ReminderNotificationScheduler'
+                );
+        rollback:   
+          - sql:
+              sql: |
+                DELETE FROM scheduler_job_info
+                WHERE JOB_GROUP = 'agreement'
+                  AND JOB_NAME = 'Agreement Reminder Notification'
+                  AND JOB_CLASS = 'com.polus.core.quartzscheduler.scheduler.reminder.ReminderNotificationScheduler';  

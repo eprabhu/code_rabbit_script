@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8868-1
+      author: Solih.N
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_EVAL_TRIAGE_QUESTIONNAIRE
+        - sqlFile:
+            path: ROUTINES/JHU/AGREEMENT/FUNCTIONS/FN_EVAL_TRIAGE_QUESTIONNAIRE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

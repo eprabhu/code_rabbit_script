@@ -1,0 +1,259 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7633-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Add Sponsor Hierarchy for NOA - JHURA and NOA - SOM
+      changes:
+        - sql:
+            sql: |
+                -- Root group: NOA - JHURA Hierarchy
+                INSERT IGNORE INTO SPONSOR_HIERARCHY (
+                    SPONSOR_GROUP_ID, SPONSOR_GROUP_NAME, SPONSOR_ORIGINATING_GROUP_ID,
+                    SPONSOR_ROOT_GROUP_ID, SPONSOR_CODE, ORDER_NUMBER,
+                    CREATE_TIMESTAMP, CREATE_USER,
+                    UPDATE_TIMESTAMP, UPDATE_USER
+                ) VALUES (
+                    300, 'NOA - JHURA Hierarchy', NULL, NULL, NULL, 5,
+                    UTC_TIMESTAMP(), 'admin',
+                    UTC_TIMESTAMP(), 'admin'
+                );
+
+                -- Child group: NOA
+                INSERT IGNORE INTO SPONSOR_HIERARCHY (
+                    SPONSOR_GROUP_ID, SPONSOR_GROUP_NAME, SPONSOR_ORIGINATING_GROUP_ID,
+                    SPONSOR_ROOT_GROUP_ID, SPONSOR_CODE, ORDER_NUMBER,
+                    CREATE_TIMESTAMP, CREATE_USER,
+                    UPDATE_TIMESTAMP, UPDATE_USER
+                ) VALUES (
+                    301, 'NOA - JHURA', 300, 300, NULL, 1,
+                    UTC_TIMESTAMP(), 'admin',
+                    UTC_TIMESTAMP(), 'admin'
+                );
+
+                -- Root group: NOA - SOM Hierarchy
+                INSERT IGNORE INTO SPONSOR_HIERARCHY (
+                    SPONSOR_GROUP_ID, SPONSOR_GROUP_NAME, SPONSOR_ORIGINATING_GROUP_ID,
+                    SPONSOR_ROOT_GROUP_ID, SPONSOR_CODE, ORDER_NUMBER,
+                    CREATE_TIMESTAMP, CREATE_USER,
+                    UPDATE_TIMESTAMP, UPDATE_USER
+                ) VALUES (
+                    302, 'NOA - SOM Hierarchy', NULL, NULL, NULL, 6,
+                    UTC_TIMESTAMP(), 'admin',
+                    UTC_TIMESTAMP(), 'admin'
+                );
+
+                -- Child group: NOA
+                INSERT IGNORE INTO SPONSOR_HIERARCHY (
+                    SPONSOR_GROUP_ID, SPONSOR_GROUP_NAME, SPONSOR_ORIGINATING_GROUP_ID,
+                    SPONSOR_ROOT_GROUP_ID, SPONSOR_CODE, ORDER_NUMBER,
+                    CREATE_TIMESTAMP, CREATE_USER,
+                    UPDATE_TIMESTAMP, UPDATE_USER
+                ) VALUES (
+                    303, 'NOA - SOM', 302, 302, NULL, 1,
+                    UTC_TIMESTAMP(), 'admin',
+                    UTC_TIMESTAMP(), 'admin'
+                );
+
+                SET @next_id := (SELECT MAX(SPONSOR_GROUP_ID) FROM SPONSOR_HIERARCHY);
+
+                -- Sponsor codes under NOA
+                INSERT INTO SPONSOR_HIERARCHY (
+                    SPONSOR_GROUP_ID, SPONSOR_GROUP_NAME, SPONSOR_ORIGINATING_GROUP_ID,
+                    SPONSOR_ROOT_GROUP_ID, SPONSOR_CODE, ORDER_NUMBER,
+                    CREATE_TIMESTAMP, CREATE_USER,
+                    UPDATE_TIMESTAMP, UPDATE_USER
+                )
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300484', 1, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300484')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300842', 2, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300842')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '308302', 3, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '308302')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '303574', 4, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '303574')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300852', 5, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300852')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '303580', 6, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '303580')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300858', 7, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300858')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '303585', 8, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '303585')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '303586', 9, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '303586')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '303587', 10, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '303587')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '303589', 11, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '303589')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300859', 12, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300859')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '302822', 13, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '302822')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300860', 14, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300860')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '301479', 15, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '301479')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300861', 16, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300861')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '302592', 17, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '302592')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300863', 18, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300863')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300866', 19, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300866')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300867', 20, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300867')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300869', 21, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300869')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '301978', 22, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '301978')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300870', 23, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300870')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '302727', 24, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '302727')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300865', 25, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300865')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300874', 26, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300874')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '305950', 27, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '305950')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '306099', 28, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '306099')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '300883', 29, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '300883')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - JHURA', 301, 300, '301153', 30, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - JHURA' AND SPONSOR_CODE = '301153');
+
+                INSERT INTO SPONSOR_HIERARCHY (
+                    SPONSOR_GROUP_ID, SPONSOR_GROUP_NAME, SPONSOR_ORIGINATING_GROUP_ID,
+                    SPONSOR_ROOT_GROUP_ID, SPONSOR_CODE, ORDER_NUMBER,
+                    CREATE_TIMESTAMP, CREATE_USER,
+                    UPDATE_TIMESTAMP, UPDATE_USER
+                )
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300484', 1, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300484')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300842', 2, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300842')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '308302', 3, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '308302')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '303574', 4, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '303574')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300852', 5, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300852')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '303580', 6, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '303580')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300858', 7, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300858')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '303585', 8, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '303585')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '303586', 9, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '303586')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '303587', 10, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '303587')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '303589', 11, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '303589')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300859', 12, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300859')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '302822', 13, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '302822')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300860', 14, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300860')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '301479', 15, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '301479')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300861', 16, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300861')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '302592', 17, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '302592')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300863', 18, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300863')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300866', 19, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300866')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300867', 20, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300867')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300869', 21, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300869')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '301978', 22, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '301978')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300870', 23, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300870')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '302727', 24, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '302727')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300865', 25, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300865')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300874', 26, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300874')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '305950', 27, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '305950')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '306099', 28, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '306099')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '300883', 29, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '300883')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '318432', 30, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '318432')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '303567', 30, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '303567')
+                UNION ALL
+                SELECT @next_id := @next_id + 1, 'NOA - SOM', 303, 302, '301948', 30, UTC_TIMESTAMP(), 'admin', UTC_TIMESTAMP(), 'admin'
+                WHERE NOT EXISTS (SELECT 1 FROM SPONSOR_HIERARCHY WHERE SPONSOR_GROUP_NAME = 'NOA - SOM' AND SPONSOR_CODE = '301948');
+      rollback: empty

@@ -1,0 +1,54 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.3-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6.3-Release/BASE/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+    #REPORT
+    - include:
+        file: Fibi-5.6.3-Release/BASE/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'
+
+    #GRANT_CALL
+    - include:
+        file: Fibi-5.6.3-Release/BASE/GRANT_CALL/SCRIPTS.yaml
+        labels: 'GRANT_CALL'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6.3-Release/BASE/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.6.3-Release/BASE/INSTITUTE_PROPOSAL/SCRIPTS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #AWARD
+    - include:
+        file: Fibi-5.6.3-Release/BASE/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.6.3-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6.3-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.6.3-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+
+    #EXTERNAL_REVIEWER
+    - include:
+        file: Fibi-5.6.3-Release/BASE/EXTERNAL_REVIEWER/SCRIPTS.yaml
+        labels: 'EXTERNAL_REVIEWER'
+    - include:
+        file: Fibi-5.6.3-Release/BASE/EXTERNAL_REVIEWER/PROCEDURES.yaml
+        labels: 'EXTERNAL_REVIEWER'

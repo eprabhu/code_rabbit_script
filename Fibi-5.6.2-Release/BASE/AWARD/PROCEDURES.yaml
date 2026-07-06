@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+- changeSet:
+      id: FIBI-10386-1
+      author: Nabeel Ahamed M.
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_CURRENT_AND_PENDING_DETAILS
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_CURRENT_AND_PENDING_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_CURRENT_AND_PENDING_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

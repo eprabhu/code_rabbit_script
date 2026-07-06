@@ -1,0 +1,22 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9314-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_GRANTCALL_DASHBOARD;
+                DROP PROCEDURE IF EXISTS GET_GRANTCALL_DASHBOARD_COUNT;
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/PROCEDURES/GET_GRANTCALL_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/GRANT_CALL/PROCEDURES/GET_GRANTCALL_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

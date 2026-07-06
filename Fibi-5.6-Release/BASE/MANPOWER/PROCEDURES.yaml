@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9304-1
+      author: Mohamed Fazil
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MANPOWER_COST_ALLOCATION_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/GET_MANPOWER_COST_ALLOCATION_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

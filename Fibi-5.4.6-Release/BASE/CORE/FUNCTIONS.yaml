@@ -1,0 +1,16 @@
+databaseChangeLog: 
+ 
+  - changeSet: 
+      id: FC-1477
+      author: Prabhu.E 
+      labels: 'FUNCTIONS'
+      comment: Update FN_UPD_QNR_ATTACHMENT function to handle new attachment types
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP FUNCTION IF EXISTS FN_UPD_QNR_ATTACHMENT; 
+        - sqlFile: 
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_UPD_QNR_ATTACHMENT.sql 
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty 

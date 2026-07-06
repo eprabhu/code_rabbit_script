@@ -1,0 +1,76 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7482-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_DYN_JSON
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_DYN_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7482-2
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_JSON_CNT
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_JSON_CNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7566-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS DELETE_AGREEMENT_RECORD
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/DELETE_AGREEMENT_RECORD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6898-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_DYN_JSON
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_DYN_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6898-2
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGRMENT_DASHBOARD_JSON_CNT
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGRMENT_DASHBOARD_JSON_CNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

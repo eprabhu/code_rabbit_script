@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9979-1
+      author: Sasikumar Chandran
+      labels: 'PROCEDURES'
+      comment: Created Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_PROPOSAL_DETAILS_FOR_ELASTIC;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/GET_PROPOSAL_DETAILS_FOR_ELASTIC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

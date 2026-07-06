@@ -1,0 +1,17 @@
+databaseChangeLog: 
+ 
+  - changeSet:
+      id: FIBI-9983-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS ADD_COLUMN_IN_AWARD_CUSTOM_DATA_RT;
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/ADD_COLUMN_IN_AWARD_CUSTOM_DATA_RT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

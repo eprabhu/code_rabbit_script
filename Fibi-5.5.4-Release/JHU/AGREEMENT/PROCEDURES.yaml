@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-10002
+        author: Prabhu.E
+        labels: 'PROCEDURES'
+        comment: Drop and create UPDATE_AGREEMENT_DATA.
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS UPDATE_AGREEMENT_DATA;
+          - sqlFile:
+              path: ROUTINES/JHU/AGREEMENT/PROCEDURES/UPDATE_AGREEMENT_DATA.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty

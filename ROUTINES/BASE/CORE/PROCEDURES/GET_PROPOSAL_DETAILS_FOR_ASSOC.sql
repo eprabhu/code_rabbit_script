@@ -1,0 +1,43 @@
+CREATE PROCEDURE GET_PROPOSAL_DETAILS_FOR_ASSOC(
+IN AV_MODULE_ITEM_ID INT)
+BEGIN
+
+SELECT 'ID'
+	,'Title'
+	,'Status'
+	,'Principal Investigator'
+	,'Lead Unit'
+	,'Proposed Start Date'
+	,'Proposed End Date'
+	,'Sponsor'
+	,'Total Project Cost'
+     UNION 
+          SELECT 
+			  T1.PROPOSAL_ID,
+			  T1.TITLE,
+              T2.DESCRIPTION AS STATUS,
+              t7.FULL_NAME AS PI,
+              T4.DISPLAY_NAME AS LEAD_UNIT,
+              DATE(t1.START_DATE) AS START_DATE,
+			  DATE(t1.END_DATE) AS END_DATE,
+              T5.DISPLAY_NAME AS SPONSOR,
+			  T6.TOTAL_COST
+            FROM EPS_PROPOSAL T1
+            inner join EPS_PROPOSAL_STATUS T2 ON T2.STATUS_CODE = T1.STATUS_CODE
+            INNER JOIN EPS_PROPOSAL_TYPE T3 ON T3.TYPE_CODE =  T1.TYPE_CODE
+            LEFT JOIN (SELECT 
+							p1.PROPOSAL_ID AS PROPOSAL_ID,
+								p1.PERSON_ID AS PERSON_ID,
+								p1.ROLODEX_ID AS ROLODEX_ID,
+								p1.FULL_NAME AS FULL_NAME
+						FROM
+							eps_proposal_persons p1
+						WHERE
+							(p1.PI_FLAG = 'Y')
+						GROUP BY p1.PROPOSAL_ID) t7 ON ((t7.PROPOSAL_ID = t1.PROPOSAL_ID))
+        LEFT JOIN UNIT T4 ON T4.UNIT_NUMBER = T1.HOME_UNIT_NUMBER
+        LEFT JOIN SPONSOR T5 ON T5.SPONSOR_CODE = T1.SPONSOR_CODE
+        LEFT JOIN BUDGET_HEADER T6 ON T6.PROPOSAL_ID = T1.PROPOSAL_ID AND T6.IS_LATEST_VERSION = 'Y'
+		WHERE T1.PROPOSAL_ID IN (AV_MODULE_ITEM_ID);
+            
+END

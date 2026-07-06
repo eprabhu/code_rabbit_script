@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8868-1
+      author: Solih.N
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_COUNT;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET_COUNT;
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_WIDGET;
+        - sqlFile:
+            path: ROUTINES/JHU/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_WIDGET.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

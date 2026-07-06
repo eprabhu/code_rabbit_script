@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10251-1
+      author: Shyla M
+      labels: 'PROCEDURES'
+      comment: New Function for checking whether atleast one award is linked to SR
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP FUNCTION IF EXISTS FN_SR_HAS_AWARD_ASSO_ON_TYPE;
+        - sqlFile:
+            path: ROUTINES/MIT/SERVICE_REQUEST/FUNCTIONS/FN_SR_HAS_AWARD_ASSO_ON_TYPE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

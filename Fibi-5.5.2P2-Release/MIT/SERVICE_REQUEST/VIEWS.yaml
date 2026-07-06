@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9775-1
+      author: Nabeel Ahamed M
+      labels: 'VIEWS'
+      comment: Added new View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS sr_contract_admin_v;
+        - sqlFile:
+            path: ROUTINES/MIT/SERVICE_REQUEST/VIEWS/sr_contract_admin_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

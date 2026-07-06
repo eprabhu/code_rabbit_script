@@ -1,0 +1,6 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.4-Release/KU/CORE/SCRIPTS.yaml
+        labels: 'CORE'

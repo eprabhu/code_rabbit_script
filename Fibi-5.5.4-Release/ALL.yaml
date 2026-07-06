@@ -1,0 +1,64 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.4-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5.4-Release/BASE/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.5.4-Release/BASE/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.5.4-Release/BASE/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5.4-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5.4-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.4-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5.4-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+
+    #AWARD
+    - include:
+        file: Fibi-5.5.4-Release/BASE/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.5.4-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'
+    
+    #CLAIMS
+    - include:
+        file: Fibi-5.5.4-Release/BASE/CLAIMS/SCRIPTS.yaml
+        labels: 'CLAIMS'
+    - include:
+        file: Fibi-5.5.4-Release/BASE/CLAIMS/VIEWS.yaml
+        labels: 'CLAIMS'
+
+    #MANPOWER
+    - include:
+        file: Fibi-5.5.4-Release/BASE/MANPOWER/PROCEDURES.yaml
+        labels: 'MANPOWER'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.5.4-Release/BASE/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #GRANT_CALL
+    - include:
+        file: Fibi-5.5.4-Release/BASE/GRANT_CALL/PROCEDURES.yaml
+        labels: 'GRANT_CALL'

@@ -1,0 +1,33 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9979-1
+      author: Sasikumar Chandran
+      labels: 'PROCEDURES'
+      comment: Created Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SR_DETAILS_FOR_ELASTIC;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SR_DETAILS_FOR_ELASTIC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10193-1
+      author: Suganya.S
+      labels: 'PROCEDURES'
+      comment: Updated procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/PROCEDURES/GET_SERVICE_REQUEST_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

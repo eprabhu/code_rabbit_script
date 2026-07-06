@@ -1,0 +1,81 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-8658-1
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update Show Lookup value for 'Grant Call Type' variable
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE BUSINESS_RULE_VARIABLE SET SHOW_LOOKUP = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (VARIABLE_NAME = 'Grant Call Type');
+                SET SQL_SAFE_UPDATES = 1;
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE BUSINESS_RULE_VARIABLE SET SHOW_LOOKUP = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE
+                SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'DDL'
+      comment: Unit number grant call changes.
+      changes:
+        - sql:
+            sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'grant_call_header'
+                      AND COLUMN_NAME = 'HOME_UNIT_NUMBER') > 0,
+                    'ALTER TABLE grant_call_header MODIFY COLUMN HOME_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'grant_call_ioi_header'
+                      AND COLUMN_NAME = 'SUBMITING_UNIT_NUMBER') > 0,
+                    'ALTER TABLE grant_call_ioi_header MODIFY COLUMN SUBMITING_UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'grant_call_ioi_header'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE grant_call_ioi_header MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'grant_call_eligible_department'
+                      AND COLUMN_NAME = 'UNIT_NUMBER') > 0,
+                    'ALTER TABLE grant_call_eligible_department MODIFY COLUMN UNIT_NUMBER VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) 
+                    FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'GRANT_ELIGIBILITY_TARGET'
+                      AND COLUMN_NAME = 'TARGET_VALUE') > 0,
+                    'ALTER TABLE GRANT_ELIGIBILITY_TARGET MODIFY COLUMN TARGET_VALUE VARCHAR(50);',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+      rollback: empty

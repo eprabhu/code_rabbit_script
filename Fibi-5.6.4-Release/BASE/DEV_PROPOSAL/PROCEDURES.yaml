@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10730-2
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update COPY_MERGE_EPS_PROPOSAL_DATA for CFDA_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS COPY_MERGE_EPS_PROPOSAL_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/DEV_PROPOSAL/PROCEDURES/COPY_MERGE_EPS_PROPOSAL_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,87 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7344-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure GET_WIDGET_DATA_IN_DETAIL.
+      runOnChange: true
+      changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+          - sqlFile:
+              path: ROUTINES/JHU/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7344-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure GET_RESEARCH_SUMMARY_DETAILS.
+      runOnChange: true
+      changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+          - sqlFile:
+              path: ROUTINES/JHU/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7633-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure GET_SPONSOR_GROUP_NAMES.
+      runOnChange: true
+      changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_SPONSOR_GROUP_NAMES;
+          - sqlFile:
+              path: ROUTINES/JHU/CORE/PROCEDURES/GET_SPONSOR_GROUP_NAMES.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8868-1
+      author: Solih.N
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS CHECK_USER_HAS_RIGHT_IN_DOC;
+                DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE;
+                DROP PROCEDURE IF EXISTS GET_ALL_SYSTEM_RIGHTS;
+                DROP PROCEDURE IF EXISTS GET_APPROVERS_FOR_ROLE_TYPE;
+                DROP PROCEDURE IF EXISTS INSERT_WORKFLOW_FOR_ROLE_TYPE;
+                DROP PROCEDURE IF EXISTS UPD_MYLEARN_PERSON_TRAINING;
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/CHECK_USER_HAS_RIGHT_IN_DOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/GET_ALL_SYSTEM_RIGHTS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/GET_APPROVERS_FOR_ROLE_TYPE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/INSERT_WORKFLOW_FOR_ROLE_TYPE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/UPD_MYLEARN_PERSON_TRAINING.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

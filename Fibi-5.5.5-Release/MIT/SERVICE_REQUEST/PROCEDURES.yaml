@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9931-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment: The procedure has been modified to prevent insertion during SR creation when the prior CA configuration is not available for the respective Unit.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS SR_CONTRACT_ADMIN_UPDATION;
+        - sqlFile:
+            path: ROUTINES/MIT/SERVICE_REQUEST/PROCEDURES/SR_CONTRACT_ADMIN_UPDATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

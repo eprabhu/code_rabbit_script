@@ -1,0 +1,22 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_INST_PROPOSAL_DASHBOARD;
+                DROP PROCEDURE IF EXISTS GET_INST_PROPOSAL_DASHBOARD_COUNT;
+        - sqlFile:
+            path: ROUTINES/BASE/INSTITUTE_PROPOSAL/PROCEDURES/GET_INST_PROPOSAL_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/INSTITUTE_PROPOSAL/PROCEDURES/GET_INST_PROPOSAL_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

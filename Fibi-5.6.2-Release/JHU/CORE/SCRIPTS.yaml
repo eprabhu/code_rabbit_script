@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-10668
+        author: shyla
+        labels: 'DML'
+        comment: Remove VIEW_ADMIN_GROUP_AGREEMENT right from JHU Department Administrators role.
+        changes:
+          - sql:
+              sql: |
+                DELETE RR
+                FROM ROLE_RIGHTS RR
+                INNER JOIN ROLE R ON R.ROLE_ID = RR.ROLE_ID
+                INNER JOIN RIGHTS RT ON RT.RIGHT_ID = RR.RIGHT_ID
+                WHERE R.ROLE_NAME = 'JHU Department Administrators'
+                  AND RT.RIGHT_NAME = 'VIEW_ADMIN_GROUP_AGREEMENT';
+        rollback:
+          - sql:
+              sql: |
+                INSERT INTO ROLE_RIGHTS (ROLE_ID, RIGHT_ID, UPDATE_TIMESTAMP, UPDATE_USER)
+                SELECT R.ROLE_ID, RT.RIGHT_ID, NOW(), 'admin'
+                FROM ROLE R
+                INNER JOIN RIGHTS RT
+                WHERE R.ROLE_NAME = 'JHU Department Administrators'
+                  AND RT.RIGHT_NAME = 'VIEW_ADMIN_GROUP_AGREEMENT'
+                  AND NOT EXISTS (
+                    SELECT 1
+                    FROM ROLE_RIGHTS RR
+                    WHERE RR.ROLE_ID = R.ROLE_ID
+                      AND RR.RIGHT_ID = RT.RIGHT_ID
+                  );

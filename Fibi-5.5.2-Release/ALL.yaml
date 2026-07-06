@@ -1,0 +1,59 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.2-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+
+    #REPORT      
+    - include:
+        file:  Fibi-5.5.2-Release/BASE/REPORT/SCRIPTS.yaml
+        labels: 'REPORT' 
+
+    #GRANT_CALL
+    - include:
+        file: Fibi-5.5.2-Release/BASE/GRANT_CALL/PROCEDURES.yaml
+        labels: 'GRANT_CALL'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.5.2-Release/BASE/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'  
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.5.2-Release/BASE/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'  
+
+    #AWARD
+    - include:
+        file: Fibi-5.5.2-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'  
+
+    #PROGRESS_REPORT
+    - include:
+        file: Fibi-5.5.2-Release/BASE/PROGRESS_REPORT/PROCEDURES.yaml
+        labels: 'PROGRESS_REPORT' 
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5.2-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5.2-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.2-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5.2-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+
+    #FIBI_INTEGRATION_SUITE
+    - include:
+        file: Fibi-5.5.2-Release/BASE/FIBI_INTEGRATION_SUITE/SCRIPTS.yaml
+        labels: 'FIBI_INTEGRATION_SUITE'

@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: AI-157-1
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_SERVICE_REQUEST_ATTACHMENTS_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_ATTACHMENTS_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_SERVICE_REQUEST_ATTACHMENTS_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-157-2
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_SERVICE_REQUEST_DETAILS_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_SERVICE_REQUEST_DETAILS_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_SERVICE_REQUEST_DETAILS_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

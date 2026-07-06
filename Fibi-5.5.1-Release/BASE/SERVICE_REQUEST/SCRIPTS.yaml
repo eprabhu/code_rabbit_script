@@ -1,0 +1,139 @@
+databaseChangeLog:
+
+        - changeSet:
+                id: FIBI-8333-1
+                author: Suganya.S
+                labels: 'DDL'
+                comment: Add PREV_CUSTOM_DATA column to SR_HEADER_HISTORY table.
+                changes:
+                  - sql:
+                        sql: |
+                                SET @col := (
+                                        SELECT COUNT(*)
+                                        FROM INFORMATION_SCHEMA.COLUMNS
+                                        WHERE TABLE_NAME = 'SR_HEADER_HISTORY'
+                                        AND TABLE_SCHEMA = DATABASE()
+                                        AND COLUMN_NAME = 'PREV_CUSTOM_DATA'
+                                );
+                                SET @sql := IF(@col = 0,
+                                        'ALTER TABLE SR_HEADER_HISTORY ADD COLUMN PREV_CUSTOM_DATA JSON NULL;',
+                                        'SELECT "Column PREV_CUSTOM_DATA already exists";');
+                                PREPARE stmt FROM @sql;
+                                EXECUTE stmt;
+                                DEALLOCATE PREPARE stmt;
+                        
+                rollback:
+                  - sql:
+                        sql: 
+                                ALTER TABLE SR_HEADER_HISTORY DROP COLUMN IF EXISTS PREV_CUSTOM_DATA;
+        
+        - changeSet:
+                id: FIBI-8333-2
+                author: Suganya.S
+                labels: 'DDL'
+                comment: Add CUSTOM_DATA column to SR_HEADER_HISTORY table.
+                changes:
+                - sql:
+                        sql: |
+                                SET @col := (
+                                SELECT COUNT(*)
+                                FROM INFORMATION_SCHEMA.COLUMNS
+                                WHERE TABLE_NAME = 'SR_HEADER_HISTORY'
+                                AND TABLE_SCHEMA = DATABASE()
+                                AND COLUMN_NAME = 'CUSTOM_DATA'
+                                );
+                                SET @sql := IF(@col = 0,
+                                        'ALTER TABLE SR_HEADER_HISTORY ADD COLUMN CUSTOM_DATA JSON NULL;',
+                                        'SELECT "Column CUSTOM_DATA already exists";');
+                                PREPARE stmt FROM @sql;
+                                EXECUTE stmt;
+                                DEALLOCATE PREPARE stmt;
+                rollback:
+                  - sql:
+                        sql:
+                                ALTER TABLE SR_HEADER_HISTORY DROP COLUMN IF EXISTS CUSTOM_DATA ;
+        
+        - changeSet:
+                id: FIBI-8766-1
+                author: Suganya.S
+                labels: 'DML'
+                comment: Update dashboard_criteria_conf table.
+                changes:
+                - sql:
+                        sql: |
+                                set sql_safe_updates=0;
+                                UPDATE dashboard_criteria_conf SET DESCRIPTION = 'For SR Linked module lookup', TYPE = 'LOOK_UP_EXTERNAL', CONFIG_JSON = '{\"option\": \"EMPTY#EMPTY#true#true\", \"lookupType\": \"linkedModule\" , \"moduleCode\":\"20\"}',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (CRITERIA_CONF_ID = '30');
+                                set sql_safe_updates=1;
+                rollback:
+                - sql:
+                        sql: |
+                                set sql_safe_updates=0;
+                                UPDATE dashboard_criteria_conf SET DESCRIPTION = 'For All module lookup', TYPE = 'LOOK_UP', CONFIG_JSON = '{\"option\": \"AGREEMENT_LINK_MODULE#MODULE_CODE#true#true\"}',UPDATE_TIMESTAMP=UTC_TIMESTAMP(),UPDATE_USER='admin' WHERE (CRITERIA_CONF_ID = '30');
+                                set sql_safe_updates=1;
+        
+        - changeSet:
+                id: FIBI-8877-1
+                author: Suganya.S
+                labels: 'DML'
+                comment: Add row into COEUS_SUB_MODULE table.
+                changes:
+                - sql:
+                        sql: |
+                                INSERT INTO COEUS_SUB_MODULE (COEUS_SUB_MODULE_ID, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, REQUIRE_UNIQUE_QUESTIONNAIRE, IS_ACTIVE)
+                                SELECT 
+                                (SELECT COALESCE(MAX(COEUS_SUB_MODULE_ID), 0) + 1 FROM COEUS_SUB_MODULE),
+                                20,
+                                2,
+                                'Service Request Task',
+                                UTC_DATE(),
+                                'admin',
+                                'N',
+                                'Y'
+                                WHERE NOT EXISTS (
+                                SELECT 1 FROM COEUS_SUB_MODULE WHERE MODULE_CODE = 20 AND SUB_MODULE_CODE = 2
+                                );
+                rollback:
+                - sql:
+                        sql: |
+                                DELETE FROM COEUS_SUB_MODULE WHERE MODULE_CODE = 20 AND SUB_MODULE_CODE = 2;
+        
+        - changeSet:
+                id: FIBI-8877-2
+                author: Suganya.S
+                labels: 'DML'
+                comment: Delete rows from INBOX table.
+                changes:
+                - sql:
+                        sql: |
+                                DELETE FROM INBOX where MODULE_CODE = 20 AND MODULE_ITEM_KEY NOT IN (SELECT SR_HEADER_ID FROM SR_HEADER);
+                rollback: empty
+        
+        - changeSet:
+                id: FIBI-8907-1
+                author: Suganya.S
+                labels: 'DML'
+                comment: Update NOTIFICATION_TYPE table.
+                changes:
+                - sql:
+                        sql: |
+                                SET SQL_SAFE_UPDATES = 0;
+                                UPDATE NOTIFICATION_TYPE
+                                SET MESSAGE = REPLACE(MESSAGE, '{SERVICE_TYPE}', '{SERVICE_REQUEST_TYPE}'), UPDATE_USER ='admin',UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                                WHERE MESSAGE LIKE '%{SERVICE_TYPE}%';
+                                SET SQL_SAFE_UPDATES = 1;          
+                rollback: empty
+        
+        - changeSet:
+                id: FIBI-8907-2
+                author: Suganya.S
+                labels: 'DML'
+                comment: Update NOTIFICATION_TYPE table.
+                changes:
+                - sql:
+                        sql: |
+                                SET SQL_SAFE_UPDATES = 0;
+                                UPDATE NOTIFICATION_TYPE
+                                SET SUBJECT = REPLACE(SUBJECT, '{SERVICE_TYPE}', '{SERVICE_REQUEST_TYPE}'),UPDATE_USER ='admin',UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                                WHERE SUBJECT LIKE '%{SERVICE_TYPE}%';
+                                SET SQL_SAFE_UPDATES = 1;
+                rollback: empty

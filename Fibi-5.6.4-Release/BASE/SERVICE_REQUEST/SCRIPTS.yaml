@@ -1,0 +1,370 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-11017-2
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Insert code table configuration for SR_MODULE_MAPPING under Service Request group.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO CODE_TABLE_CONFIGURATION (
+                TABLE_NAME,
+                DISPLAY_NAME,
+                CONTENT,
+                GROUP_NAME,
+                DESCRIPTION,
+                UPDATE_USER,
+                UPDATE_TIMESTAMP,
+                IS_LOG_ENABLED
+              )
+              VALUES (
+                'SR_MODULE_MAPPING',
+                'Service Request Module Mapping',
+                '{"group":"Service Request","codeTableName":"Service Request Module Mapping","description":"List of all service request project association module mappings. Controls which modules appear in the Add Project Association modal Module dropdown for each service request category and type.","databaseTableName":"SR_MODULE_MAPPING","fields":[{"columnName":"SR_MODULE_MAPPING_ID","displayName":"Mapping Id","dataType":"INTEGER","isEditable":false,"length":11,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"ASSOC_CONFIG_CODE","displayName":"Assoc Config Code","dataType":"String","isEditable":true,"length":3,"canEmpty":false,"visible":false,"valueChanged":null,"index":null,"filterType":"lookUp","valueField":"ASSOC_CONFIG#ASSOC_CONFIG_CODE","isTransient":null,"values":null,"refColumnName":null,"defaultValue":"DESCRIPTION_ASSOC_CONFIG_CODE"},{"columnName":"DESCRIPTION_ASSOC_CONFIG_CODE","displayName":"Assoc Config","dataType":"String","isEditable":false,"length":null,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":"true","values":null,"refColumnName":null,"defaultValue":null},{"columnName":"CATEGORY_CODE","displayName":"Category Code","dataType":"String","isEditable":true,"length":3,"canEmpty":false,"visible":false,"valueChanged":null,"index":null,"filterType":"lookUp","valueField":"SR_CATEGORY#CATEGORY_CODE","isTransient":null,"values":null,"refColumnName":null,"defaultValue":"DESCRIPTION_CATEGORY_CODE"},{"columnName":"DESCRIPTION_CATEGORY_CODE","displayName":"Category","dataType":"String","isEditable":false,"length":null,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":"true","values":null,"refColumnName":null,"defaultValue":null},{"columnName":"TYPE_CODE","displayName":"Type Code","dataType":"String","isEditable":true,"length":3,"canEmpty":false,"visible":false,"valueChanged":null,"index":null,"filterType":"lookUp","valueField":"SR_TYPE#TYPE_CODE","isTransient":null,"values":null,"refColumnName":null,"defaultValue":"DESCRIPTION_TYPE_CODE"},{"columnName":"DESCRIPTION_TYPE_CODE","displayName":"Type","dataType":"String","isEditable":false,"length":null,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":"true","values":null,"refColumnName":null,"defaultValue":null},{"columnName":"IS_ACTIVE","displayName":"Is Active","dataType":"String","isEditable":true,"length":1,"canEmpty":false,"visible":true,"valueChanged":null,"index":null,"filterType":"switch","valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_TIMESTAMP","displayName":"Update Timestamp","dataType":"Date","isEditable":false,"length":null,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":null,"defaultValue":null},{"columnName":"UPDATE_USER","displayName":"Update User","dataType":"String","isEditable":false,"length":60,"canEmpty":true,"visible":true,"valueChanged":null,"index":null,"filterType":null,"valueField":null,"isTransient":null,"values":null,"refColumnName":"PERSON#PERSON_ID","defaultValue":null}],"primaryKey":["SR_MODULE_MAPPING_ID"],"dependency":[{"displayName":"Association Configuration","table_name":"ASSOC_CONFIG","columnName":"ASSOC_CONFIG_CODE","showTableName":"true"},{"displayName":"Service Request Category","table_name":"SR_CATEGORY","columnName":"CATEGORY_CODE","showTableName":"true"},{"displayName":"Service Request Types","table_name":"SR_TYPE","columnName":"TYPE_CODE","showTableName":"true"}],"actions":null}',
+                'Service Request',
+                'List of all service request project association module mappings. Controls which modules appear in the Add Project Association modal Module dropdown for each service request category and type. To add a new entry, please ensure that data is already added/available in the following code table(s) and/or in the database table(s):',
+                'admin',
+                UTC_TIMESTAMP(),
+                'N'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM CODE_TABLE_CONFIGURATION
+              WHERE TABLE_NAME = 'SR_MODULE_MAPPING'
+                AND DISPLAY_NAME = 'Service Request Module Mapping';
+
+  - changeSet:
+      id: FIBI-9477-2
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Insert widget_lookup entry for the Service Request by Type widget (widget ID 2004).
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO WIDGET_LOOKUP (WIDGET_ID, DESCRIPTION, WIDGET_NAME, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER, SIZE, IMAGE_PATH)
+              VALUES (2004, 'Service Request Count by Type', 'Service Request Count by Type', 'Y', UTC_TIMESTAMP(), 'admin', 'L', 'srTypeChart.png');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM WIDGET_LOOKUP WHERE WIDGET_ID = 2004;
+
+  - changeSet:
+      id: FIBI-10847-1
+      author: Shyla
+      labels: 'DDL'
+      comment: Add CREATE_USER and CREATE_TIMESTAMP and FROM_EMAIL_ADDRESS columns to sr_mail_informations table
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE sr_mail_informations;
+
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                   FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'sr_mail_informations'
+                     AND COLUMN_NAME = 'CREATE_TIMESTAMP') = 0,
+                  'ALTER TABLE sr_mail_informations ADD COLUMN CREATE_TIMESTAMP DATETIME(6) DEFAULT NULL;',
+                  'ALTER TABLE sr_mail_informations MODIFY COLUMN CREATE_TIMESTAMP DATETIME(6) DEFAULT NULL;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                   FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'sr_mail_informations'
+                     AND COLUMN_NAME = 'CREATE_USER') = 0,
+                  'ALTER TABLE sr_mail_informations ADD COLUMN CREATE_USER VARCHAR(60) DEFAULT NULL;',
+                  'ALTER TABLE sr_mail_informations MODIFY COLUMN CREATE_USER VARCHAR(60) DEFAULT NULL;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+
+              SET @sql := IF(
+                  (SELECT COUNT(*)
+                   FROM information_schema.COLUMNS
+                   WHERE TABLE_SCHEMA = DATABASE()
+                     AND TABLE_NAME = 'sr_mail_informations'
+                     AND COLUMN_NAME = 'FROM_EMAIL_ADDRESS') = 0,
+                  'ALTER TABLE sr_mail_informations ADD COLUMN FROM_EMAIL_ADDRESS VARCHAR(60) DEFAULT NULL;',
+                  'ALTER TABLE sr_mail_informations MODIFY COLUMN FROM_EMAIL_ADDRESS VARCHAR(60) DEFAULT NULL;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE sr_mail_informations DROP COLUMN IF EXISTS FROM_EMAIL_ADDRESS;
+              ALTER TABLE sr_mail_informations DROP COLUMN IF EXISTS CREATE_USER;
+              ALTER TABLE sr_mail_informations DROP COLUMN IF EXISTS CREATE_TIMESTAMP;
+
+  - changeSet:
+      id: FIBI-10847-2
+      author: Shyla
+      labels: 'DML'
+      comment: Backfill audit columns on sr_mail_informations for existing records
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_mail_sr_ids;
+              CREATE TEMPORARY TABLE tmp_sr_mail_sr_ids (
+                  SR_HEADER_ID INT NOT NULL PRIMARY KEY
+              ) ENGINE=InnoDB;
+
+              INSERT INTO tmp_sr_mail_sr_ids (SR_HEADER_ID)
+              SELECT DISTINCT SR_HEADER_ID
+              FROM sr_mail_informations
+              WHERE SR_HEADER_ID IS NOT NULL;
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_creation_mail;
+              CREATE TEMPORARY TABLE tmp_sr_creation_mail (
+                  SR_HEADER_ID INT NOT NULL PRIMARY KEY,
+                  creation_mail_id INT NOT NULL,
+                  KEY idx_creation_mail_id (creation_mail_id)
+              ) ENGINE=InnoDB;
+
+              INSERT INTO tmp_sr_creation_mail (SR_HEADER_ID, creation_mail_id)
+              SELECT SR_HEADER_ID, MIN(MAIL_ID)
+              FROM sr_mail_informations
+              WHERE SR_HEADER_ID IS NOT NULL
+                AND READ_STATUS = 'SUCCESS'
+              GROUP BY SR_HEADER_ID;
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_create_users;
+              CREATE TEMPORARY TABLE tmp_sr_create_users (
+                  CREATE_USER VARCHAR(60) NOT NULL PRIMARY KEY
+              ) ENGINE=InnoDB;
+
+              INSERT INTO tmp_sr_create_users (CREATE_USER)
+              SELECT DISTINCT sh.CREATE_USER
+              FROM sr_header sh
+              INNER JOIN tmp_sr_mail_sr_ids ids
+                  ON ids.SR_HEADER_ID = sh.SR_HEADER_ID
+              WHERE sh.CREATE_USER IS NOT NULL;
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_person_by_username;
+              CREATE TEMPORARY TABLE tmp_person_by_username (
+                  USER_NAME VARCHAR(60) NOT NULL PRIMARY KEY,
+                  EMAIL_ADDRESS VARCHAR(60) DEFAULT NULL
+              ) ENGINE=InnoDB;
+
+              INSERT INTO tmp_person_by_username (USER_NAME, EMAIL_ADDRESS)
+              SELECT p.USER_NAME, MAX(p.EMAIL_ADDRESS)
+              FROM person p
+              INNER JOIN tmp_sr_create_users cu
+                  ON cu.CREATE_USER = p.USER_NAME
+              GROUP BY p.USER_NAME;
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_header_audit;
+              CREATE TEMPORARY TABLE tmp_sr_header_audit (
+                  SR_HEADER_ID INT NOT NULL PRIMARY KEY,
+                  CREATE_USER VARCHAR(60) DEFAULT NULL,
+                  CREATE_TIMESTAMP DATETIME(6) DEFAULT NULL,
+                  FROM_EMAIL_ADDRESS VARCHAR(60) DEFAULT NULL
+              ) ENGINE=InnoDB;
+
+              INSERT INTO tmp_sr_header_audit (
+                  SR_HEADER_ID,
+                  CREATE_USER,
+                  CREATE_TIMESTAMP,
+                  FROM_EMAIL_ADDRESS
+              )
+              SELECT
+                  sh.SR_HEADER_ID,
+                  sh.CREATE_USER,
+                  sh.CREATE_TIMESTAMP,
+                  CASE
+                      WHEN sh.CREATE_USER IS NULL THEN NULL
+                      ELSE COALESCE(
+                          pu.EMAIL_ADDRESS,
+                          pe.EMAIL_ADDRESS,
+                          CASE
+                              WHEN sh.CREATE_USER LIKE '%@%' THEN sh.CREATE_USER
+                              ELSE NULL
+                          END
+                      )
+                  END
+              FROM sr_header sh
+              INNER JOIN tmp_sr_mail_sr_ids ids
+                  ON ids.SR_HEADER_ID = sh.SR_HEADER_ID
+              LEFT JOIN tmp_person_by_username pu
+                  ON pu.USER_NAME = sh.CREATE_USER
+              LEFT JOIN person pe
+                  ON pe.EMAIL_ADDRESS = sh.CREATE_USER
+                 AND sh.CREATE_USER LIKE '%@%';
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_create_users;
+              DROP TEMPORARY TABLE IF EXISTS tmp_person_by_username;
+
+              UPDATE sr_mail_informations smi
+              INNER JOIN tmp_sr_header_audit ha
+                  ON smi.SR_HEADER_ID = ha.SR_HEADER_ID
+              SET smi.CREATE_USER = ha.CREATE_USER;
+
+              UPDATE sr_mail_informations smi
+              INNER JOIN tmp_sr_creation_mail cr
+                  ON smi.SR_HEADER_ID = cr.SR_HEADER_ID
+                 AND smi.MAIL_ID = cr.creation_mail_id
+              INNER JOIN tmp_sr_header_audit ha
+                  ON smi.SR_HEADER_ID = ha.SR_HEADER_ID
+              SET smi.CREATE_TIMESTAMP = ha.CREATE_TIMESTAMP;
+
+              UPDATE sr_mail_informations smi
+              INNER JOIN tmp_sr_header_audit ha
+                  ON smi.SR_HEADER_ID = ha.SR_HEADER_ID
+              SET smi.FROM_EMAIL_ADDRESS = ha.FROM_EMAIL_ADDRESS
+              WHERE smi.READ_STATUS = 'SUCCESS';
+
+              UPDATE sr_mail_informations
+              SET FROM_EMAIL_ADDRESS = 'UNKNOWN'
+              WHERE FROM_EMAIL_ADDRESS IS NULL
+                 OR FROM_EMAIL_ADDRESS = '';
+
+              UPDATE sr_mail_informations smi
+              LEFT JOIN tmp_sr_creation_mail cr
+                  ON smi.SR_HEADER_ID = cr.SR_HEADER_ID
+                 AND smi.MAIL_ID = cr.creation_mail_id
+              SET smi.CREATE_TIMESTAMP = UTC_TIMESTAMP(6)
+              WHERE smi.CREATE_TIMESTAMP IS NULL
+                AND (
+                    (smi.READ_STATUS = 'SUCCESS'
+                     AND smi.SR_HEADER_ID IS NOT NULL
+                     AND cr.creation_mail_id IS NULL)
+                    OR smi.READ_STATUS = 'ERROR'
+                );
+
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_mail_sr_ids;
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_creation_mail;
+              DROP TEMPORARY TABLE IF EXISTS tmp_sr_header_audit;
+
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10847-3
+      author: Shyla
+      labels: 'DDL'
+      comment: Set CREATE_TIMESTAMP and FROM_EMAIL_ADDRESS as NOT NULL on sr_mail_informations after backfill
+      changes:
+        - sql:
+            sql: |
+              ALTER TABLE sr_mail_informations
+              MODIFY COLUMN CREATE_TIMESTAMP DATETIME(6) NOT NULL,
+              MODIFY COLUMN FROM_EMAIL_ADDRESS VARCHAR(60) NOT NULL;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE sr_mail_informations
+              MODIFY COLUMN CREATE_TIMESTAMP DATETIME(6) DEFAULT NULL,
+              MODIFY COLUMN FROM_EMAIL_ADDRESS VARCHAR(60) DEFAULT NULL;
+
+  - changeSet:
+      id: FIBI-10847-4
+      author: Shyla
+      labels: 'DML'
+      comment: Insert Service Request dashboard criteria for Created from Email filter
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO dashboard_criteria_lookup (
+                  CRITERIA_KEY,
+                  DESCRIPTION,
+                  DISPLAY_NAME,
+                  MODULE_CODE,
+                  CRITERIA_CONF_ID,
+                  CUSTOM_DATA_ELEMENTS_ID,
+                  IS_ASSOC,
+                  IS_ACTIVE,
+                  DEFAULT_SORT_ORDER,
+                  UPDATE_TIMESTAMP,
+                  UPDATE_USER
+              )
+              SELECT
+                  'CRT_SR_CREATED_FROM_EMAIL',
+                  'Created from Email',
+                  'Created from Email',
+                  20,
+                  (
+                      SELECT CRITERIA_CONF_ID
+                      FROM dashboard_criteria_conf
+                      WHERE TYPE = 'LOOK_UP_EXTERNAL'
+                        AND DESCRIPTION = 'Dashboard Yes/No filter (single select)'
+                      LIMIT 1
+                  ),
+                  NULL,
+                  NULL,
+                  'Y',
+                  (
+                      SELECT IFNULL(MAX(DEFAULT_SORT_ORDER), 0) + 1
+                      FROM dashboard_criteria_lookup
+                      WHERE MODULE_CODE = 20
+                  ),
+                  UTC_TIMESTAMP(),
+                  'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM dashboard_criteria_lookup
+                  WHERE CRITERIA_KEY = 'CRT_SR_CREATED_FROM_EMAIL'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dashboard_criteria_lookup
+              WHERE CRITERIA_KEY = 'CRT_SR_CREATED_FROM_EMAIL';
+
+  - changeSet:
+      id: FIBI-10847-5
+      author: Shyla
+      labels: 'DML'
+      comment: Insert Service Request dashboard criteria for From Email Address filter
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO dashboard_criteria_lookup (
+                  CRITERIA_KEY,
+                  DESCRIPTION,
+                  DISPLAY_NAME,
+                  MODULE_CODE,
+                  CRITERIA_CONF_ID,
+                  CUSTOM_DATA_ELEMENTS_ID,
+                  IS_ASSOC,
+                  IS_ACTIVE,
+                  DEFAULT_SORT_ORDER,
+                  UPDATE_TIMESTAMP,
+                  UPDATE_USER
+              )
+              SELECT
+                  'CRT_SR_FROM_EMAIL_ADDRESS',
+                  'From Email Address',
+                  'From Email Address',
+                  20,
+                  1,
+                  NULL,
+                  NULL,
+                  'Y',
+                  (
+                      SELECT IFNULL(MAX(DEFAULT_SORT_ORDER), 0) + 1
+                      FROM dashboard_criteria_lookup
+                      WHERE MODULE_CODE = 20
+                  ),
+                  UTC_TIMESTAMP(),
+                  'admin'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM dashboard_criteria_lookup
+                  WHERE CRITERIA_KEY = 'CRT_SR_FROM_EMAIL_ADDRESS'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM dashboard_criteria_lookup
+              WHERE CRITERIA_KEY = 'CRT_SR_FROM_EMAIL_ADDRESS';

@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8588-1
+      author: Vishnu.BH
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS sr_assoc_detail_v;
+        - sqlFile:
+            path: ROUTINES/MIT/SERVICE_REQUEST/VIEWS/sr_assoc_detail_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

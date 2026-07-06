@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10098-1
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Update DASHBOARD_COLUMN_LOOKUP for AG contract value column config
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE DASHBOARD_COLUMN_LOOKUP
+              SET COLUMN_CONF_ID = '16' , UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin'
+              WHERE COLUMN_KEY = 'COL_AG_CONTRACT_VALUE'
+                AND (COLUMN_CONF_ID IS NULL OR COLUMN_CONF_ID != '16');
+                SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

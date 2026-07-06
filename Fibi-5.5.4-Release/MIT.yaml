@@ -1,0 +1,9 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5.4-Release/MIT/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5.4-Release/MIT/CORE/PROCEDURES.yaml
+        labels: 'CORE'

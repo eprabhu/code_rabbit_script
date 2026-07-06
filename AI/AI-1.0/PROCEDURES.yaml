@@ -1,0 +1,166 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: AI-8-1
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_ATTACHMENTS_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_ATTACHMENTS_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_ATTACHMENTS_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-2
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_BUDGET_SUMMARY_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_BUDGET_SUMMARY_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_BUDGET_SUMMARY_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-3
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_CERTIFICATION_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_CERTIFICATION_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_CERTIFICATION_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-4
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_COMMENTS_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_COMMENTS_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_COMMENTS_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-5
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_CUSTOM_DATA_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_CUSTOM_DATA_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_CUSTOM_DATA_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-6
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_GENERAL_DETAILS_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_GENERAL_DETAILS_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_GENERAL_DETAILS_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-7
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_QUESTIONNAIRE_DATA_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_QUESTIONNAIRE_DATA_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_QUESTIONNAIRE_DATA_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-8
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_REVIEW_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_REVIEW_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_REVIEW_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-9
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_PROPOSAL_SUPPORT_QUESTIONS_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_PROPOSAL_SUPPORT_QUESTIONS_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_PROPOSAL_SUPPORT_QUESTIONS_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-8-10
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_FULL_PROPOSAL_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_FULL_PROPOSAL_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_FULL_PROPOSAL_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: AI-121-1
+      author: Sanidh.IV
+      labels: 'PROCEDURES'
+      comment: Create Procedure GET_ROUTE_LOG_JSON.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_ROUTE_LOG_JSON
+        - sqlFile:
+            path: AI/ROUTINES/PROCEDURES/GET_ROUTE_LOG_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

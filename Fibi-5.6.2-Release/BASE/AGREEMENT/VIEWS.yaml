@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+- changeSet:
+      id: FIBI-10540-1
+      author: Solih N
+      labels: 'VIEWS'
+      comment: Update view agreement_v to use principal full name
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS agreement_v;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/VIEWS/agreement_v.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

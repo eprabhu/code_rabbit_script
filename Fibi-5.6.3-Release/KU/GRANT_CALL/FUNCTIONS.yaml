@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+- changeSet:
+      id: FIBI-10384-1
+      author: Nabeel Ahamed M
+      labels: 'FUNCTIONS'
+      comment:  Add KU Specific FN_CHK_GRANTCALL_ELGLTY_PI
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP FUNCTION IF EXISTS FN_CHK_GRANTCALL_ELGLTY_PI;
+        - sqlFile:
+            path: ROUTINES/KU/GRANT_CALL/FUNCTIONS/FN_CHK_GRANTCALL_ELGLTY_PI.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

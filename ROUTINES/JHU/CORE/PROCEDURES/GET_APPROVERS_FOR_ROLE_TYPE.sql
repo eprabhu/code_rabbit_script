@@ -1,0 +1,548 @@
+CREATE PROCEDURE `GET_APPROVERS_FOR_ROLE_TYPE`(
+        AV_MODULE_CODE DECIMAL(38, 0),
+        AV_MODULE_ITEM_ID VARCHAR(20),
+        AV_ROLE_TYPE DECIMAL(38, 0),
+        AV_SUBMODULE_CODE DECIMAL(38, 0),
+        AV_SUB_MODULE_ITEM_KEY VARCHAR(20)
+)
+    DETERMINISTIC
+BEGIN
+DECLARE LI_RETURN DECIMAL(38, 0);
+DECLARE LS_LEAD_UNIT VARCHAR(50);
+DECLARE LS_SUBMITING_UNIT_NUMBER VARCHAR(50);
+DECLARE LS_UNIT_ADMIN_TYPE_CODE DECIMAL(38, 0);
+DECLARE LS_CREATE_USER VARCHAR(20);
+DECLARE LS_CODE CHAR(5) DEFAULT '00000';
+DECLARE LS_MSG TEXT;
+DECLARE LI_MODULE_CODE INT(3);
+DECLARE LS_MODULE_ITEM_KEY VARCHAR(20);
+DECLARE LS_AWARD_ID VARCHAR(22);
+DECLARE LS_AWARD_NUMBER VARCHAR(12);
+DECLARE LS_ACTIVE_AWARD_ID VARCHAR(22);
+DECLARE LI_FLAG INT;
+DECLARE LS_ADMIN_PERSON_ID VARCHAR(22);
+DECLARE LI_GRANT_TYPE INT;
+DECLARE LI_FUNDING_SCHEME_ID INT;
+DECLARE LI_PERSON_COUNT INT;
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION 
+BEGIN 
+        GET DIAGNOSTICS CONDITION 1 LS_CODE = RETURNED_SQLSTATE,LS_MSG = MESSAGE_TEXT;
+END;
+
+IF AV_MODULE_CODE = 1 THEN
+        SELECT T2.AWARD_ID INTO LS_ACTIVE_AWARD_ID
+        FROM AWARD T1,AWARD T2
+        WHERE T1.AWARD_ID = AV_MODULE_ITEM_ID
+        AND T1.AWARD_NUMBER = T2.AWARD_NUMBER
+        AND T2.AWARD_SEQUENCE_STATUS = 'ACTIVE';
+        IF LS_ACTIVE_AWARD_ID IS NOT NULL THEN
+                SET AV_MODULE_ITEM_ID = LS_ACTIVE_AWARD_ID;
+        END IF;
+        SELECT LEAD_UNIT_NUMBER INTO LS_LEAD_UNIT
+        FROM AWARD
+        WHERE AWARD_ID = AV_MODULE_ITEM_ID;
+
+ELSEIF AV_MODULE_CODE = 2 THEN
+        SELECT HOME_UNIT_NUMBER INTO LS_LEAD_UNIT
+        FROM PROPOSAL
+        WHERE PROPOSAL_ID = AV_MODULE_ITEM_ID;
+ELSEIF AV_MODULE_CODE = 3 THEN
+        SELECT HOME_UNIT_NUMBER INTO LS_LEAD_UNIT
+        FROM EPS_PROPOSAL
+        WHERE PROPOSAL_ID = AV_MODULE_ITEM_ID;
+
+ELSEIF AV_MODULE_CODE = 12 THEN
+        SELECT UNIT_NUMBER INTO LS_LEAD_UNIT
+        FROM AGREEMENT_HEADER
+        WHERE AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID;
+        IF LS_LEAD_UNIT IS NULL THEN
+                SELECT UNIT_NUMBER INTO LS_LEAD_UNIT
+                FROM UNIT
+                WHERE PARENT_UNIT_NUMBER IS NULL;
+        END IF;
+
+ELSEIF AV_MODULE_CODE = 15 THEN
+        SELECT HOME_UNIT_NUMBER INTO LS_LEAD_UNIT
+        FROM GRANT_CALL_HEADER
+        WHERE GRANT_HEADER_ID = AV_MODULE_ITEM_ID;
+
+ELSEIF AV_MODULE_CODE = 20 THEN
+        SELECT MODULE_CODE,ORIGINATING_MODULE_ITEM_KEY INTO LI_MODULE_CODE,LS_MODULE_ITEM_KEY
+        FROM SR_HEADER T1
+        WHERE T1.SR_HEADER_ID = AV_MODULE_ITEM_ID;
+        IF LI_MODULE_CODE = 1 THEN
+                SELECT AWARD_ID,LEAD_UNIT_NUMBER INTO LS_AWARD_ID,LS_LEAD_UNIT
+                FROM AWARD
+                WHERE AWARD_ID = LS_MODULE_ITEM_KEY;
+        ELSEIF LI_MODULE_CODE = 3 THEN
+                SELECT HOME_UNIT_NUMBER INTO LS_LEAD_UNIT
+                FROM EPS_PROPOSAL
+                WHERE PROPOSAL_ID = LS_MODULE_ITEM_KEY;
+        END IF;
+
+ELSEIF AV_MODULE_CODE = 14 THEN
+        SELECT LEAD_UNIT_NUMBER,AWARD_ID INTO LS_LEAD_UNIT,LS_AWARD_ID
+        FROM AWARD
+        WHERE AWARD_ID IN(
+                SELECT AWARD_ID
+                FROM CLAIM
+                WHERE CLAIM_ID = AV_MODULE_ITEM_ID
+        );
+
+ELSEIF AV_MODULE_CODE = 16 THEN
+        SELECT LEAD_UNIT_NUMBER,AWARD_ID INTO LS_LEAD_UNIT,LS_AWARD_ID
+        FROM AWARD
+        WHERE AWARD_ID IN(
+                SELECT AWARD_ID
+                FROM AWARD_PROGRESS_REPORT
+                WHERE PROGRESS_REPORT_ID = AV_MODULE_ITEM_ID
+        );
+
+ELSEIF AV_MODULE_CODE = 21 THEN
+        SELECT FUNDING_OFFICE INTO LS_LEAD_UNIT
+        FROM EXTERNAL_USER
+        WHERE PERSON_ID = AV_MODULE_ITEM_ID;
+END IF;
+
+IF AV_ROLE_TYPE = 1 THEN   
+        IF AV_MODULE_CODE = 3 THEN               
+					SELECT T2.PERSON_ID
+					FROM EPS_PROPOSAL T1
+					INNER JOIN EPS_PROPOSAL_PERSON_ROLES T2 ON T1.PROPOSAL_ID = T2.PROPOSAL_ID
+					INNER JOIN PERSON T3 ON T2.PERSON_ID = T3.PERSON_ID 
+					WHERE T1.PROPOSAL_ID = AV_MODULE_ITEM_ID 
+                                        AND T2.ROLE_ID = 5 
+					AND T3.STATUS = 'A';
+        END IF;
+    ELSEIF AV_ROLE_TYPE = 2  THEN 
+
+                                IF AV_MODULE_CODE = 1 THEN
+
+                                        SELECT T2.PERSON_ID
+                                        FROM AWARD T1
+                                        INNER JOIN AWARD_PERSONS T2 ON T1.AWARD_ID = T2.AWARD_ID 
+					INNER JOIN PERSON T3 ON T2.PERSON_ID = T3.PERSON_ID 
+                                        WHERE T1.AWARD_ID = AV_MODULE_ITEM_ID
+                                        AND T2.PERSON_ROLE_ID = 3
+					AND T3.STATUS = 'A';
+								
+				ELSEIF AV_MODULE_CODE = 16 THEN
+
+                                        SELECT T2.PERSON_ID
+                                        FROM AWARD T1
+                                        INNER JOIN AWARD_PERSONS T2 ON T1.AWARD_ID = T2.AWARD_ID 
+					INNER JOIN PERSON T3 ON T2.PERSON_ID = T3.PERSON_ID 
+                                        WHERE T1.AWARD_ID = LS_AWARD_ID
+                                        AND T2.PERSON_ROLE_ID = 3
+					AND T3.STATUS = 'A';	  
+										  
+                                ELSEIF AV_MODULE_CODE = 3 THEN
+
+                                                SELECT T2.PERSON_ID
+                                                FROM EPS_PROPOSAL T1
+                                                INNER JOIN EPS_PROPOSAL_PERSONS T2 ON T1.PROPOSAL_ID = T2.PROPOSAL_ID
+                                                AND T2.PROP_PERSON_ROLE_ID = 3
+                                                INNER JOIN PERSON T3 ON T2.PERSON_ID = T3.PERSON_ID 
+						WHERE T1.PROPOSAL_ID = AV_MODULE_ITEM_ID
+						AND T3.STATUS = 'A';
+
+                                ELSEIF AV_MODULE_CODE = 20 THEN
+
+                                           SELECT MODULE_CODE,MODULE_ITEM_KEY INTO LI_MODULE_CODE,LS_MODULE_ITEM_KEY
+                                           FROM SR_HEADER T1
+                                           WHERE T1.SR_HEADER_ID = AV_MODULE_ITEM_ID;
+
+                                                IF LI_MODULE_CODE = 1 THEN
+
+                                                                        SELECT T2.PERSON_ID
+                                                                        FROM AWARD T1
+                                                                        INNER JOIN AWARD_PERSONS T2 ON T1.AWARD_ID = T2.AWARD_ID
+                                                                        INNER JOIN PERSON T3 ON T2.PERSON_ID = T3.PERSON_ID 
+									WHERE T1.AWARD_ID = LS_MODULE_ITEM_KEY
+                                                                        AND T2.PERSON_ROLE_ID = 3
+									AND T3.STATUS = 'A';
+
+                                                ELSEIF LI_MODULE_CODE = 3 THEN
+
+                                                                        SELECT T2.PERSON_ID
+                                                                        FROM EPS_PROPOSAL T1
+                                                                        INNER JOIN EPS_PROPOSAL_PERSONS T2 ON T1.PROPOSAL_ID = T2.PROPOSAL_ID
+                                                                        AND T2.PROP_PERSON_ROLE_ID = 3 
+									INNER JOIN PERSON T3 ON T2.PERSON_ID = T3.PERSON_ID 
+                                                                        WHERE T1.PROPOSAL_ID = LS_MODULE_ITEM_KEY 
+									AND T3.STATUS = 'A';
+
+                                                END IF;
+
+                                ELSEIF AV_MODULE_CODE = 15  AND AV_SUBMODULE_CODE = 1 THEN
+
+                                        SELECT T1.PI_PERSON_ID AS PERSON_ID
+                                        FROM GRANT_CALL_IOI_HEADER T1
+					INNER JOIN PERSON T2 ON T1.PI_PERSON_ID = T2.PERSON_ID 
+                                        WHERE T1.GRANT_HEADER_ID = AV_MODULE_ITEM_ID
+                                        AND T1.IOI_ID = AV_SUB_MODULE_ITEM_KEY 
+					AND T2.STATUS = 'A';
+
+
+                                ELSEIF AV_MODULE_CODE = 13 THEN
+										  
+                                        SELECT DISTINCT T1.PERSON_ID
+                                        FROM AGREEMENT_PEOPLE T1
+					INNER JOIN PERSON T2 ON T1.PERSON_ID = T2.PERSON_ID 
+                                        WHERE T1.AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID 
+					AND T1.PEOPLE_TYPE_ID = 3
+					AND T2.STATUS = 'A';
+
+				ELSEIF AV_MODULE_CODE = 16 THEN
+
+                                        SELECT T2.PERSON_ID
+                                        FROM AWARD T1
+                                        INNER JOIN AWARD_PERSONS T2 ON T1.AWARD_ID = T2.AWARD_ID 
+					INNER JOIN PERSON T3 ON T3.PERSON_ID = T2.PERSON_ID 
+                                        WHERE T1.AWARD_ID = LS_AWARD_ID
+                                        AND T2.PERSON_ROLE_ID = 3 
+					AND T3.STATUS = 'A';	  
+										  
+                                 END IF;
+								 
+								  ELSEIF AV_MODULE_CODE = 2 THEN
+                SELECT T2.PERSON_ID
+                FROM PROPOSAL T1
+                INNER JOIN PROPOSAL_PERSONS T2 ON T1.PROPOSAL_ID = T2.PROPOSAL_ID
+                AND T2.PROP_PERSON_ROLE_ID = 3
+                INNER JOIN PERSON T3 ON T2.PERSON_ID = T3.PERSON_ID
+                WHERE T1.PROPOSAL_ID = AV_MODULE_ITEM_ID
+                AND T3.STATUS = 'A';
+                                 
+	ELSEIF AV_ROLE_TYPE = 3  THEN 
+                                IF AV_MODULE_CODE = 1 THEN
+
+
+                                        SELECT T2.PERSON_ID
+                                        FROM AWARD T1
+                                        INNER JOIN AWARD_PERSONS T2 ON T1.AWARD_ID = T2.AWARD_ID 
+					INNER JOIN PERSON T3 ON T3.PERSON_ID = T2.PERSON_ID 
+                                        WHERE T1.AWARD_ID = AV_MODULE_ITEM_ID
+					AND T3.STATUS = 'A';
+																																	
+
+                                ELSEIF AV_MODULE_CODE = 3 THEN
+
+
+                                        SELECT T1.PERSON_ID
+                                        FROM  EPS_PROPOSAL_PERSONS T1
+					INNER JOIN PERSON T2 ON T1.PERSON_ID = T2.PERSON_ID 
+                                        WHERE T1.PROPOSAL_ID = AV_MODULE_ITEM_ID 
+					AND T2.STATUS = 'A';
+
+                                ELSEIF AV_MODULE_CODE = 20 THEN
+
+                                   SELECT MODULE_CODE,MODULE_ITEM_KEY INTO LI_MODULE_CODE,LS_MODULE_ITEM_KEY
+                                   FROM SR_HEADER T1
+                                   WHERE T1.SR_HEADER_ID = AV_MODULE_ITEM_ID;
+
+                                   IF LI_MODULE_CODE = 1 THEN
+
+                                                                SELECT T2.PERSON_ID
+                                                                FROM AWARD T1
+                                                                INNER JOIN AWARD_PERSONS T2 ON T1.AWARD_ID = T2.AWARD_ID 
+								INNER JOIN PERSON T3 ON T3.PERSON_ID = T2.PERSON_ID 
+                                                                WHERE T1.AWARD_ID = LS_MODULE_ITEM_KEY 
+								AND T3.STATUS = 'A';
+
+                                   ELSEIF LI_MODULE_CODE = 3 THEN
+
+
+                                                                SELECT T1.PERSON_ID
+                                                                FROM  EPS_PROPOSAL_PERSONS T1
+								INNER JOIN PERSON T2 ON T1.PERSON_ID = T2.PERSON_ID 
+                                                                WHERE T1.PROPOSAL_ID = LS_MODULE_ITEM_KEY 
+								AND T2.STATUS = 'A';
+
+                                   END IF;
+								   
+								        ELSEIF AV_MODULE_CODE = 2 THEN
+                SELECT T1.PERSON_ID
+                FROM PROPOSAL_PERSONS T1
+                INNER JOIN PERSON T2 ON T1.PERSON_ID = T2.PERSON_ID
+                WHERE T1.PROPOSAL_ID = AV_MODULE_ITEM_ID
+                AND T2.STATUS = 'A';
+
+                                END IF;
+
+    ELSEIF AV_ROLE_TYPE = 4 THEN 
+		IF AV_MODULE_CODE = 13 THEN
+                                SELECT T1.REQUESTOR_PERSON_ID AS  PERSON_ID
+				FROM AGREEMENT_HEADER T1
+				INNER JOIN PERSON T2 ON T1.REQUESTOR_PERSON_ID = T2.PERSON_ID 
+				WHERE AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID AND T2.STATUS = 'A';
+        END IF ;
+
+        IF AV_MODULE_CODE = 20 THEN 
+        
+		SELECT DISTINCT T3.PERSON_ID AS PERSON_ID FROM WORKFLOW T1
+		INNER JOIN WORKFLOW_DETAIL T2 ON T1.WORKFLOW_ID = T2.WORKFLOW_ID
+		INNER JOIN PERSON T3 ON T3.USER_NAME = T2.UPDATE_USER
+		WHERE T1.MODULE_CODE = AV_MODULE_CODE
+		AND T1.MODULE_ITEM_ID = AV_MODULE_ITEM_ID
+		AND T1.SUB_MODULE_CODE = AV_SUBMODULE_CODE
+		AND T1.SUB_MODULE_ITEM_ID = AV_SUB_MODULE_ITEM_KEY
+		AND T1.MAP_TYPE = 'R'
+		AND T1.IS_WORKFLOW_ACTIVE = 'Y'
+		AND T2.APPROVAL_STATUS IN ('A', 'B', 'R') AND T3.STATUS = 'A';
+	END IF;
+	
+ELSEIF AV_ROLE_TYPE = 5 THEN 
+
+        IF AV_MODULE_CODE = 20 THEN 
+			SET AV_MODULE_CODE = 1;
+			SELECT ORIGINATING_MODULE_ITEM_KEY INTO AV_MODULE_ITEM_ID FROM SR_HEADER WHERE SR_HEADER_ID = AV_MODULE_ITEM_ID;
+	END IF;
+        
+		SELECT DISTINCT T2.APPROVER_PERSON_ID AS PERSON_ID FROM WORKFLOW T1
+		INNER JOIN WORKFLOW_DETAIL T2 ON T1.WORKFLOW_ID = T2.WORKFLOW_ID 
+		INNER JOIN PERSON T3 ON T3.PERSON_ID = T2.APPROVER_PERSON_ID 
+		WHERE T1.MODULE_CODE = AV_MODULE_CODE
+		AND T1.MODULE_ITEM_ID = AV_MODULE_ITEM_ID
+		AND T1.SUB_MODULE_CODE = AV_SUBMODULE_CODE
+		AND T1.SUB_MODULE_ITEM_ID = AV_SUB_MODULE_ITEM_KEY
+		AND T1.MAP_TYPE = 'R'
+		AND T1.IS_WORKFLOW_ACTIVE = 'Y'
+		AND T2.APPROVAL_STATUS IN ('W') AND T3.STATUS = 'A';
+
+ELSEIF AV_ROLE_TYPE = 6 THEN 
+
+       SELECT DISTINCT T2.APPROVER_PERSON_ID AS PERSON_ID FROM WORKFLOW T1
+		INNER JOIN WORKFLOW_DETAIL T2 ON T1.WORKFLOW_ID = T2.WORKFLOW_ID 
+		INNER JOIN PERSON T3 ON T3.PERSON_ID = T2.APPROVER_PERSON_ID 
+		WHERE T1.MODULE_CODE = AV_MODULE_CODE
+		AND T1.MODULE_ITEM_ID = AV_MODULE_ITEM_ID
+		AND T1.SUB_MODULE_CODE = AV_SUBMODULE_CODE
+		AND T1.SUB_MODULE_ITEM_ID = AV_SUB_MODULE_ITEM_KEY
+		AND T1.MAP_TYPE = 'R'
+		AND T1.IS_WORKFLOW_ACTIVE = 'Y'
+		AND T3.STATUS = 'A';
+
+ ELSEIF AV_ROLE_TYPE = 8 THEN 
+ 
+		SELECT DISTINCT T1.PERSON_ID
+                FROM PERSON_ROLES T1 
+		INNER JOIN PERSON T2 ON T1.PERSON_ID = T2.PERSON_ID 
+                WHERE T1.ROLE_ID = 42 
+                AND T2.STATUS = 'A';      
+        
+	ELSEIF AV_ROLE_TYPE = 7  THEN 
+
+			IF AV_MODULE_CODE = 13 THEN
+
+                                        SELECT T1.SUBMIT_USER_ID AS PERSON_ID
+                                        FROM AGREEMENT_HEADER T1
+					INNER JOIN PERSON T2 ON T1.SUBMIT_USER_ID = T2.PERSON_ID 
+                                        WHERE T1.AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID
+					AND T2.STATUS = 'A';
+
+            ELSEIF AV_MODULE_CODE = 20 THEN  
+                     
+                SELECT T1.WORKFLOW_START_PERSON AS PERSON_ID
+				FROM WORKFLOW T1, PERSON P
+				WHERE T1.MODULE_CODE = AV_MODULE_CODE
+				AND T1.MODULE_ITEM_ID = AV_MODULE_ITEM_ID
+				AND T1.IS_WORKFLOW_ACTIVE = 'Y'
+				AND T1.WORKFLOW_SEQUENCE = (SELECT MAX(T2.WORKFLOW_SEQUENCE)
+											FROM  WORKFLOW T2
+											WHERE T2.MODULE_CODE = AV_MODULE_CODE 
+											AND T2.MODULE_ITEM_ID =T1.MODULE_ITEM_ID
+											AND T2.IS_WORKFLOW_ACTIVE = 'Y'
+											)
+				AND P.PERSON_ID = T1.WORKFLOW_START_PERSON
+				AND P.STATUS = 'A';
+
+                        END IF;
+
+ELSEIF AV_ROLE_TYPE = 51 THEN 
+
+IF AV_MODULE_CODE = 20 THEN
+
+   SELECT MODULE_CODE,MODULE_ITEM_KEY INTO LI_MODULE_CODE,LS_MODULE_ITEM_KEY
+		FROM SR_HEADER T1
+		WHERE T1.SR_HEADER_ID = AV_MODULE_ITEM_ID;
+
+		IF LI_MODULE_CODE = 1 THEN
+                        SELECT T2.PERSON_ID
+						FROM PERSON T2 WHERE T2.USER_NAME = (SELECT CREATE_USER 
+						FROM AWARD
+						WHERE AWARD_ID = LS_MODULE_ITEM_KEY) AND T2.STATUS = 'A';
+		ELSEIF LI_MODULE_CODE = 3 THEN
+                        SELECT T2.PERSON_ID
+						FROM PERSON T2 WHERE T2.USER_NAME = (SELECT CREATE_USER 
+						FROM eps_proposal
+						WHERE PROPOSAL_ID = LS_MODULE_ITEM_KEY) AND T2.STATUS = 'A';
+       	ELSE 
+	       SELECT REPORTER_PERSON_ID AS PERSON_ID
+	        FROM SR_HEADER
+	        WHERE SR_HEADER_ID = AV_MODULE_ITEM_ID;
+		END IF;
+END IF;
+
+ELSEIF AV_ROLE_TYPE = 46 THEN  
+
+	IF AV_MODULE_CODE = 1 THEN
+		SELECT T1.PERSON_ID
+		FROM PERSON T1 WHERE T1.USER_NAME = (SELECT CREATE_USER 
+		FROM AWARD
+		WHERE AWARD_ID = AV_MODULE_ITEM_ID)
+		AND T1.STATUS = 'A';
+
+		ELSEIF AV_MODULE_CODE = 3 THEN
+		SELECT T2.PERSON_ID
+		FROM PERSON T2 WHERE T2.USER_NAME = (SELECT CREATE_USER 
+		FROM eps_proposal
+		WHERE PROPOSAL_ID = AV_MODULE_ITEM_ID) AND T2.STATUS = 'A';
+
+        ELSEIF AV_MODULE_CODE = 20 THEN
+
+		SELECT MODULE_CODE,MODULE_ITEM_KEY INTO LI_MODULE_CODE,LS_MODULE_ITEM_KEY
+
+		FROM SR_HEADER T1
+
+		WHERE T1.SR_HEADER_ID = AV_MODULE_ITEM_ID;
+
+		IF LI_MODULE_CODE = 1 THEN
+
+                        SELECT T2.PERSON_ID
+
+						FROM PERSON T2 WHERE T2.USER_NAME = (SELECT CREATE_USER 
+
+						FROM AWARD
+
+						WHERE AWARD_ID = LS_MODULE_ITEM_KEY) AND T2.STATUS = 'A';
+
+		ELSEIF LI_MODULE_CODE = 3 THEN
+
+                        SELECT T2.PERSON_ID
+
+						FROM PERSON T2 WHERE T2.USER_NAME = (SELECT CREATE_USER 
+
+						FROM eps_proposal
+
+						WHERE PROPOSAL_ID = LS_MODULE_ITEM_KEY) AND T2.STATUS = 'A';
+
+       	ELSE 
+
+	       SELECT REPORTER_PERSON_ID AS PERSON_ID
+
+	        FROM SR_HEADER
+
+	        WHERE SR_HEADER_ID = AV_MODULE_ITEM_ID;
+
+		END IF;
+		
+		 ELSEIF AV_MODULE_CODE = 13 THEN 
+
+          SELECT T1.REQUESTOR_PERSON_ID AS PERSON_ID
+
+          FROM AGREEMENT_HEADER T1
+
+          INNER JOIN PERSON T2 ON T1.REQUESTOR_PERSON_ID = T2.PERSON_ID 
+
+          WHERE T1.AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID AND T2.STATUS = 'A';
+
+        END IF; 
+		
+ELSEIF AV_ROLE_TYPE = 48 THEN 
+
+		IF AV_MODULE_CODE = 22 THEN
+                        SELECT GROUP_CONCAT(EMAIL_ADDRESS_PRIMARY) AS RECIPIENT_ADDRESS FROM EXTERNAL_REVIEWER T1 
+			INNER JOIN  EXTERNAL_REVIEWER_RIGHTS T2 ON T2.EXTERNAL_REVIEWER_ID = T1.EXTERNAL_REVIEWER_ID 
+                        WHERE REVIEWER_RIGHTS_ID = 3;
+                END IF;
+    
+ 
+	ELSEIF AV_ROLE_TYPE = 50 THEN  
+
+  IF AV_MODULE_CODE = 20 THEN
+	SELECT T2.PERSON_ID
+FROM PERSON T2 WHERE T2.PERSON_ID IN (SELECT WATCHER_PERSON_ID 
+FROM SR_WATCHER
+WHERE SR_HEADER_ID = AV_MODULE_ITEM_ID) AND T2.STATUS = 'A';
+END IF;
+
+ELSEIF AV_ROLE_TYPE = 52 THEN 
+IF AV_MODULE_CODE = 3 THEN
+
+        SELECT T3.PERSON_ID FROM PERSON T3 WHERE T3.PERSON_ID IN (SELECT T2.PERSON_ID FROM PERSON_ROLES T2 WHERE T2.UNIT_NUMBER = (SELECT T1.HOME_UNIT_NUMBER FROM
+	    EPS_PROPOSAL T1 WHERE T1.PROPOSAL_ID = AV_MODULE_ITEM_ID) AND T2.ROLE_ID = 1331) AND T3.STATUS = 'A';
+	END IF;
+	
+	ELSEIF AV_ROLE_TYPE = 53 THEN  
+	IF AV_MODULE_CODE = 20 THEN
+		SELECT T1.PERSON_ID
+		FROM PERSON_ROLES T1
+		LEFT JOIN PERSON T2 ON T1.PERSON_ID = T2.PERSON_ID
+		WHERE ROLE_ID = 1339 AND T2.STATUS = 'A';
+	 END IF;
+	 
+ELSEIF AV_ROLE_TYPE = 35 THEN -- Agreement Administrator
+        IF AV_MODULE_CODE = 13 THEN
+                SELECT ADMIN_PERSON_ID INTO LS_ADMIN_PERSON_ID
+                FROM AGREEMENT_HEADER
+                WHERE AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID;
+                IF LS_ADMIN_PERSON_ID IS NULL THEN
+                       SELECT PR.PERSON_ID AS PERSON_ID
+        FROM
+        PERSON_ROLES PR,
+        (SELECT ROLE_ID,RT.RIGHT_NAME 
+           FROM ROLE_RIGHTS RR,
+                RIGHTS RT
+            WHERE RR.RIGHT_ID = RT.RIGHT_ID
+        ) RLE,
+        PERSON P
+        WHERE (( PR. DESCEND_FLAG = 'Y' AND LS_LEAD_UNIT IN (SELECT CHILD_UNIT_NUMBER
+                                                                 FROM UNIT_WITH_CHILDREN 
+                                                                                  WHERE UNIT_NUMBER = PR.UNIT_NUMBER
+             ))OR ( PR. DESCEND_FLAG = 'N' AND PR.UNIT_NUMBER = LS_LEAD_UNIT )
+            )
+         AND PR.PERSON_ID=P.PERSON_ID AND P.STATUS='A' AND RLE.ROLE_ID =1406  AND RLE.ROLE_ID = PR.ROLE_ID;
+                ELSE
+                        SELECT T1.ADMIN_PERSON_ID AS PERSON_ID
+                        FROM AGREEMENT_HEADER T1
+                        INNER JOIN PERSON T2 ON T1.ADMIN_PERSON_ID = T2.PERSON_ID
+                        WHERE AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID
+                        AND T2.STATUS = 'A';
+                END IF;
+        END IF;
+		
+		
+		ELSEIF AV_ROLE_TYPE = 54 THEN  
+                IF AV_MODULE_CODE = 13 THEN
+                /* Use the Agreement Aggregator role ID based on the instance */
+                        SELECT T1.PERSON_ID 
+                                        FROM AGREEMENT_PEOPLE_ROLES T1
+                                        LEFT JOIN PERSON T2 ON T1.PERSON_ID = T2.PERSON_ID
+                                        WHERE T1.AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID AND T1.ROLE_ID = 1404 AND T2.STATUS = 'A';                                             
+                END IF;
+				
+				
+		ELSEIF AV_ROLE_TYPE = 55 THEN   -- Agreement Admin Group 
+		        IF AV_MODULE_CODE = 13 THEN 
+                SELECT DISTINCT T1.PERSON_ID
+                        FROM AGREEMENT_HEADER T2
+                        INNER JOIN ADMIN_GROUP T3 ON T2.ADMIN_GROUP_ID = T3.ADMIN_GROUP_ID
+                        INNER JOIN PERSON_ROLES T1 ON T3.ROLE_ID = T1.ROLE_ID
+                        INNER JOIN PERSON T4 ON T1.PERSON_ID = T4.PERSON_ID
+                        WHERE T2.AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID
+                        AND T3.IS_ACTIVE = 'Y'
+                        AND T4.STATUS = 'A' 
+                UNION SELECT DISTINCT T3.PERSON_ID
+                        FROM AGREEMENT_HEADER T2
+                        INNER JOIN ADMIN_GROUP T3 ON T2.ADMIN_GROUP_ID = T3.ADMIN_GROUP_ID
+                        INNER JOIN PERSON T4 ON T3.PERSON_ID = T4.PERSON_ID
+                        WHERE T2.AGREEMENT_REQUEST_ID = AV_MODULE_ITEM_ID
+                        AND T3.IS_ACTIVE = 'Y'
+                        AND T4.STATUS = 'A';
+        END IF;	 
+	 
+END IF;
+
+
+END

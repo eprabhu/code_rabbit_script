@@ -1,0 +1,16 @@
+databaseChangeLog: 
+ 
+  - changeSet: 
+      id:  FIBI-6824
+      author: Prabhu.E 
+      labels: 'VIEWS'
+      comment: Modified agreement_custom_report_v view 
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP VIEW IF EXISTS award_manpower_compr_report_v; 
+        - sqlFile: 
+            path: ROUTINES/BASE/MANPOWER/VIEWS/award_manpower_compr_report_v.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty

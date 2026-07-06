@@ -1,0 +1,136 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7811-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS PR_MASTER_DATASET_SYNC
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/PR_MASTER_DATASET_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7561-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS ADD_COLUMN_IN_SR_CUSTOM_DATA_RT
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/ADD_COLUMN_IN_SR_CUSTOM_DATA_RT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7561-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS ADD_FULL_COLUMN_IN_SR_CUSTOM_DATA_RT
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/ADD_FULL_COLUMN_IN_SR_CUSTOM_DATA_RT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7561-3
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SR_CUSTOM_DATA_RT_FULL_SYNC
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/SR_CUSTOM_DATA_RT_FULL_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7561-4
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SR_CUSTOM_DATA_RT_SYNC_BY_SR_HEADER_ID
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/SR_CUSTOM_DATA_RT_SYNC_BY_SR_HEADER_ID.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8206-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure AWARD_MASTER_DATASET_SYNC.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS AWARD_MASTER_DATASET_SYNC
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/AWARD_MASTER_DATASET_SYNC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8590-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure AWARD_CUSTOM_DATA_RT_SYNC_BY_AWARD_ID.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS AWARD_CUSTOM_DATA_RT_SYNC_BY_AWARD_ID
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/AWARD_CUSTOM_DATA_RT_SYNC_BY_AWARD_ID.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure ADD_COLUMN_IN_AGREEMENT_CUSTOM_DATA_RT.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS ADD_COLUMN_IN_AGREEMENT_CUSTOM_DATA_RT
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/ADD_COLUMN_IN_AGREEMENT_CUSTOM_DATA_RT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure ADD_COLUMN_IN_SR_CUSTOM_DATA_RT.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS ADD_COLUMN_IN_SR_CUSTOM_DATA_RT
+        - sqlFile:
+            path: ROUTINES/BASE/REPORT/PROCEDURES/ADD_COLUMN_IN_SR_CUSTOM_DATA_RT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,33 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9745-1
+      author: Chitra T
+      labels: 'PROCEDURES'
+      comment: New Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS jhu_sap_awd_update_award_table;
+        - sqlFile:
+            path: ROUTINES/JHU/AWARD/PROCEDURES/jhu_sap_awd_update_award_table.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9745-2
+      author: Chitra T
+      labels: 'PROCEDURES'
+      comment: New Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS jhu_sap_awd_upd_proposal_tb;
+        - sqlFile:
+            path: ROUTINES/JHU/AWARD/PROCEDURES/jhu_sap_awd_upd_proposal_tb.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

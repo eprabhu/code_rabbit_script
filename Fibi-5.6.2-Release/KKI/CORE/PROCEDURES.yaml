@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10457
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment:  Create Procedure RULE_EVALUATE_VARIABLE
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_VARIABLE;
+        - sqlFile:
+            path: ROUTINES/KKI/CORE/PROCEDURES/RULE_EVALUATE_VARIABLE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

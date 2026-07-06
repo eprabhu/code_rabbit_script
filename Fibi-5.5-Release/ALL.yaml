@@ -1,0 +1,178 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.5-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5-Release/BASE/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5-Release/BASE/CORE/FUNCTIONS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.5-Release/BASE/CORE/VIEWS.yaml
+        labels: 'CORE'
+
+    #REPORT
+    - include:
+        file: Fibi-5.5-Release/BASE/REPORT/SCRIPTS.yaml
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.5-Release/BASE/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.5-Release/BASE/REPORT/FUNCTIONS.yaml
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.5-Release/BASE/REPORT/VIEWS.yaml
+        labels: 'REPORT'
+
+    #GRANT_CALL
+    - include:
+        file: Fibi-5.5-Release/BASE/GRANT_CALL/SCRIPTS.yaml
+        labels: 'GRANT_CALL'
+    - include:
+        file: Fibi-5.5-Release/BASE/GRANT_CALL/PROCEDURES.yaml
+        labels: 'GRANT_CALL'
+    - include:
+        file: Fibi-5.5-Release/BASE/GRANT_CALL/FUNCTIONS.yaml
+        labels: 'GRANT_CALL'
+    - include:
+        file: Fibi-5.5-Release/BASE/GRANT_CALL/VIEWS.yaml
+        labels: 'GRANT_CALL'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.5-Release/BASE/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.5-Release/BASE/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.5-Release/BASE/DEV_PROPOSAL/FUNCTIONS.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.5-Release/BASE/DEV_PROPOSAL/VIEWS.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.5-Release/BASE/INSTITUTE_PROPOSAL/SCRIPTS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+    - include:
+        file: Fibi-5.5-Release/BASE/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+    - include:
+        file: Fibi-5.5-Release/BASE/INSTITUTE_PROPOSAL/FUNCTIONS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+    - include:
+        file: Fibi-5.5-Release/BASE/INSTITUTE_PROPOSAL/VIEWS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #AWARD
+    - include:
+        file: Fibi-5.5-Release/BASE/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.5-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.5-Release/BASE/AWARD/FUNCTIONS.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.5-Release/BASE/AWARD/VIEWS.yaml
+        labels: 'AWARD'
+
+    #MANPOWER
+    - include:
+        file: Fibi-5.5-Release/BASE/MANPOWER/SCRIPTS.yaml
+        labels: 'MANPOWER'
+    - include:
+        file: Fibi-5.5-Release/BASE/MANPOWER/PROCEDURES.yaml
+        labels: 'MANPOWER'
+    - include:
+        file: Fibi-5.5-Release/BASE/MANPOWER/FUNCTIONS.yaml
+        labels: 'MANPOWER'
+    - include:
+        file: Fibi-5.5-Release/BASE/MANPOWER/VIEWS.yaml
+        labels: 'MANPOWER'
+
+    #CLAIMS
+    - include:
+        file: Fibi-5.5-Release/BASE/CLAIMS/SCRIPTS.yaml
+        labels: 'CLAIMS'
+    - include:
+        file: Fibi-5.5-Release/BASE/CLAIMS/PROCEDURES.yaml
+        labels: 'CLAIMS'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.5-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5-Release/BASE/SERVICE_REQUEST/FUNCTIONS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.5-Release/BASE/SERVICE_REQUEST/VIEWS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.5-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5-Release/BASE/AGREEMENT/FUNCTIONS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.5-Release/BASE/AGREEMENT/VIEWS.yaml
+        labels: 'AGREEMENT'
+
+    #FORM_BUILDER
+    - include:
+        file: Fibi-5.5-Release/BASE/FORM_BUILDER/SCRIPTS.yaml
+        labels: 'FORM_BUILDER'
+    - include:
+        file: Fibi-5.5-Release/BASE/FORM_BUILDER/PROCEDURES.yaml
+        labels: 'FORM_BUILDER'
+    - include:
+        file: Fibi-5.5-Release/BASE/FORM_BUILDER/FUNCTIONS.yaml
+        labels: 'FORM_BUILDER'
+    - include:
+        file: Fibi-5.5-Release/BASE/FORM_BUILDER/VIEWS.yaml
+        labels: 'FORM_BUILDER'
+
+    #MAIL_READER
+    - include:
+        file: Fibi-5.5-Release/BASE/MAIL_READER/SCRIPTS.yaml
+        labels: 'MAIL_READER'
+
+    #IACUC
+    - include:
+        file: Fibi-5.5-Release/BASE/IACUC/SCRIPTS.yaml
+        labels: 'IACUC'
+
+    #IRB
+    - include:
+        file: Fibi-5.5-Release/BASE/IRB/SCRIPTS.yaml
+        labels: 'IRB'
+
+    #COI
+    - include:
+        file: Fibi-5.5-Release/BASE/COI/SCRIPTS.yaml
+        labels: 'COI'
+    - include:
+        file: Fibi-5.5-Release/BASE/COI/PROCEDURES.yaml
+        labels: 'COI'
+    - include:
+        file: Fibi-5.5-Release/BASE/COI/FUNCTIONS.yaml
+        labels: 'COI'
+    - include:
+        file: Fibi-5.5-Release/BASE/COI/VIEWS.yaml
+        labels: 'COI'

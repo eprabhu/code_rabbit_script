@@ -1,0 +1,33 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10787-20
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_CLAIM_DASHBOARD for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_CLAIM_DASHBOARD;
+        - sqlFile:
+            path: ROUTINES/BASE/CLAIMS/PROCEDURES/GET_CLAIM_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-21
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_CLAIM_DASHBOARD_COUNT for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_CLAIM_DASHBOARD_COUNT;
+        - sqlFile:
+            path: ROUTINES/BASE/CLAIMS/PROCEDURES/GET_CLAIM_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

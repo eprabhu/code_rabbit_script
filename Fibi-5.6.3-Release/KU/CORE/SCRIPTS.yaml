@@ -1,0 +1,147 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10412
+      author: vishnu BH
+      labels: 'DML'
+      comment: Add MODIFY_DOCUMENT_PERMISSION right.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO rights
+                  (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT
+                  (SELECT COALESCE(MAX(t.RIGHT_ID), 0) + 1 FROM rights t),
+                  'MODIFY_DOCUMENT_PERMISSION',
+                  'To Edit Permission Tab',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  '2'
+              FROM dual
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM rights
+                  WHERE RIGHT_NAME = 'MODIFY_DOCUMENT_PERMISSION'
+              );
+      rollback: 
+            DELETE FROM `rights` WHERE `RIGHT_NAME` = 'MODIFY_DOCUMENT_PERMISSION';
+
+  - changeSet:
+      id: FIBI-7855-1
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Add Co-Investigator role in person_role_type table.
+      changes:
+        - sql:
+            sql: |
+                INSERT IGNORE INTO person_role_type (ROLE_TYPE_CODE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER, IS_ACTIVE) VALUES ('68', 'Co-Investigator', UTC_TIMESTAMP(), 'admin', 'Y');
+      
+      rollback: 
+            DELETE FROM `person_role_type` WHERE `ROLE_TYPE_CODE` = '68' AND `DESCRIPTION` = 'Co-Investigator';
+
+  - changeSet:
+      id: FIBI-10843-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Update the Configurations in dyn_element_config, dyn_section_config and dyn_subsection_config.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `dyn_element_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`UI_REFERENCE_ID` = 'proposal-gnrl-master-proposal');
+              UPDATE `dyn_element_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`UI_REFERENCE_ID` = 'inst-prop-keywords');
+              UPDATE `dyn_section_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SECTION_CODE` = 'AW115');
+              UPDATE `dyn_subsection_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`SUB_SECTION_CODE` = '116');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10534-1
+      author: Vishnu BH
+      labels: 'DML'
+      comment: Deactivate scheduler jobs by JOB_ID.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `scheduler_job_info`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (41, 42, 43, 46, 48, 49, 50, 52, 53);
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `scheduler_job_info`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_USER` = 'admin',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP()
+              WHERE `JOB_ID` IN (41, 42, 43, 46, 48, 49, 50, 52, 53);
+
+  - changeSet:
+      id: FIBI-10949
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Update fiscal start month to 1 in parameter table.
+      changes:
+        - sql:
+            sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE `PARAMETER` SET `VALUE` = '1',UPDATE_USER = 'admin',UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (`PARAMETER_NAME` = 'FISCAL_START_MONTH');
+                    SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10989-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Inactive the letter template for the Endorsement Letter.
+      changes:
+        - sql:
+            sql: |
+             UPDATE `letter_template_type` SET `IS_ACTIVE` = 'N', UPDATE_TIMESTAMP = UTC_TIMESTAMP(),UPDATE_USER = 'admin' WHERE (`LETTER_TEMPLATE_TYPE_CODE` = '3001');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `letter_template_type` SET `IS_ACTIVE` = 'Y', UPDATE_TIMESTAMP = UTC_TIMESTAMP(),UPDATE_USER = 'admin' WHERE (`LETTER_TEMPLATE_TYPE_CODE` = '3001');
+
+  - changeSet:
+      id: FIBI-11007
+      author: Vishnu BH
+      labels: 'DML'
+      comment: Enable Medusa relationship sync in integration_sync_config for KU.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `integration_sync_config`
+              SET `IS_ACTIVE` = 'Y',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`CONFIG_KEY` = 'sync_medusa_relationship');
+              SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE `integration_sync_config`
+              SET `IS_ACTIVE` = 'N',
+                  `UPDATE_TIMESTAMP` = UTC_TIMESTAMP(),
+                  `UPDATE_USER` = 'admin'
+              WHERE (`CONFIG_KEY` = 'sync_medusa_relationship');
+              SET SQL_SAFE_UPDATES = 1;

@@ -1,0 +1,141 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9162-1
+        author: Hridya E K
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS CHECK_USER_HAS_RIGHT_IN_DOC;
+          - sqlFile:
+              path: ROUTINES/BASE/CORE/PROCEDURES/CHECK_USER_HAS_RIGHT_IN_DOC.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-9208-1
+        author: Shyla M
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_FILTER_DETAILS_FOR_TAB;
+          - sqlFile:
+              path: ROUTINES/BASE/CORE/PROCEDURES/GET_FILTER_DETAILS_FOR_TAB.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-8115-1
+        author: Adarsh
+        labels: 'PROCEDURES'
+        comment: New Procedure
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GRANT_CALL_DUE_DATE_REMINDER;
+          - sqlFile:
+              path: ROUTINES/BASE/CORE/PROCEDURES/GRANT_CALL_DUE_DATE_REMINDER.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-9373-1
+        author: Solih
+        labels: 'PROCEDURES'
+        comment: Drop and create GET_RESEARCH_SUMMARY_DETAILS.
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+          - sqlFile:
+              path: ROUTINES/BASE/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-7562-1
+        author: Mohamed Fazil
+        labels: 'PROCEDURES'
+        comment: Drop and create RULE_EVALUATE_VARIABLE.
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS RULE_EVALUATE_VARIABLE;
+          - sqlFile:
+              path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_VARIABLE.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-8343-1
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: Update Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS UPDATE_DASHBOARD_LOOKUPS_FOR_CUSTOM_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/UPDATE_DASHBOARD_LOOKUPS_FOR_CUSTOM_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9971-1
+      author: Adarsh 
+      labels: 'PROCEDURES'
+      comment: Update procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9971-2
+      author: Adarsh 
+      labels: 'PROCEDURES'
+      comment: Update procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10095-1
+      author: Adarsh 
+      labels: 'PROCEDURES'
+      comment: Update procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS UPD_ANS_TO_NEW_QUEST_VERSN;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/UPD_ANS_TO_NEW_QUEST_VERSN.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+

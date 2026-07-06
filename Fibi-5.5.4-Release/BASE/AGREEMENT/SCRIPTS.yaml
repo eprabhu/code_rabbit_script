@@ -1,0 +1,29 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9635
+        author: Sasikumar Chandran
+        labels: 'DML'
+        comment: Insert parameter to control Agreement Lead Unit auto-fill behavior
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO `PARAMETER` (`PARAMETER_NAME`, `VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('AGREEMENT_LEAD_UNIT_AUTOFILL', 'N', 'Determines if the Lead Unit field on an Agreement is auto-filled based on system rules (Y/N)', UTC_TIMESTAMP(), 'admin');
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM `PARAMETER` WHERE `PARAMETER_NAME` = 'AGREEMENT_LEAD_UNIT_AUTOFILL';
+
+  - changeSet:
+        id: FIBI-9663
+        author: Sasikumar Chandran
+        labels: 'DML'
+        comment: Insert parameter to control mandatory Review Location Assignee behavior
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO `PARAMETER` (`PARAMETER_NAME`, `VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('REVIEW_LOCATION_ASSIGNEE_MANDATORY', 'Y', 'Controls whether the Review Location Assignee field is mandatory (Y = mandatory, N = optional)', UTC_TIMESTAMP(), 'admin');
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM `PARAMETER` WHERE `PARAMETER_NAME` = 'REVIEW_LOCATION_ASSIGNEE_MANDATORY';

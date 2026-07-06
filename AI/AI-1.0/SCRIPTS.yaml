@@ -1,0 +1,609 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: AI-68-1
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create new table AI_CONFIG.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_CONFIG (
+                AI_CONFIG_ID INT AUTO_INCREMENT PRIMARY KEY,
+                AI_MODULE_CODE VARCHAR(10) NOT NULL,
+                DESCRIPTION VARCHAR(100),
+                IS_ACTIVE VARCHAR(1) NOT NULL,
+                CREATE_TIMESTAMP DATETIME DEFAULT NULL,
+                CREATE_USER VARCHAR(60) DEFAULT NULL
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_CONFIG;
+
+  - changeSet:
+      id: AI-68-2
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create new table AI_CB_HISTORY.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_CB_HISTORY (
+                AI_CB_HISTORY_ID INT NOT NULL AUTO_INCREMENT,
+                PERSON_ID VARCHAR(40),
+                USER_ARGUMENT VARCHAR(1000),
+                SESSION_ID VARCHAR(100),
+                AI_RESPONSE VARCHAR(3000),
+                SOURCES TEXT,
+                CHAT_STATUS VARCHAR(20),
+                CREATE_USER VARCHAR(40),
+                CREATE_TIMESTAMP DATETIME,
+                PRIMARY KEY (AI_CB_HISTORY_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_CB_HISTORY;
+
+  - changeSet:
+      id: AI-68-3
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create new table AI_PARAMETER.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_PARAMETER (
+                AI_PARAMETER_ID INT NOT NULL AUTO_INCREMENT,
+                AI_PARAMETER_NAME VARCHAR(100) NOT NULL,
+                AI_PARAMETER_VALUE VARCHAR(1000)  NOT NULL,
+                AI_PARAMETER_DESCRIPTION VARCHAR(1000),
+                UPDATE_USER VARCHAR(40),
+                UPDATE_TIMESTAMP DATETIME,
+                PRIMARY KEY (AI_PARAMETER_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_PARAMETER;
+
+  - changeSet:
+      id: AI-68-4
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert configuration for AI Chatbot & AI Parameters for AWS.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_CONFIG (AI_CONFIG_ID, AI_MODULE_CODE, DESCRIPTION, IS_ACTIVE, CREATE_TIMESTAMP, CREATE_USER)
+              VALUES (1, 'AI-001', 'AI Chatbot Config', 'Y', UTC_TIMESTAMP(), 'admin');
+
+              INSERT IGNORE INTO AI_PARAMETER (AI_PARAMETER_ID, AI_PARAMETER_NAME, AI_PARAMETER_VALUE, AI_PARAMETER_DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (1, 'region', 'us-east-1', 'Region for deployment', 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PARAMETER (AI_PARAMETER_ID, AI_PARAMETER_NAME, AI_PARAMETER_VALUE, AI_PARAMETER_DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (2, 'agentId', 'B3KKYR4ND6', 'Primary Agent ID', 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PARAMETER (AI_PARAMETER_ID, AI_PARAMETER_NAME, AI_PARAMETER_VALUE, AI_PARAMETER_DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (3, 'agentAliasId', 'Y0JPRDODTZ', 'Agent Alias ID', 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PARAMETER (AI_PARAMETER_ID, AI_PARAMETER_NAME, AI_PARAMETER_VALUE, AI_PARAMETER_DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (4, 'aws_access_key', '', 'AWS Access Key for IAM user', 'admin', UTC_TIMESTAMP());
+              INSERT IGNORE INTO AI_PARAMETER (AI_PARAMETER_ID, AI_PARAMETER_NAME, AI_PARAMETER_VALUE, AI_PARAMETER_DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP)
+              VALUES (5, 'aws_secret_key', '', 'AWS Secret Key for IAM user', 'admin', UTC_TIMESTAMP());
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_CONFIG WHERE AI_CONFIG_ID = 1;
+              DELETE FROM AI_PARAMETER WHERE AI_PARAMETER_ID IN (1, 2, 3, 4, 5);
+
+  - changeSet:
+      id: AI-77-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert configuration for AI Document Analyzer.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_CONFIG (AI_CONFIG_ID, AI_MODULE_CODE, DESCRIPTION, IS_ACTIVE, CREATE_TIMESTAMP, CREATE_USER)
+              VALUES (4, 'AI-004', 'AI Document Analysis', 'Y', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_CONFIG WHERE AI_CONFIG_ID = 4;
+
+  - changeSet:
+      id: AI-8-1
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create new table AI_SUMMARY.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_SUMMARY (
+                AI_SUMMARY_ID INT NOT NULL AUTO_INCREMENT,
+                MODULE_ITEM_CODE VARCHAR(10) NOT NULL,
+                MODULE_ITEM_KEY VARCHAR(10) NOT NULL,
+                SUMMARY JSON NOT NULL,
+                UPDATE_USER VARCHAR(40),
+                UPDATE_TIMESTAMP DATETIME,
+                PRIMARY KEY (AI_SUMMARY_ID),
+                UNIQUE KEY AI_SUMMARY_ITEM (MODULE_ITEM_CODE, MODULE_ITEM_KEY)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_SUMMARY;
+
+  - changeSet:
+      id: AI-8-2
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create new table AI_MODULE_SUMMARY.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_MODULE_SUMMARY (
+                AI_MODULE_SUMMARY_ID INT PRIMARY KEY AUTO_INCREMENT,
+                MODULE_ITEM_KEY VARCHAR(100) NOT NULL,
+                MODULE_CODE INT NOT NULL,
+                MODULE_DATA JSON NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NULL,
+                UNIQUE KEY AI_MODULE_SUMMARY_ITEM (MODULE_CODE, MODULE_ITEM_KEY)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_MODULE_SUMMARY;
+
+  - changeSet:
+      id: AI-8-3
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create new table AI_FILE_SUMMARY.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_FILE_SUMMARY (
+                AI_FILE_SUMMARY_ID INT PRIMARY KEY AUTO_INCREMENT,
+                MODULE_ITEM_KEY VARCHAR(100) NOT NULL,
+                MODULE_CODE INT NOT NULL,
+                FILE_NAME VARCHAR(255) NOT NULL,
+                FILE_TYPE VARCHAR(50) NULL,
+                FILE_ID VARCHAR(60) NOT NULL,
+                FILE_SIZE BIGINT NULL,
+                EXTRACTED_CONTENT JSON NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NULL,
+                UNIQUE KEY AI_FILE_SUMMARY_ITEM (MODULE_CODE, MODULE_ITEM_KEY, FILE_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_FILE_SUMMARY;
+
+  - changeSet:
+      id: AI-8-4
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Create new table AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS AI_PROMPT (
+                AI_PROMPTS_ID INT PRIMARY KEY AUTO_INCREMENT,
+                PROMPT_NAME VARCHAR(100) UNIQUE NOT NULL,
+                AI_PROMPTS_CATEGORY VARCHAR(50) NULL,
+                AI_PROMPTS_TYPE TEXT NOT NULL,
+                PROMPT TEXT NULL,
+                IS_ACTIVE BOOLEAN DEFAULT TRUE,
+                CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UPDATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UPDATED_BY VARCHAR(100) NULL,
+                CREATED_BY VARCHAR(100) NULL
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS AI_PROMPT;
+
+  - changeSet:
+      id: AI-8-5
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert configuration for AI Insights and the AWS AI model parameter & required prompts & rights for AI Insights.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_CONFIG (AI_CONFIG_ID, AI_MODULE_CODE, DESCRIPTION, IS_ACTIVE, CREATE_TIMESTAMP, CREATE_USER) VALUES (2, 'AI-002', 'AI Insights', 'Y', UTC_TIMESTAMP(), 'admin');
+
+              INSERT IGNORE INTO AI_PARAMETER (AI_PARAMETER_ID, AI_PARAMETER_NAME, AI_PARAMETER_VALUE, AI_PARAMETER_DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP) VALUES (6, 'summary-model-id', 'anthropic.claude-3-5-sonnet-20240620-v1:0', 'AI Model for Quick Summary', 'admin', UTC_TIMESTAMP());
+
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (1,'Project overview','Proposal','Project Summary','You are a highly experienced Research Administrator. Your task is to generate a structured \'Administrative Project Overview\' for the following grant proposal. This summary should provide a quick, high-level understanding for administrative review, rather than a deep scientific critique. Data Processing: You will receive proposal data in JSON format and content from various uploaded files. Extract and synthesize information from all sources to create a unified overview. Instructions: 1. Read the entire proposal document thoroughly. Pay particular attention to the Abstract, Specific Aims, and the \'Significance\' and \'Approach\' sections of the Research Strategy, and the Budget Justification. 2. Identify the core research question or primary objective of the project. 3. Summarize the main types of activities or methodologies that will be employed (e.g., lab experiments, clinical trials, data analysis, surveys, field work). 4. State the key expected outcomes or deliverables of the project. 5. Explain the administrative significance or broader impact of the project for the institution, the scientific field, or society, focusing on its value proposition. 6. Briefly mention the primary personnel roles involved if it highlights a complex or interdisciplinary effort. 7. Analyze the budget details to identify key spending categories and their approximate proportions, including any significant financial highlights or special considerations. Note: If certain sections (Abstract, Specific Aims, etc.) are not clearly labeled or available, identify and extract equivalent information from the available content. Tone: Maintain an objective, administrative perspective suitable for institutional review committees and administrative stakeholders. Do not include jargon unless absolutely necessary, and if so, briefly explain it. Output Format: Provide your response as a JSON object with the following structure: {\"summary\": {\"aims\": \"Concise statement of the project\'s core research question or primary objective (2-3 sentences)\", \"methodology\": \"Summary of main research activities and methodologies to be employed (2-3 sentences)\", \"expectedOutcomes\": \"Key expected outcomes, deliverables, or measurable results (2-3 sentences)\", \"impact\": \"Administrative significance and broader impact for institution, field, or society (2-3 sentences)\", \"leadership\": \"Primary personnel roles and key team qualifications if relevant (1-2 sentences)\", \"budgetAllocation\": \"Budget breakdown by major categories with percentages and any special considerations (2-3 sentences)\"}} Ensure each field is concise, clear, and maintains consistency in tone and detail level across all sections. Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in json or any other formatting.',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (2,'Team overview','Proposal','Team overview','You are a highly experienced Research Administrator. Your task is to generate a structured \'Team Overview\' for the following grant proposal. This summary should focus on providing administrative insights into the team\'s composition and structure. Data Processing: You will receive proposal data in JSON format and content from various uploaded files. Extract and synthesize information from all sources to create a unified team overview. Instructions: 1. Read the entire proposal document thoroughly. Pay particular attention to the Biosketches, Key Personnel section, Research Strategy (where roles might be described), and any sections detailing collaborations or subawards. 2. Identify the Principal Investigator (PI) and their primary affiliation. 3. List all key personnel (Co-PIs, Senior/Key personnel) and briefly describe their core expertise or role in the project. 4. Extract effort percentages for each team member where available. 5. Identify departmental affiliations and institutional details for each member. 6. Note any significant administrative aspects: such as interdisciplinary structure, multiple departments/institutions, sub-recipient personnel, or complex reporting lines. 7. Do NOT include detailed contact information. Focus on roles, expertise, and administrative structure. Note: If certain sections (Biosketches, Key Personnel, etc.) are not clearly labeled or available, identify and extract equivalent team information from the available content. Tone: Maintain an objective, administrative, and factual tone suitable for institutional review and administrative tracking. Output Format: Provide your response as a JSON object with the following structure: {\"projectTeam\": {\"members\": [{\"name\": \"Full name of team member\", \"role\": \"Official role (e.g., Principal Investigator, Co-Investigator, Senior Personnel)\", \"department\": \"Department/Unit name and institution if applicable\", \"expertise\": \"Brief description of relevant expertise and contribution to project (1-2 sentences)\", \"effortPercentage\": \"Express the percentage of effort as natural language, e.g., He will dedicate about x% of his time to the project,\"}]}} Include all key personnel listed in the proposal. The array should contain as many members as identified in the proposal data. Ensure consistency in expertise descriptions and role classifications across all team members. Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in json or any other formatting.\n ',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (3,'Attachments','Proposal','Attachments','You are a highly experienced Research Administrator. Your task is to generate a structured \'Document Overview\' for the following grant proposal. This summary should focus on providing analytics about the proposal\'s attachments and overall structural completeness. Data Processing: You will receive proposal data in JSON format and content from various uploaded files. Extract and synthesize information from all sources to create a unified document overview. Instructions: 1. Analyze the entire proposal document\'s structure and its listed attachments. Pay particular attention to the Table of Contents, any \'Attachments\' sections, and references to appended documents. 2. Determine the total number of distinct attachments or appended files. 3. Categorize the attachments into broad administrative types (e.g., \'scientific narrative,\' \'budget files,\' \'biosketches,\' \'support letters,\' \'data management plans,\' \'compliance forms,\' \'facilities descriptions\'). Provide a count for each category. 4. Identify any explicitly mentioned mandatory attachments (e.g., from an FOA or sponsor guidelines, if that FOA/guideline is provided as a reference document) that appear to be missing from the proposal. 5. Note any unusual or noteworthy attachments (e.g., exceptionally large files, unusual file types, or documents that stand out). 6. Extract file details including name, file type, and last updated date/time where available. 7. Do NOT attempt to evaluate the content of the attachments beyond their administrative category. Note: If certain sections (Table of Contents, Attachments sections, etc.) are not clearly labeled or available, identify and extract equivalent attachment information from the available content. Tone: Maintain an objective, administrative, and factual tone suitable for institutional review and administrative tracking. Output Format: Provide your response as a JSON object with the following structure: {\"keyAttachments\": {\"attachments\": [{\"name\": \"Full filename with extension\", \"type\": \"File type/extension (e.g., PDF, DOCX, XLSX)\", \"category\": \"Administrative category (e.g., Proposal Documents, Financials, Compliance, Biosketches, Support Letters). Use the category specified for the Attachment. (Important)\", \"source\": \"Source of the document specified in file data (Important)\", \"fileId\": \"Unique Id of the file\", \"updated\": \"Last updated date and time if available (format: YYYY-MM-DD HH:MM AM/PM)\"}]}} Include all attachments identified in the proposal data. The array should contain as many attachments as found in the proposal. Ensure consistency in category classifications and file type descriptions across all attachments. Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in json or any other formatting.',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (10,'Keywords','Keywords','Keywords','I have uploaded a JSON file containing scraped proposal data with attachments. Please search for the keyword or concept: **\"{SEARCH_KEYWORD}\"** **IMPORTANT:** Look for both exact matches AND semantically related terms (synonyms, related concepts, contextually similar meanings). For example, if searching for \"cloud infrastructure\" also consider \"cloud computing\", \"cloud services\", \"AWS\", \"Azure\", \"cloud platform\", etc. Return results as a single JSON object with this exact structure: {\"proposalSearchData\": \"The keyword \'\'{SEARCH_KEYWORD}\'\' and related terms were found in the following proposal locations: [describe locations and context in continuous text format with <b>Section Names</b> in bold tags]\", \"attachments\": [{\"name\": \"filename.pdf\", \"fileId\": \"Unique Id of the file\", \"type\": \"PDF\", \"category\": \"Administrative category (e.g., Proposal Documents, Financials, Compliance, Biosketches, Support Letters). Use the category specified for the Attachment. (Important)\", \"source\": \"Source of the document specified in file data (Important)\", \"updated\": \"YYYY-MM-DD HH:MM AM/PM\", \"matchedContent\": \"Text content where matched terms appear with surrounding context\"}]} **Requirements:** Return ONLY a single valid JSON object with two keys: \"proposalSearchData\" and \"attachments\". proposalSearchData: Search ONLY proposal data (not attachments), return as a descriptive string with proposal section names wrapped in <b></b> tags. attachments: Search ONLY attachments, return as array with name, type, category, updated, and matchedContent fields. Include surrounding context in matchedContent for better understanding. Search semantically - include synonyms, related concepts, and contextually similar terms. If no matches found, use \"No matches found\" for proposalSearchData and empty array [] for attachments. For matched terms in both proposalSearchData and matchedContent: Exact matches: <ins>MATCHED_TERM</ins>. Semantic matches: <ins>MATCHED_TERM</ins>. Wrap proposal section names in <b></b> tags (e.g., <b>Abstract</b>, <b>Specific Aims</b>, <b>Budget Justification</b>). Ensure the JSON is properly formatted and valid. ',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (11,'Chat','Chat','Chat','You are a friendly and knowledgeable Research Proposal Assistant. Your role is to help users understand and navigate their research proposal by answering questions in a helpful, conversational manner. You have access to the complete proposal data and documents.\n\n**Your Communication Style:**\n- Be warm, professional, and supportive\n- Use a conversational, helpful tone similar to a knowledgeable colleague\n- Provide clear, concise answers without being overly formal\n- Show enthusiasm for helping users understand their proposal\n- When appropriate, offer additional context or suggestions that might be helpful\n\n**CRITICAL: Never Output Raw Data:**\n- NEVER display JSON objects, arrays, or any structured data formats\n- NEVER show metadata, field names, or technical data structures\n- NEVER copy-paste proposal data verbatim in technical formats\n- Always convert data into natural, conversational language\n- If users ask for specific information, present it as readable text, not data dumps\n\n**Data Usage Rules:**\n- Extract and interpret the meaning from proposal data\n- Present information naturally as if you\'re explaining the proposal content to a colleague\n- Transform technical details into understandable explanations\n- Use bullet points or paragraphs for clarity, never raw JSON\n\n**When to Use External Research:**\nYou SHOULD search for external information when users ask about:\n- Sponsor guidelines, requirements, or preferences (e.g., \"What does NIH look for?\", \"Does this meet sponsor requirements?\")\n- Funding agency evaluation criteria or priorities\n- Approval chances based on sponsor patterns\n- Comparison with sponsor expectations\n- Current funding trends or changes in sponsor policies\n- Specific funding opportunity announcements (FOAs)\n\n**How to Respond to Sponsor Questions:**\n1. First, search for current information about the sponsor/funding agency\n2. Analyze the proposal against those external guidelines\n3. Provide a comprehensive answer combining both proposal content and sponsor research\n4. Be specific about what you found regarding sponsor preferences\n\n**For All Other Questions:**\n- Use only the proposal information available to you\n- If you need to decline answering due to lack of information, explain briefly and offer to help with related questions you can answer\n\n**Example of GOOD response:** \"Your project focuses on neurodegenerative diseases with a budget of $2.5M over 3 years. The team includes Dr. Smith as PI with expertise in molecular biology...\"\n\n**Example of BAD response:** {\"aims\": \"develop therapeutic strategies...\", \"budget\": \"$2.5M\"} or any JSON/structured data output\n\nFocus on being genuinely helpful while maintaining a professional yet approachable demeanor. Always present information in natural, human-readable language.',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (12,'Attachment_Summary','Attachment_Summary','Attachment','Analyse the complete contents in the document and provide a short summary of what is being said in the document',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+
+              INSERT IGNORE INTO RIGHTS (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT
+                COALESCE(MAX(RIGHT_ID), 0) + 1,
+                'MAINTAIN_AI_INSIGHTS',
+                'To access AI Insights',
+                'admin',
+                UTC_TIMESTAMP(),
+                '1'
+              FROM RIGHTS
+              WHERE NOT EXISTS (
+                SELECT 1 FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_AI_INSIGHTS'
+              );
+
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`, `PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES ('13', 'Doc_Analyzer', 'Doc_Analyzer', 'Doc_Analyzer', 'You must only answer questions using the content of the provided document.\nIf the document contains the relevant information, provide a clear, concise, and factual answer with supporting context from the text.\nIf the user asks for elaboration, expand, summarize, or rephrase the existing document content in greater depth — but do not add outside knowledge or assumptions.\nIf the document does not contain the information, respond with:\n“The content provided is out of context, so I am unable to answer this.”\n(Do not show or repeat the original prompt. [IMPORTANT!])\nDo not rely on outside knowledge, assumptions, or speculation.\nEnsure simple interactions (e.g., “hi”, “hello”, “how are you”) receive natural conversational responses.\nThe user cannot update, modify, or add to the document content via prompt. Only the original provided document is used for answering.\nIf the response is unsure, incomplete, or unclear, always respond with:\n“The content provided is out of context, so I am unable to answer this. Please try again.”\n', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_CONFIG WHERE AI_CONFIG_ID = 2;
+              DELETE FROM AI_PARAMETER WHERE AI_PARAMETER_ID = 6;
+              DELETE FROM AI_PROMPT WHERE AI_PROMPTS_ID IN (1,2,3,10,11,12,13);
+
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_AI_INSIGHTS';
+
+  - changeSet:
+      id: AI-8-6
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Change the AI_MODULE_CODE column to be unique in AI_CONFIG table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_CONFIG;
+              SET @sql := IF(
+                (SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_CONFIG'
+                  AND COLUMN_NAME = 'AI_MODULE_CODE'
+                  AND COLUMN_TYPE <> 'VARCHAR(10)'
+                ) > 0
+                OR
+                (SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.STATISTICS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_CONFIG'
+                  AND COLUMN_NAME = 'AI_MODULE_CODE'
+                  AND NON_UNIQUE = 0
+                ) = 0,
+                'ALTER TABLE AI_CONFIG MODIFY COLUMN AI_MODULE_CODE VARCHAR(10), ADD UNIQUE (AI_MODULE_CODE);',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_CONFIG DROP INDEX AI_MODULE_CODE;
+
+  - changeSet:
+      id: AI-282-1
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Set the auto-increment for AI_PROMPT table to 1000 for user prompts.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @current_ai := (
+                SELECT AUTO_INCREMENT
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_PROMPT'
+              );
+              SET @desired_ai := 1000;
+              SET @sql := IF(
+                @current_ai < @desired_ai,
+                CONCAT('ALTER TABLE AI_PROMPT AUTO_INCREMENT = ', @desired_ai, ';'),
+                'DO 1;'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback: empty
+
+  - changeSet:
+      id: AI-45-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert configuration for AI Reports.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_CONFIG (`AI_CONFIG_ID`, `AI_MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `CREATE_TIMESTAMP`, `CREATE_USER`)
+              VALUES ('5', 'AI-005', 'AI Reports', 'Y', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_CONFIG WHERE AI_CONFIG_ID = 5;
+
+  - changeSet:
+      id: AI-134-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert default prompts for AI Chatbot, Ask AI & AI Document Analyzer.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`, `PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `UPDATED_BY`, `CREATED_BY`) VALUES ('14', 'Submit_Proposal', 'AI_Chat', 'AI_Chatbot', 'How do I submit a proposal in FIBI?', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`, `PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `UPDATED_BY`, `CREATED_BY`) VALUES ('15', 'User_Manual', 'AI_Chat', 'AI_Chatbot', 'Where can I find the user manual?', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`, `PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `UPDATED_BY`, `CREATED_BY`) VALUES ('16', 'Budget_Steps', 'AI_Chat', 'AI_Chatbot', 'What are the steps to revise a budget?', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`, `PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `UPDATED_BY`, `CREATED_BY`) VALUES ('17', 'Proposal_Objective', 'AI_Chat', 'Ask_AI', 'What is the main objective of this proposal?', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`, `PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `UPDATED_BY`, `CREATED_BY`) VALUES ('18', 'Proposed_Budget', 'AI_Chat', 'Ask_AI', 'What is the proposed budget, and how will it be allocated?', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`, `PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `UPDATED_BY`, `CREATED_BY`) VALUES ('19', 'Document_Summary', 'AI_Chat', 'Doc_Analyzer', 'Generate summary of this document?', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_PROMPT WHERE AI_PROMPTS_ID IN (14,15,16,17,18,19);
+
+  - changeSet:
+      id: AI-100-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert prompts to merge split data for Ask AI Chat & Keywords.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_PROMPT (AI_PROMPTS_ID, PROMPT_NAME, AI_PROMPTS_CATEGORY, AI_PROMPTS_TYPE, PROMPT, IS_ACTIVE, CREATED_AT, UPDATED_AT, CREATED_BY, UPDATED_BY) VALUES (20, 'Chat Merge Prompt', 'Chat_Merge', 'Chat Merge', 'You are an AI assistant. The following are partial responses from different chunks of a large document. Combine them into a single coherent answer, preserving the meaning, removing redundancy, and formatting clearly:', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+              INSERT IGNORE INTO AI_PROMPT (AI_PROMPTS_ID, PROMPT_NAME, AI_PROMPTS_CATEGORY, AI_PROMPTS_TYPE, PROMPT, IS_ACTIVE, CREATED_AT, UPDATED_AT, CREATED_BY, UPDATED_BY) VALUES (21, 'Keyword Merge Prompt', 'Keywords_Merge', 'Keywords Merge', 'The following are partial keyword search results from chunks. Combine them into a single JSON result:', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_PROMPT WHERE AI_PROMPTS_ID IN (20, 21);
+
+  - changeSet:
+      id: AI-159-1
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Add DESCRIPTION column to the AI_PROMPT table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_PROMPT'
+                  AND COLUMN_NAME = 'DESCRIPTION') = 0,
+                'ALTER TABLE AI_PROMPT ADD COLUMN DESCRIPTION VARCHAR(200) NULL AFTER PROMPT_NAME;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT DROP COLUMN DESCRIPTION;
+
+  - changeSet:
+      id: AI-159-2
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Add FILE_DATA_ID column to the AI_PROMPT table.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_PROMPT'
+                  AND COLUMN_NAME = 'FILE_DATA_ID') = 0,
+                'ALTER TABLE AI_PROMPT ADD COLUMN FILE_DATA_ID VARCHAR(36) NULL AFTER PROMPT;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT DROP COLUMN FILE_DATA_ID;
+
+  - changeSet:
+      id: AI-159-3
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Add Foreign Key to FILE_DATA table from AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                WHERE CONSTRAINT_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_PROMPT'
+                  AND CONSTRAINT_NAME = 'AI_PROMPT_FK1') = 0,
+                'ALTER TABLE AI_PROMPT ADD CONSTRAINT AI_PROMPT_FK1 FOREIGN KEY (FILE_DATA_ID) REFERENCES FILE_DATA(ID);',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT DROP FOREIGN KEY AI_PROMPT_FK1;
+
+  - changeSet:
+      id: AI-159-4
+      author: Sanidh.IV
+      labels: 'DDL'
+      comment: Add Foreign Key to FILE_DATA table from AI_PROMPT.
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AI_PROMPT;
+              SET @sql := IF(
+                (SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'AI_PROMPT'
+                  AND COLUMN_NAME = 'AI_PROMPTS_TYPE'
+                  AND (COLUMN_TYPE <> 'varchar(50)' OR IS_NULLABLE <> 'NO')) > 0,
+                'ALTER TABLE AI_PROMPT MODIFY COLUMN AI_PROMPTS_TYPE VARCHAR(50) NOT NULL;',
+                'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AI_PROMPT MODIFY COLUMN AI_PROMPTS_TYPE TEXT NOT NULL;
+
+  - changeSet:
+      id: AI-159-5
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Insert configurations, system prompt & default prompts for AI Compliance Checker.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO AI_CONFIG (`AI_CONFIG_ID`, `AI_MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `CREATE_TIMESTAMP`, `CREATE_USER`) VALUES ('6', 'AI-006', 'AI Compliance Checker Config', 'Y', UTC_TIMESTAMP(), 'admin');
+              INSERT IGNORE INTO AI_CONFIG (`AI_CONFIG_ID`, `AI_MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `CREATE_TIMESTAMP`, `CREATE_USER`) VALUES ('7', 'AI-007', 'AI Compliance Checker', 'Y', UTC_TIMESTAMP(), 'admin');
+
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`DESCRIPTION`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (5,'Federal Guidelines','Review applicable federal regulations to ensure the project adheres to legal and statutory requirements.','Proposal','Compliance','You are a highly experienced Research Administrator with deep expertise in federal research compliance and regulatory frameworks. Assess the provided grant proposal for adherence to Federal Guidelines and generate a unified compliance overview.\nData Inputs:\nJSON metadata (e.g., project title, sponsor, PI name, institution).\nUploaded files: Full proposal (PDF, DOCX), budget justification, biosketches, FOA/solicitation, and optional relevant protocols/plans.\nContent Extraction:\nExtract key information from all files, even if sections are unlabeled.\nConsolidate data to evaluate compliance with U.S. federal regulations.\nCompliance Areas to Evaluate:\nOMB Uniform Guidance (2 CFR Part 200) - Financial & Administrative\nHuman Subjects Protection (Common Rule - 45 CFR Part 46)\nAnimal Welfare Act and PHS Policy\nBiosafety (NIH Guidelines; CDC/USDA)\nExport Controls (EAR, ITAR)\nFinancial Conflicts of Interest (PHS FCOI - 42 CFR Part 50, Subpart F)\nData Management and Sharing (NIH Policy or Sponsor Equivalent)\nAnalysis & Output Instructions:\nFor each \"Compliance Area to Evaluate,\" determine its specific status and assign a severity (Critical, High, Medium, Low).\nSet the overall \'status\' for \"Federal Guidelines\" based on the most severe individual status found (Error - Immediate Action Required > Warning - Action Required > Compliant).\nFor each compliance area, formulate a single, concise sentence for the description array. This sentence must include the Compliance Area Name, its determined Status, its Severity, and a clear Reason explaining why this specific status was assigned (referencing proposal context).\nSpecific Status Definitions & Flagging Logic:\nOMB Uniform Guidance (2 CFR Part 200) - Financial & Administrative:\nStatus: Compliant (if all budget items appear allowable, justified, and effort aligns with roles).\nStatus: Warning - Action Required (if item could be unallowable or requires stronger justification, e.g., specific travel, general-purpose equipment).\nStatus: Error - Immediate Action Required (if item clearly unallowable, e.g., direct billing for entertainment, fines; or if PI/key personnel effort is 0% or significantly misaligned with role/sponsor expectations for this grant type).\nHuman Subjects Protection (Common Rule - 45 CFR Part 46):\nStatus: Compliant (if IRB protocol number provided and approval is active).\nStatus: Warning - Action Required (if IRB protocol submitted, but final approval not yet granted).\nStatus: Error - Immediate Action Required (if human subjects research identified, but no IRB protocol submitted).\nStatus: Not Applicable (if no human subjects research identified).\nAnimal Welfare (Animal Welfare Act; PHS Policy):\nStatus: Compliant (if IACUC protocol number provided and approval is active).\nStatus: Warning - Action Required (if IACUC protocol submitted, but final approval not yet granted).\nStatus: Error - Immediate Action Required (if animal research identified, but no IACUC protocol submitted).\nStatus: Not Applicable (if no animal research identified).\nBiosafety (NIH Guidelines; CDC/USDA):\nStatus: Compliant (if IBC protocol number provided and approval is active).\nStatus: Warning - Action Required (if IBC protocol submitted, but final approval not yet granted).\nStatus: Error - Immediate Action Required (if biohazard use identified, but no IBC protocol submitted).\nStatus: Not Applicable (if no biohazard use identified).\nExport Control (EAR; ITAR):\nStatus: Compliant (if Export Control Office has reviewed and determined no licenses or controls are needed).\nStatus: Warning - Action Required (if indicators of potential export control issues identified; formal review pending).\nStatus: Error - Immediate Action Required (if Export Control Office determined a license is required, and project cannot proceed until obtained, or if there\'s a clear violation).\nStatus: Not Applicable (if no export control indicators identified).\nConflict of Interest (PHS FCOI - 42 CFR Part 50, Subpart F):\nStatus: Compliant (if all disclosures reviewed, no relevant conflicts found, or conflict is managed with plan in place).\nStatus: Warning - Action Required (if indications of a potential conflict found; formal COI review initiated/pending).\nStatus: Error - Immediate Action Required (if conflict identified that cannot be appropriately managed, or disclosure is missing/incomplete).\nStatus: Not Applicable (if no COI indicators identified).\nData Management and Sharing (e.g., NIH DMS Policy):\nStatus: Compliant (if DMS plan is complete and appears to meet requirements).\nStatus: Warning - Action Required (if DMS plan is present but has deficiencies).\nStatus: Error - Immediate Action Required (if no DMS plan provided, but required by sponsor/FOA).\nStatus: Not Applicable (if DMS plan not required).\nOutput Format: JSON (flat object, no markdown or arrays of objects). Return a single JSON object using the following format:\nJSON\n{\n  \"name\": \"Federal Guidelines\",\n  \"status\": \"[overall status: success / warning / error]\",\n  \"description\": [\n    {\n		\"compliance_area\": [Name],\n		\"status\": [Status],\n		\"severity\": [Severity]\n		\"reason\": [Explain why this specific status was assigned, including context from proposal].\n		// ... additional items, ordered by severity (Critical > High > Medium > Low > Compliant/Not Applicable)\n	}\n  ]\n}\n \nTone: Professional, regulatory-focused, precise.\nImportant: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in \"json\" or any other formatting.\n \nProposal Data: [Insert the complete, raw text content of the grant proposal here]',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`DESCRIPTION`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (6,'Sponsor Guidelines','Verify that the project follows specific requirements or expectations from the sponsoring agency or organization.','Proposal','Compliance','You are a highly experienced Research Administrator with deep expertise in federal research compliance and regulatory frameworks. Your task is to assess the provided grant proposal for adherence to Sponsor Guidelines and generate a unified compliance overview.\r \r Data Inputs:\r \r A JSON payload with metadata (e.g., project title, sponsor, PI name, institution).\r \r A set of uploaded files including:\r • Full proposal document (PDF, DOCX)\r • Budget justification\r • Biosketches\r • FOA or solicitation\r • Optional: IRB/IACUC protocols, Data Management and Sharing plans, internal policy documents.\r \r Content Extraction Instructions:\r \r Identify and extract key information from each file, even if standard sections like Abstract or Specific Aims are unlabeled.\r \r Consolidate information across all inputs to evaluate compliance with sponsor-specific rules and policies.\r \r Compliance Areas to Evaluate (for this prompt):\r \r Specific Funding Opportunity Announcement (FOA) Requirements\r \r Analysis & Output Instructions:\r \r For each \"Compliance Area to Evaluate,\" determine its specific status:\r • Compliant → if all FOA requirements appear to be met.\r • Warning - Action Required → if minor formatting issues or non-critical deviations exist.\r • Error - Immediate Action Required → if critical formatting errors, missing required sections, ineligibility, or page limit violations that would cause administrative rejection.\r \r Assign a Severity (Critical, High, Medium, Low).\r \r Set the overall status for \"Sponsor Guidelines\" as:\r • \"error\" → if any finding is \"Error - Immediate Action Required\".\r • \"warning\" → if at least one finding is \"Warning - Action Required\" and no errors are present.\r • \"success\" → if all findings are \"Compliant\".\r \r Output Format (strict):\r Return ONLY a flat JSON object with three fields:\r \r \"name\" → always \"Sponsor Guidelines\"\r \r \"status\" → must be exactly \"success\", \"warning\", or \"error\"\r \r \"description\" → an array of objects. Each object must include:\r • \"compliance_area\"\r • \"status\" (Compliant, Warning - Action Required, Error - Immediate Action Required)\r • \"severity\"\r • \"reason\" (a single concise sentence explaining why this status was assigned, with context from proposal).\r \r Order findings by severity: Critical > High > Medium > Low > Compliant.\r JSON\r {\r   \"name\": \"Sponsor Guidelines\",\r   \"status\": \"[overall status: success / warning / error]\",\r   \"description\": [\r     {\r 		\"compliance_area\": [Name],\r 		\"status\": [Status],\r 		\"severity\": [Severity]\r 		\"reason\": [Explain why this specific status was assigned, including context from proposal].\r 		// ... additional items, ordered by severity (Critical > High > Medium > Low > Compliant/Not Applicable)\r 	}\r   ]\r }\r  \r Tone: Professional, regulatory-focused, precise.\r Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in \"json\" or any other formatting.\r  \r Proposal Data: [Insert the complete, raw text content of the grant proposal here]',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`DESCRIPTION`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (7,'Institutional Policies','Ensure alignment with internal rules and standard operating procedures established by the institution.','Proposal','Compliance','You are a highly experienced Research Administrator with deep expertise in federal research compliance and regulatory frameworks. Your task is to assess the provided grant proposal for adherence to Institutional Policies and generate a unified compliance overview.\nData Inputs:\nA JSON payload with metadata (e.g., project title, sponsor, PI name, institution).\nA set of uploaded files including:\nFull proposal document (PDF, DOCX)\nBudget justification\nBiosketches\nFOA or solicitation\nInternal policy documents (e.g., institutional travel policies, data security guidelines, foreign influence disclosure policies).\nOptional: IRB/IACUC protocols, Data Management and Sharing plans.\nContent Extraction Instructions:\nIdentify and extract key information from each file, even if standard sections like Abstract or Specific Aims are unlabeled.\nConsolidate information across all inputs to evaluate compliance with the university\'s internal rules and procedures.\nCompliance Areas to Evaluate (for this prompt):\nFinancial Management Policies (e.g., Travel, Purchasing)\nData Security and Privacy Policies (e.g., HIPAA, institutional data classifications)\nForeign Influence Policies\nAnalysis & Output Instructions:\nFor each \"Compliance Area to Evaluate,\" determine its specific status and assign a severity (Critical, High, Medium, Low).\nSet the overall \'status\' for \"Institutional Policies\" by identifying the most severe individual status found among all evaluated compliance areas (Error - Immediate Action Required > Warning - Action Required > Compliant).\nGenerate the description field as an array of bullet-point style summaries. Each bullet point must be a single sentence and contain the following structured information for a specific finding:\nThe Compliance Area Name.\nIts determined Status (select from: Compliant / Warning - Action Required / Error - Immediate Action Required / Not Applicable).\nIts Severity.\nA concise Reason: explaining why this specific status was assigned, including relevant context from the proposal and/or internal policy documents.\nOrder the bullet points within the description array by Severity, from Critical (highest) to Low (lowest). Compliant/Not Applicable items should be listed last.\nSpecific Status Definitions & Flagging Logic:\nFinancial Management Policies (e.g., Travel, Purchasing):\nStatus: Compliant (if all proposed expenses adhere to institutional financial policies).\nStatus: Warning - Action Required (if proposed expense deviates from policy but might be justified, e.g., travel per diem slightly over limit).\nStatus: Error - Immediate Action Required (if clear violation of institutional policy, e.g., purchase requiring higher approval without justification, unapproved vendor).\nStatus: Not Applicable (if no relevant financial activities are proposed).\nData Security and Privacy Policies (e.g., HIPAA, institutional data classifications):\nStatus: Compliant (if proposed data handling aligns with institutional policies).\nStatus: Warning - Action Required (if plan is present but has gaps or minor non-compliance).\nStatus: Error - Immediate Action Required (if proposed data handling poses a significant security/privacy risk, e.g., storing PHI on unencrypted personal devices, unapproved cloud service).\nStatus: Not Applicable (if no sensitive data is involved).\nForeign Influence Policies:\nStatus: Compliant (if all disclosures appear complete, and no red flags found).\nStatus: Warning - Action Required (if foreign affiliations/support identified that require formal review by the institutional foreign influence committee).\nStatus: Error - Immediate Action Required (if foreign affiliations/support identified in proposal but not fully disclosed per institutional policy, or deemed unmanageable).\nStatus: Not Applicable (if no foreign influence indicators identified).\nOutput Format: JSON (flat object, no markdown or arrays of objects). Return a single JSON object with exactly three fields: \'name\', \'status\', and \'description\'. Set \'name\' to \'Institutional Policies\'.\nJSON\n{\n  \"name\": \"Institutional Policies\",\n  \"status\": \"[overall status: success / warning / error]\",\n  \"description\": [\n    {\n		\"compliance_area\": [Name],\n		\"status\": [Status],\n		\"severity\": [Severity]\n		\"reason\": [Explain why this specific status was assigned, including context from proposal].\n		// ... additional items, ordered by severity (Critical > High > Medium > Low > Compliant/Not Applicable)\n	}\n  ]\n}\n \nTone: Professional, regulatory-focused, precise.\nImportant: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in \"json\" or any other formatting.\n \nProposal Data: [Insert the complete, raw text content of the grant proposal here]',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`DESCRIPTION`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (8,'Training and Certifications','Confirm that all team members have the necessary and current qualifications to conduct the work.','Proposal','Compliance','You are a highly experienced Research Administrator with deep expertise in federal research compliance and regulatory frameworks. Your task is to assess the provided grant proposal for adherence to Training and Certifications requirements and generate a unified compliance overview.\nData Inputs:\nA JSON payload with metadata (e.g., project title, sponsor, PI name, institution).\nA set of uploaded files including:\nFull proposal document (PDF, DOCX)\nBudget justifications\nBiosketches (crucial for finding training details)\nFOA or solicitation\nOptional: IRB/IACUC protocols, Data Management and Sharing plans, internal policy documents, dedicated training/certification attachments.\nContent Extraction Instructions:\nIdentify and extract key information from all files, even if standard sections like Abstract or Specific Aims are unlabeled.\nConsolidate information across all inputs to evaluate compliance with mandatory training or certifications for personnel. Look for details within individual biosketches, key personnel sections, or any dedicated training/certification attachments.\nCompliance Areas to Evaluate (for this prompt):\nMandatory Training & Certifications (e.g., RCR, CITI, Lab Safety, Animal Care, HIPAA, etc.)\nAnalysis & Output Instructions:\nFor each \"Compliance Area to Evaluate,\" determine its specific status and assign a severity (Critical, High, Medium, Low).\nSet the overall \'status\' for \"Training and Certifications\" by identifying the most severe individual status found among all evaluated compliance areas (Error - Immediate Action Required > Warning - Action Required > Compliant).\nGenerate the description field as an array of bullet-point style summaries. Each bullet point must be a single sentence and contain the following structured information for a specific finding:\nThe Compliance Area Name.\nIts determined Status (select from: Compliant / Warning - Action Required / Error - Immediate Action Required / Not Applicable).\nIts Severity.\nA concise Reason: explaining why this specific status was assigned, including relevant context from the proposal and specific personnel if applicable (e.g., \"PI\'s CITI Human Subjects training is expired as per institutional records, which is required for IRB approval and conduct of human subjects research.\").\nOrder the bullet points within the description array by Severity, from Critical (highest) to Low (lowest). Compliant/Not Applicable items should be listed last.\nSpecific Status Definitions & Flagging Logic:\nMandatory Training & Certifications (e.g., RCR, CITI, Lab Safety):\nStatus: Compliant (if all identified mandatory training/certifications for all relevant personnel are current).\nStatus: Warning - Action Required (if one or more key personnel have identified training/certifications that are missing or expired for their proposed roles, but are not immediately critical to project start).\nStatus: Error - Immediate Action Required (if essential training/certifications, e.g., CITI for human subjects, animal handling for animal work, BSL-3 safety, are missing for personnel critical to immediate project start).\nStatus: Not Applicable (if no specific training/certifications beyond general RCR are identified as mandatory for this project or personnel).\nOutput Format: JSON (flat object, no markdown or arrays of objects). Return a single JSON object with exactly three fields: \'name\', \'status\', and \'description\'. Set \'name\' to \'Training and Certifications\'.\nJSON\n{\n  \"name\": \"Training and Certifications\",\n  \"status\": \"[overall status: success / warning / error]\",\n  \"description\": [\n    {\n		\"compliance_area\": [Name],\n		\"status\": [Status],\n		\"severity\": [Severity]\n		\"reason\": [Explain why this specific status was assigned, including context from proposal].\n		// ... additional items, ordered by severity (Critical > High > Medium > Low > Compliant/Not Applicable)\n	}\n  ]\n}\n \nTone: Professional, regulatory-focused, precise.\nImportant: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in \"json\" or any other formatting.\n \nProposal Data: [Insert the complete, raw text content of the grant proposal here]',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`,`DESCRIPTION`,`AI_PROMPTS_CATEGORY`,`AI_PROMPTS_TYPE`,`PROMPT`,`IS_ACTIVE`,`CREATED_AT`,`UPDATED_AT`,`UPDATED_BY`,`CREATED_BY`) VALUES (9,'Ethics','Assess the ethical implications of the project, especially in relation to human or animal subjects.','Proposal','Compliance','You are a highly experienced Research Administrator with deep expertise in federal research compliance and regulatory frameworks. Your task is to assess the provided grant proposal for adherence to Ethics principles and generate a unified compliance overview.\nData Inputs:\nA JSON payload with metadata (e.g., project title, sponsor, PI name, institution).\nA set of uploaded files including:\nFull proposal document (PDF, DOCX)\nBudget justifications\nBiosketches\nFOA or solicitation\nOptional: IRB/IACUC protocols, Data Management and Sharing plans, internal policy documents.\nContent Extraction Instructions:\nIdentify and extract key information from each file, even if standard sections like Abstract or Specific Aims are unlabeled.\nConsolidate information across all inputs to evaluate compliance with moral principles guiding research conduct.\nCompliance Areas to Evaluate (for this prompt):\nResearch Integrity (Misconduct, Authorship, Peer Review)\nAnalysis & Output Instructions:\nFor each \"Compliance Area to Evaluate,\" determine its specific status and assign a severity (Critical, High, Medium, Low).\nSet the overall \'status\' for \"Ethics\" by identifying the most severe individual status found among all evaluated compliance areas (Error - Immediate Action Required > Warning - Action Required > Compliant).\nGenerate the description field as an array of bullet-point style summaries. Each bullet point must be a single sentence and contain the following structured information for a specific finding:\nThe Compliance Area Name.\nIts determined Status (select from: Compliant / Warning - Action Required / Error - Immediate Action Required / Not Applicable).\nIts Severity.\nA concise Reason: explaining why this specific status was assigned, including relevant context from the proposal.\nOrder the bullet points within the description array by Severity, from Critical (highest) to Low (lowest). Compliant/Not Applicable items should be listed last.\nSpecific Status Definitions & Flagging Logic:\nResearch Integrity (Misconduct, Authorship, Peer Review):\nStatus: Compliant (if no research integrity concerns identified in the proposal content).\nStatus: Warning - Action Required (if a potential research integrity concern, e.g., suspected minor plagiarism, highly questionable data presentation, inconsistent data references, has been identified, requiring review by the Research Integrity Officer).\nStatus: Error - Immediate Action Required (if a clear and significant research integrity concern, e.g., blatant plagiarism, evidence of data fabrication/falsification, has been identified, requiring immediate review by the Research Integrity Officer and potentially blocking the project).\nStatus: Not Applicable (if the nature of the proposal does not lend itself to these specific integrity checks, or if no relevant content is found).\nOutput Format: JSON (flat object, no markdown or arrays of objects). Return a single JSON object with exactly three fields: \'name\', \'status\', and \'description\'. Set \'name\' to \'Ethics\'.\nJSON\n{\n  \"name\": \"Ethics\",\n  \"status\": \"[overall status: success / warning / error]\",\n  \"description\": [\n    {\n		\"compliance_area\": [Name],\n		\"status\": [Status],\n		\"severity\": [Severity]\n		\"reason\": [Explain why this specific status was assigned, including context from proposal].\n		// ... additional items, ordered by severity (Critical > High > Medium > Low > Compliant/Not Applicable)\n	}\n  ]\n}\n \nTone: Professional, regulatory-focused, precise.\nImportant: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in \"json\" or any other formatting.',1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),'admin','admin');
+
+              INSERT IGNORE INTO AI_PROMPT (`AI_PROMPTS_ID`,`PROMPT_NAME`, `AI_PROMPTS_CATEGORY`, `AI_PROMPTS_TYPE`, `PROMPT`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `UPDATED_BY`, `CREATED_BY`) VALUES (23,'Compliance General Prompt', 'Compliance_General_Prompt', 'Compliance_General_Prompt', 'Task: Return a compliance overview as a JSON object.\nFormat: JSON (flat object, no markdown or arrays of objects). Return a single JSON object with exactly three fields: \'name\', \'status\', and \'description\'.\n-> name → set to the compliance area name being evaluated (e.g., \"Ethics\", \"Data Management & Sharing\", \"Human Subjects Protection\").\n-> status → overall status (success, warning, or error).\n-> description → an array of one or more objects, each with exactly these four fields:\n* compliance_area\n* status\n*severity\n* reason\n\nJSON\n{\n  \"name\": \"[Compliance Area Name]\",\n  \"status\": \"[overall status: success / warning / error]\",\n  \"description\": [\n    {\n		\"compliance_area\": [Name],\n		\"status\": [Status],\n		\"severity\": [Severity]\n		\"reason\": [Explain why this specific status was assigned, including context from proposal].\n		// ... additional items, ordered by severity (Critical > High > Medium > Low > Compliant/Not Applicable)\n	}\n  ]\n}\n \nTone: Professional, regulatory-focused, precise.\nImportant: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in \"json\" or any other formatting.\rProposal Data: [Insert the complete, raw text content of the grant proposal here]', '1', UTC_TIMESTAMP(), UTC_TIMESTAMP(), 'admin', 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM AI_CONFIG WHERE AI_CONFIG_ID IN (6,7);
+              DELETE FROM AI_PROMPT WHERE AI_PROMPTS_ID IN (5,6,7,8,9,23);
+
+  - changeSet:
+      id: AI-165-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Add right for AI Document Analyzer.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO RIGHTS (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT
+                COALESCE(MAX(RIGHT_ID), 0) + 1,
+                'MAINTAIN_DOC_ANALYZER',
+                'To access AI Document Analyzer',
+                'admin',
+                UTC_TIMESTAMP(),
+                '1'
+              FROM RIGHTS
+              WHERE NOT EXISTS (
+                SELECT 1 FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_DOC_ANALYZER'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_DOC_ANALYZER';
+
+  - changeSet:
+      id: AI-167-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Add right for AI Insights.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO RIGHTS (RIGHT_ID, RIGHT_NAME, DESCRIPTION, UPDATE_USER, UPDATE_TIMESTAMP, RIGHTS_TYPE_CODE)
+              SELECT
+                COALESCE(MAX(RIGHT_ID), 0) + 1,
+                'MAINTAIN_AI_CONFIG',
+                'To access & manage AI Config',
+                'admin',
+                UTC_TIMESTAMP(),
+                '1'
+              FROM RIGHTS
+              WHERE NOT EXISTS (
+                SELECT 1 FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_AI_CONFIG'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM RIGHTS WHERE RIGHT_NAME = 'MAINTAIN_AI_CONFIG';
+
+  - changeSet:
+      id: AI-176-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Add configuration for AI in DYN_MODULES_CONFIG.
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO DYN_MODULES_CONFIG (`MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('AI', 'Fibi AI', 'N', UTC_TIMESTAMP(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_MODULES_CONFIG WHERE MODULE_CODE = 'AI';
+
+  - changeSet:
+      id: AI-180-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Update prompt for Team Overview in AI Insights.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `AI_PROMPT`
+              SET `PROMPT` = 'You are a highly experienced Research Administrator. Your task is to generate a structured \'Team Overview\' for the following grant proposal. This summary should focus on providing administrative insights into the team\'s composition and structure. Data Processing: You will receive proposal data in JSON format and content from various uploaded files. Extract and synthesize information from all sources to create a unified team overview. Instructions: 1. Read the entire proposal document thoroughly. Pay particular attention to the Biosketches, Key Personnel section, Research Strategy (where roles might be described), and any sections detailing collaborations or subawards. 2. Identify the Principal Investigator (PI) and their primary affiliation. 3. List all key personnel (Co-PIs, Senior/Key personnel) and briefly describe their core expertise or role in the project. 4. Extract effort percentages for each team member where available. 5. Identify departmental affiliations and institutional details for each member. 6. Note any significant administrative aspects: such as interdisciplinary structure, multiple departments/institutions, sub-recipient personnel, or complex reporting lines. 7. Do NOT include detailed contact information. Focus on roles, expertise, and administrative structure. Note: If certain sections (Biosketches, Key Personnel, etc.) are not clearly labeled or available, identify and extract equivalent team information from the available content. PRIORITY INSTRUCTION: If Study Team Information such as Key Personnel or Project Team is present in the proposal, it should be given first priority. The Study Team Information extracted from the uploaded documents should be shown only as secondary priority. When displaying results, always show data from proposal fields such as proposalPersons and proposalProjectTeam first, followed by information extracted from the uploaded documents (in that order). When providing details, include roles, departments, and any other relevant attributes only if they are explicitly mentioned. Do not assume or generate roles, departments, or any missing information. If such details are not present, inform the user that this information was not found, instead of making assumptions. Tone: Maintain an objective, administrative, and factual tone suitable for institutional review and administrative tracking. Output Format: Provide your response as a JSON object with the following structure: {\"projectTeam\": {\"members\": [{\"name\": \"Full name of team member\", \"role\": \"Official role (e.g., Principal Investigator, Co-Investigator, Senior Personnel)\", \"department\": \"Department/Unit name and institution if applicable\", \"expertise\": \"Brief description of relevant expertise and contribution to project (1-2 sentences)\", \"effortPercentage\": \"Express the percentage of effort as natural language, e.g., He will dedicate about x% of his time to the project\"}]}} Include all key personnel listed in the proposal. The array should contain as many members as identified in the proposal data. Ensure consistency in expertise descriptions and role classifications across all team members. Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in json or any other formatting.\n  - Do not include any text, comments, explanations, or introductions before or after the JSON object.\n - Do not wrap the JSON in markdown, code blocks, or quotes.\n - Do not say \"Here is the JSON\".\n - If a section cannot be filled, leave its value as an empty string (\"\").\n - Ensure the output is valid JSON and can be parsed without modification.',
+              `UPDATED_AT` = UTC_TIMESTAMP(),
+              `UPDATED_BY` = 'admin'
+              WHERE (`AI_PROMPTS_ID` = '2') AND (`PROMPT_NAME` = 'Team overview');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `AI_PROMPT`
+              SET `PROMPT` = 'You are a highly experienced Research Administrator. Your task is to generate a structured \'Team Overview\' for the following grant proposal. This summary should focus on providing administrative insights into the team\'s composition and structure. Data Processing: You will receive proposal data in JSON format and content from various uploaded files. Extract and synthesize information from all sources to create a unified team overview. Instructions: 1. Read the entire proposal document thoroughly. Pay particular attention to the Biosketches, Key Personnel section, Research Strategy (where roles might be described), and any sections detailing collaborations or subawards. 2. Identify the Principal Investigator (PI) and their primary affiliation. 3. List all key personnel (Co-PIs, Senior/Key personnel) and briefly describe their core expertise or role in the project. 4. Extract effort percentages for each team member where available. 5. Identify departmental affiliations and institutional details for each member. 6. Note any significant administrative aspects: such as interdisciplinary structure, multiple departments/institutions, sub-recipient personnel, or complex reporting lines. 7. Do NOT include detailed contact information. Focus on roles, expertise, and administrative structure. Note: If certain sections (Biosketches, Key Personnel, etc.) are not clearly labeled or available, identify and extract equivalent team information from the available content. Tone: Maintain an objective, administrative, and factual tone suitable for institutional review and administrative tracking. Output Format: Provide your response as a JSON object with the following structure: {\"projectTeam\": {\"members\": [{\"name\": \"Full name of team member\", \"role\": \"Official role (e.g., Principal Investigator, Co-Investigator, Senior Personnel)\", \"department\": \"Department/Unit name and institution if applicable\", \"expertise\": \"Brief description of relevant expertise and contribution to project (1-2 sentences)\", \"effortPercentage\": \"Express the percentage of effort as natural language, e.g., He will dedicate about x% of his time to the project,\"}]}} Include all key personnel listed in the proposal. The array should contain as many members as identified in the proposal data. Ensure consistency in expertise descriptions and role classifications across all team members. Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in json or any other formatting.\n ',
+              `UPDATED_AT` = UTC_TIMESTAMP(),
+              `UPDATED_BY` = 'admin'
+              WHERE (`AI_PROMPTS_ID` = '2') AND (`PROMPT_NAME` = 'Team overview');
+
+  - changeSet:
+      id: AI-196-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Update description for AI Chatbot.
+      changes:
+        - sql:
+            sql: |
+              UPDATE AI_CONFIG SET `DESCRIPTION` = 'AI Chatbot' WHERE (`AI_CONFIG_ID` = '1');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE AI_CONFIG SET `DESCRIPTION` = 'AI Chatbot Config' WHERE (`AI_CONFIG_ID` = '1');
+
+  - changeSet:
+      id: AI-234-1
+      author: Sanidh.IV
+      labels: 'DML'
+      comment: Update prompt for Team Overview in AI Insights.
+      changes:
+        - sql:
+            sql: |
+              UPDATE `AI_PROMPT`
+              SET `PROMPT` = 'You are a highly experienced Research Administrator. Your task is to generate a structured \'Team Overview\' for the following grant proposal. This summary should focus on providing administrative insights into the team\'s composition and structure. Data Processing: You will receive proposal data in JSON format and content from various uploaded files. Extract and synthesize information from all sources to create a unified team overview. Instructions: 1. Read the entire proposal document thoroughly. Pay particular attention to the Biosketches, Key Personnel section, Research Strategy (where roles might be described), and any sections detailing collaborations or subawards. 2. Identify the Principal Investigator (PI) and their primary affiliation. 3. List all key personnel (Co-PIs, Senior/Key personnel) and briefly describe their core expertise or role in the project. 4. Extract effort percentages for each team member where available. 5. Identify departmental affiliations and institutional details for each member. 6. Note any significant administrative aspects: such as interdisciplinary structure, multiple departments/institutions, sub-recipient personnel, or complex reporting lines. 7. Do NOT include detailed contact information. Focus on roles, expertise, and administrative structure. Note: If certain sections (Biosketches, Key Personnel, etc.) are not clearly labeled or available, identify and extract equivalent team information from the available content. PRIORITY INSTRUCTION: If Study Team Information such as Key Personnel or Project Team is present in the proposal, it should be given first priority. The Study Team Information extracted from the uploaded documents should be shown only as secondary priority. When displaying results, always show data from proposal fields such as proposalPersons and proposalProjectTeam first, followed by information extracted from the uploaded documents (in that order). When providing details, include roles, departments, and any other relevant attributes only if they are explicitly mentioned. Do not assume or generate roles, departments, or any missing information. If such details are not present, inform the user that this information was not found, instead of making assumptions. Additionally, do not assume or infer anyone’s gender. Do not mention or include gendered pronouns or terms unless the gender is explicitly stated in the provided data. Always use gender-neutral phrasing when referring to team members. Additionally, do not assume or infer anyone’s gender. Do not mention or include gendered pronouns or terms unless the gender is explicitly stated in the provided data. Always use gender-neutral phrasing when referring to team members. Tone: Maintain an objective, administrative, and factual tone suitable for institutional review and administrative tracking. Output Format: Provide your response as a JSON object with the following structure: {\"projectTeam\": {\"members\": [{\"name\": \"Full name of team member\", \"role\": \"Official role (e.g., Principal Investigator, Co-Investigator, Senior Personnel)\", \"department\": \"Department/Unit name and institution if applicable\", \"expertise\": \"Brief description of relevant expertise and contribution to project (1-2 sentences)\", \"effortPercentage\": \"Express the percentage of effort as natural language, e.g., He will dedicate about x% of his time to the project\"}]}} Include all key personnel listed in the proposal. The array should contain as many members as identified in the proposal data. Ensure consistency in expertise descriptions and role classifications across all team members. Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in json or any other formatting.\r - Do not include any text, comments, explanations, or introductions before or after the JSON object.\r - Do not wrap the JSON in markdown, code blocks, or quotes.\r - Do not say \"Here is the JSON\".\r - If a section cannot be filled, leave its value as an empty string (\"\").\r - Ensure the output is valid JSON and can be parsed without modification.',
+              `UPDATED_AT` = UTC_TIMESTAMP(),
+              `UPDATED_BY` = 'admin'
+              WHERE (`AI_PROMPTS_ID` = '2') AND (`PROMPT_NAME` = 'Team overview');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `AI_PROMPT`
+              SET `PROMPT` = 'You are a highly experienced Research Administrator. Your task is to generate a structured \'Team Overview\' for the following grant proposal. This summary should focus on providing administrative insights into the team\'s composition and structure. Data Processing: You will receive proposal data in JSON format and content from various uploaded files. Extract and synthesize information from all sources to create a unified team overview. Instructions: 1. Read the entire proposal document thoroughly. Pay particular attention to the Biosketches, Key Personnel section, Research Strategy (where roles might be described), and any sections detailing collaborations or subawards. 2. Identify the Principal Investigator (PI) and their primary affiliation. 3. List all key personnel (Co-PIs, Senior/Key personnel) and briefly describe their core expertise or role in the project. 4. Extract effort percentages for each team member where available. 5. Identify departmental affiliations and institutional details for each member. 6. Note any significant administrative aspects: such as interdisciplinary structure, multiple departments/institutions, sub-recipient personnel, or complex reporting lines. 7. Do NOT include detailed contact information. Focus on roles, expertise, and administrative structure. Note: If certain sections (Biosketches, Key Personnel, etc.) are not clearly labeled or available, identify and extract equivalent team information from the available content. PRIORITY INSTRUCTION: If Study Team Information such as Key Personnel or Project Team is present in the proposal, it should be given first priority. The Study Team Information extracted from the uploaded documents should be shown only as secondary priority. When displaying results, always show data from proposal fields such as proposalPersons and proposalProjectTeam first, followed by information extracted from the uploaded documents (in that order). When providing details, include roles, departments, and any other relevant attributes only if they are explicitly mentioned. Do not assume or generate roles, departments, or any missing information. If such details are not present, inform the user that this information was not found, instead of making assumptions. Tone: Maintain an objective, administrative, and factual tone suitable for institutional review and administrative tracking. Output Format: Provide your response as a JSON object with the following structure: {\"projectTeam\": {\"members\": [{\"name\": \"Full name of team member\", \"role\": \"Official role (e.g., Principal Investigator, Co-Investigator, Senior Personnel)\", \"department\": \"Department/Unit name and institution if applicable\", \"expertise\": \"Brief description of relevant expertise and contribution to project (1-2 sentences)\", \"effortPercentage\": \"Express the percentage of effort as natural language, e.g., He will dedicate about x% of his time to the project\"}]}} Include all key personnel listed in the proposal. The array should contain as many members as identified in the proposal data. Ensure consistency in expertise descriptions and role classifications across all team members. Important: Return ONLY the JSON object without any markdown formatting, code blocks, or additional text. Do not wrap the response in json or any other formatting.\n  - Do not include any text, comments, explanations, or introductions before or after the JSON object.\n - Do not wrap the JSON in markdown, code blocks, or quotes.\n - Do not say \"Here is the JSON\".\n - If a section cannot be filled, leave its value as an empty string (\"\").\n - Ensure the output is valid JSON and can be parsed without modification.',
+              `UPDATED_AT` = UTC_TIMESTAMP(),
+              `UPDATED_BY` = 'admin'
+              WHERE (`AI_PROMPTS_ID` = '2') AND (`PROMPT_NAME` = 'Team overview');

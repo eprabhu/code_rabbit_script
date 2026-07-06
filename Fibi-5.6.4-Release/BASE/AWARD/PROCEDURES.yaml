@@ -1,0 +1,354 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10787-2
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_AWARD_DASHBOARD for CFDA_NUMBER and SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-3
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_AWARD_DASHBOARD_COUNT for CFDA_NUMBER and SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_COUNT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-4
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_AWARD_DASHBOARD_COUNT_DYNAMIC_JSON for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_COUNT_DYNAMIC_JSON;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_COUNT_DYNAMIC_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-5
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_AWARD_DASHBOARD_DYNAMIC_JSON for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_DASHBOARD_DYNAMIC_JSON;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_DASHBOARD_DYNAMIC_JSON.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-6
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_AWARD_TIMESHEET_DASHBOARD for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_TIMESHEET_DASHBOARD;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_TIMESHEET_DASHBOARD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-7
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update GET_AWARD_TIMESHEET_DASHBOARD_COUNT for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_AWARD_TIMESHEET_DASHBOARD_COUNT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/GET_AWARD_TIMESHEET_DASHBOARD_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-8
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update LOAD_ALL_AWARD_VERSION_REPORT for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS LOAD_ALL_AWARD_VERSION_REPORT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/LOAD_ALL_AWARD_VERSION_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-9
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update MERGE_AWARD_MASTER_DATA for CFDA_NUMBER and SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWARD_MASTER_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWARD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-10
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update MERGE_AWARD_MASTER_GENERAL for CFDA_NUMBER and SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWARD_MASTER_GENERAL;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWARD_MASTER_GENERAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-11
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update MERGE_AWD_MASTER_DATA for CFDA_NUMBER and SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_MASTER_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-12
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update MERGE_AWD_SECTION_GENERAL for CFDA_NUMBER and SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_GENERAL;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_GENERAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-13
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update MERGE_AWD_SECTION_PROJECT_OUTCOME for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_PROJECT_OUTCOME;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_PROJECT_OUTCOME.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-14
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update SAP_FEED_GENERATE_BATCH for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS SAP_FEED_GENERATE_BATCH;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_GENERATE_BATCH.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-15
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update SAP_FEED_GENERATE_BATCH_MOD for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS SAP_FEED_GENERATE_BATCH_MOD;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_GENERATE_BATCH_MOD.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-16
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update SAP_FEED_GENERATE_BATCH_NEW for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS SAP_FEED_GENERATE_BATCH_NEW;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_GENERATE_BATCH_NEW.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-17
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update SAP_FEED_PROBLEMATIC_GRANT_CODE_REPORT for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS SAP_FEED_PROBLEMATIC_GRANT_CODE_REPORT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_PROBLEMATIC_GRANT_CODE_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-18
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update SAP_FEED_SOFT_LAUNCH_NO_REPORT for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS SAP_FEED_SOFT_LAUNCH_NO_REPORT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_SOFT_LAUNCH_NO_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWARD_MASTER_DATA
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWARD_MASTER_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWARD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-2
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWD_MASTER_DATA
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_MASTER_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-3
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWD_SECTION_GENERAL
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_GENERAL;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_GENERAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-4
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWD_SECTION_PAYMNT_INVOICE
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_PAYMNT_INVOICE;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_PAYMNT_INVOICE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+ - changeSet:
+      id: FIBI-10419-1
+      author: vishnu
+      labels: 'PROCEDURES'
+      comment: Update MERGE_AWD_SECTION_REPORT to preserve active report tracking and files during award section merge
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+            DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_REPORT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+

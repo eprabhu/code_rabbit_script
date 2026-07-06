@@ -1,0 +1,8 @@
+databaseChangeLog:
+
+    - include:
+        file: Fibi-5.5.1-Release/JHU/FIBI_FIBI_FORM_BUILDER/ALL.yaml
+        labels: 'FORM_BUILDER'
+    - include:
+        file: Fibi-5.5.1-Release/JHU/FIBI_RESEARCHER_PROFILE/ALL.yaml
+        labels: 'RESEARCHER_PROFILE' 

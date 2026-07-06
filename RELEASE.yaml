@@ -1,0 +1,78 @@
+databaseChangeLog:
+
+     #Fibi-Vanilla
+    #- include:
+    #    file: Fibi-Vanilla/ALL.yaml
+    #    labels: 'Fibi-Vanilla'
+    # #Fibi_Demo_Config
+    # - include:
+    #     file: Fibi_Demo_Config/ALL.yaml
+    #     labels: 'Fibi-Demo-Config'
+    #Fibi-5.4.5-Release
+    - include:
+        file: Fibi-5.4.5-Release/ALL.yaml
+        labels: 'Fibi-5.4.5-Release,BASE'
+    #Fibi-5.4.6-Release
+    - include:
+        file: Fibi-5.4.6-Release/ALL.yaml
+        labels: 'Fibi-5.4.6-Release,BASE'
+    #Fibi-5.4.6P1-Release
+    - include:
+        file: Fibi-5.4.6P1-Release/ALL.yaml
+        labels: 'Fibi-5.4.6P1-Release,BASE'
+    #Fibi-5.4.8-Release
+    - include:
+        file: Fibi-5.4.8-Release/ALL.yaml
+        labels: 'Fibi-5.4.8-Release,BASE'
+    #Fibi-5.5-Release
+    - include:
+        file: Fibi-5.5-Release/ALL.yaml
+        labels: 'Fibi-5.5-Release,BASE'
+    - include:
+        file: Fibi-5.5.1-Release/ALL.yaml
+        labels: 'Fibi-5.5.1-Release,BASE'
+
+    #Fibi-5.5.2-Release
+    - include:
+        file: Fibi-5.5.2-Release/ALL.yaml
+        labels: 'Fibi-5.5.2-Release,BASE'
+    #Fibi-5.5.3-Release
+    - include:
+        file: Fibi-5.5.3-Release/ALL.yaml
+        labels: 'Fibi-5.5.3-Release,BASE'
+    #AI
+    - include:
+        file: AI/ALL.yaml
+        labels: 'AI'
+    #FIBI-9126
+    - include:
+        file: FIBI-9126/ALL.yaml
+        labels: 'FIBI-9126,BASE'
+    #Fibi-5.5.4-Release
+    - include:
+        file: Fibi-5.5.4-Release/ALL.yaml
+        labels: 'Fibi-5.5.4-Release,BASE'
+    #Fibi-5.5.5-Release
+    - include:
+        file: Fibi-5.5.5-Release/ALL.yaml
+        labels: 'Fibi-5.5.5-Release,BASE'
+    #Fibi-5.6-Release
+    - include:
+        file: Fibi-5.6-Release/ALL.yaml
+        labels: 'Fibi-5.6-Release,BASE'
+    #Fibi-5.6.1-Release
+    - include:
+        file: Fibi-5.6.1-Release/ALL.yaml
+        labels: 'Fibi-5.6.1-Release,BASE'
+    #Fibi-5.6.2-Release
+    - include:
+        file: Fibi-5.6.2-Release/ALL.yaml
+        labels: 'Fibi-5.6.2-Release,BASE'
+    #Fibi-5.6.3-Release
+    - include:
+        file: Fibi-5.6.3-Release/ALL.yaml
+        labels: 'Fibi-5.6.3-Release,BASE'
+    #Fibi-5.6.4-Release
+    - include:
+        file: Fibi-5.6.4-Release/ALL.yaml
+        labels: 'Fibi-5.6.4-Release,BASE'

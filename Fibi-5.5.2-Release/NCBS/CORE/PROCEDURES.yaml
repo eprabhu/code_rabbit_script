@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9246
+        author: Robin
+        labels: 'PROCEDURES'
+        comment: Modified Procedure
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_APPROVERS_FOR_ROLE_TYPE;
+          - sqlFile:
+              path: ROUTINES/NCBS/CORE/PROCEDURES/GET_APPROVERS_FOR_ROLE_TYPE.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty

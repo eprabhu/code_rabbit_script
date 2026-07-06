@@ -1,0 +1,47 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-9373-1
+        author: Solih
+        labels: 'PROCEDURES'
+        comment: Drop and create GET_RESEARCH_SUMMARY_DETAILS.
+        runOnChange: true
+        changes:
+          - sql:
+              sql: DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+          - sqlFile:
+              path: ROUTINES/JHU/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+              relativeToChangelogFile: false
+              splitStatements: false
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-9479-1
+      author: Arjun
+      labels: 'PROCEDURES'
+      comment: Drop and create GET_RESEARCH_SUMMARY_DETAILS for the performance issue.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9479-2
+      author: Arjun
+      labels: 'PROCEDURES'
+      comment: Drop and create GET_WIDGET_DATA_IN_DETAIL for the performance issue.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+        - sqlFile:
+            path: ROUTINES/JHU/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+    

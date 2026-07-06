@@ -1,0 +1,105 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9150
+      author: Hridya E K
+      labels: 'DDL'
+      comment: ALTER WORKDAY_TERMINATION_DETAILS table
+      changes:
+        - sql:
+            sql: |
+              SET @sql := IF(
+                  (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'WORKDAY_TERMINATION_DETAILS' AND COLUMN_NAME = 'EFFECTIVE_LAST_DATE') = 0,
+                  'ALTER TABLE WORKDAY_TERMINATION_DETAILS ADD COLUMN EFFECTIVE_LAST_DATE DATETIME NULL DEFAULT NULL;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE WORKDAY_TERMINATION_DETAILS DROP COLUMN EFFECTIVE_LAST_DATE;
+  - changeSet:
+      id: FIBI-7562-7
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Award Type (module 1)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Award Type', 1, 0, 'Award Type', 'AWARD', 'AWARD_TYPE_CODE', 'Y', UTC_TIMESTAMP(), 'admin', 'AWARD_TYPE_LOOKUP'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Award Type' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Award Type' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD';
+
+  - changeSet:
+      id: FIBI-7562-8
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Final Expiration Date (module 1)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Final Expiration Date', 1, 0, 'Final Expiration Date', 'AWARD', 'FINAL_EXPIRATION_DATE', 'N', UTC_TIMESTAMP(), 'admin', 'DATE'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Final Expiration Date' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Final Expiration Date' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD';
+
+  - changeSet:
+      id: FIBI-7562-9
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Award Status (module 1)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Award Status', 1, 0, 'Award Status', 'AWARD', 'STATUS_CODE', 'Y', UTC_TIMESTAMP(), 'admin', 'Award Status'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Award Status' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Award Status' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD';
+
+  - changeSet:
+      id: FIBI-7562-10
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Insert BUSINESS_RULE_VARIABLE Award Sponsor Code (module 1)
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO BUSINESS_RULE_VARIABLE (VARIABLE_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, TABLE_NAME, COLUMN_NAME, SHOW_LOOKUP, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME)
+              SELECT 'Award Sponsor Code', 1, 0, 'Award Sponsor Code', 'AWARD', 'SPONSOR_CODE', 'Y', UTC_TIMESTAMP(), 'admin', 'SPONSOR_LOOKUP'
+              FROM dual
+              WHERE NOT EXISTS (
+                SELECT 1 FROM BUSINESS_RULE_VARIABLE
+                WHERE VARIABLE_NAME = 'Award Sponsor Code' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM BUSINESS_RULE_VARIABLE
+              WHERE VARIABLE_NAME = 'Award Sponsor Code' AND MODULE_CODE = 1 AND TABLE_NAME = 'AWARD';

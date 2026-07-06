@@ -1,0 +1,10 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6-Release/NCBS/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/NCBS/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+

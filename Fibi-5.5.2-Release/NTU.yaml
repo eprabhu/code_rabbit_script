@@ -1,0 +1,7 @@
+databaseChangeLog:
+
+    #MANPOWER
+    - include:
+        file: Fibi-5.5.2-Release/NTU/MANPOWER/PROCEDURES.yaml
+        labels: 'MANPOWER'
+

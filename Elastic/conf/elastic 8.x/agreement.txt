@@ -1,0 +1,167 @@
+
+1. To delete and index from the elastic server (update the IP as required a dummy IP for refernce is added).
+
+    curl -XDELETE http://192.168.1.33:9200/agreementfibi/  
+
+
+2. To create an Index in elastic server , the command will create an index in elastic server named "agreementfibi".
+(update the IP as required a dummy IP for refernce is added).
+
+    curl -XPUT 'http://192.168.1.33:9200/agreementfibi/' -H 'Content-Type: application/json' -d '{"settings":{"number_of_shards":5,"analysis":{"filter":{"ngram_filter":{"type":"edge_ngram","min_gram":2,"max_gram":20}},"analyzer":{"ngram_analyzer":{"type":"custom","tokenizer":"whitespace","filter":["lowercase","ngram_filter"]}}}},"mappings":{"properties":{"agreement_request_id":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard","fields":{"sort":{"type":"keyword","index":true}}},"title":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard"},"category":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"agreement_type":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"requestor_full_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"agreement_status":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"status_code":{"type":"integer","index":"false"},"displayName":{"type":"text","index":"false"},"unit_number":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"unit_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"sponsor_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"principal_person_full_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"agreement_start_date":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"agreement_end_date":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"aa_person_full_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"@version":{"type":"integer"},"@timestamp":{"type":"date"}}}}'
+3. logstash configuration that need to used to sync elastic index from Database
+    1.jdbc_driver_library = path to library for jar for mysqlconnector ( eg:/root/conf/mysql-connector.jar) 
+    2.jdbc_connection_string = The URL for the Database that need to be used.
+    3.hosts = the ip address of the elastic search sever thats used for data sync.
+    4.Other properties dont need to be changed. only add DB password and user details. 
+
+
+    input {
+        jdbc {
+            jdbc_driver_library => ""
+            jdbc_driver_class => "Java::com.mysql.jdbc.Driver"
+            jdbc_connection_string => "jdbc:mysql://192.168.1.6:3306/fibi_base?useSSL=false&useTimezone=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+            jdbc_user => ""
+            jdbc_password =>"" 
+            jdbc_validate_connection => true
+            statement => "select t1.agreement_request_id, t1.agreement_type, t1.title, t1.unit_number, t1.unit_name, t1.sponsor_name, t1.aa_person_full_name, t1.principal_person_full_name, t1.requestor_full_name,t1.agreement_status,t1.agreement_start_date,t1.agreement_end_date,t2.DISPLAY_NAME as displayName from agreement_v t1
+             LEFT OUTER JOIN UNIT t2 ON t1.unit_number = t2.UNIT_NUMBER
+             where AGREEMENT_SEQUENCE_STATUS = 'ACTIVE'"
+        }
+      }
+      output {
+        elasticsearch {
+            index => "agreementfibi"
+            document_id => "%{agreement_request_id}"
+            hosts => "192.168.1.242:9200"
+        }
+      }
+
+
+4. The JSON object used for Developers and miantainers so that its easy to identify the propoerties used to create an index
+
+{
+  "settings": {
+    "number_of_shards": 5,
+    "analysis": {
+      "filter": {
+        "ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20
+        }
+      },
+      "analyzer": {
+        "ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": [
+            "lowercase",
+            "ngram_filter"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "agreement_request_id": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard",
+        "fields": {
+          "sort": {
+            "type": "keyword",
+            "index": true
+          }
+        }
+      },
+      "title": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "category": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "agreement_type": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "requestor_full_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "agreement_status": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "status_code": {
+        "type": "integer",
+        "index": "false"
+      },
+      "displayName": {
+       "type": "text",
+        "index": "false"
+      },
+      "unit_number": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "unit_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "sponsor_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "principal_person_full_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "agreement_start_date": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "agreement_end_date": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "aa_person_full_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "@version": {
+        "type": "integer"
+      },
+      "@timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}

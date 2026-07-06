@@ -1,0 +1,97 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10841-11
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:  Implement new view EPS_PROPOSAL_DATA_V
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS EPS_PROPOSAL_DATA_V;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/VIEWS/EPS_PROPOSAL_DATA_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10841-12
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:  Implement new view EPS_PROPOSAL_PERSONNEL_V
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS EPS_PROPOSAL_PERSONNEL_V;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/VIEWS/EPS_PROPOSAL_PERSONNEL_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10841-13
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:  Implement new view EXTERNAL_REVIEWERS_DATA_REPORT_V
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS EXTERNAL_REVIEWERS_DATA_REPORT_V;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/VIEWS/EXTERNAL_REVIEWERS_DATA_REPORT_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10841-14
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:  Implement new view WORKFLOW_DETAILED_V
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS WORKFLOW_DETAILED_V;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/VIEWS/WORKFLOW_DETAILED_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10904-2
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:  update view WORKFLOW_DETAILED_V
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS WORKFLOW_DETAILED_V;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/VIEWS/WORKFLOW_DETAILED_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-11109-3
+      author: Prabhu.E
+      labels: 'VIEWS'
+      comment:  Implement new view EXTERNAL_REVIEWERS_DATA_REPORT_V
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP VIEW IF EXISTS EXTERNAL_REVIEWERS_DATA_REPORT_V;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/VIEWS/EXTERNAL_REVIEWERS_DATA_REPORT_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,9 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.1-Release/JHU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6.1-Release/JHU/CORE/PROCEDURES.yaml
+        labels: 'CORE'

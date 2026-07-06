@@ -1,0 +1,116 @@
+CREATE PROCEDURE `IMPORT_BUDGET_PERSON_LINE_ITEM_TO_AWARD_PROJECT_TEAM`(
+    IN AV_AWARD_ID INT,
+    IN AV_AWARD_NUMBER VARCHAR(50),
+    IN AV_PROPOSAL_ID INT,
+    IN AV_SEQUENCE_NUMBER INT,
+    IN AV_BUDGET_HEADER_ID INT,
+    IN AV_UPDATE_USER VARCHAR(100)
+)
+proc_main: BEGIN
+
+    DECLARE done INT DEFAULT FALSE;
+
+    DECLARE LS_PERSON_NAME VARCHAR(200);
+    DECLARE LS_PERSON_ID VARCHAR(50);
+    DECLARE LD_PERCENT_EFFORT DECIMAL(10,2);
+    DECLARE LD_START_DATE DATE;
+    DECLARE LD_END_DATE DATE;
+    DECLARE LS_PROJECT_ROLE VARCHAR(200);
+    DECLARE LI_NAME_COUNT INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT 
+            COALESCE(TBN.PERSON_NAME, BPD.PERSON_NAME) AS PERSON_NAME,
+            BPD.PERSON_ID,
+            BPD.PERCENT_EFFORT,
+            BPD.START_DATE,
+            BPD.END_DATE,
+            COALESCE(TBN.PERSON_NAME, BPD.PERSON_NAME) AS PROJECT_ROLE
+        FROM BUDGET_PERSON_DETAIL BPD
+        LEFT JOIN TBN TBN ON TBN.TBN_ID = BPD.TBN_ID
+        WHERE BPD.PERSON_TYPE = 'T'
+          AND BPD.BUDGET_DETAILS_ID IN (
+                SELECT BUDGET_DETAILS_ID
+                FROM BUDGET_DETAIL
+                WHERE BUDGET_PERIOD_ID IN (
+                    SELECT BUDGET_PERIOD_ID
+                    FROM BUDGET_PERIOD
+                    WHERE BUDGET_HEADER_ID = AV_BUDGET_HEADER_ID
+                )
+          );
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    IF AV_BUDGET_HEADER_ID = 0 THEN
+        LEAVE proc_main;
+    END IF;
+
+    CREATE TEMPORARY TABLE IF NOT EXISTS tmp_name_counter (
+        PERSON_NAME VARCHAR(200) PRIMARY KEY,
+        CNT INT NOT NULL
+    );
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO
+            LS_PERSON_NAME,
+            LS_PERSON_ID,
+            LD_PERCENT_EFFORT,
+            LD_START_DATE,
+            LD_END_DATE,
+            LS_PROJECT_ROLE;
+
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Safe per-name counter
+        INSERT INTO TMP_NAME_COUNTER (PERSON_NAME, CNT)
+        VALUES (LS_PERSON_NAME, 1)
+        ON DUPLICATE KEY UPDATE CNT = CNT + 1;
+
+        SELECT CNT
+        INTO LI_NAME_COUNT
+        FROM TMP_NAME_COUNTER
+        WHERE PERSON_NAME = LS_PERSON_NAME;
+
+        INSERT INTO AWARD_PROJECT_TEAM (
+            AWARD_ID,
+            AWARD_NUMBER,
+            SEQUENCE_NUMBER,
+            PERSON_ID,
+            FULL_NAME,
+            PROJECT_ROLE,
+            NON_EMPLOYEE_FLAG,
+            PERCENTAGE_CHARGED,
+            START_DATE,
+            END_DATE,
+            IS_ACTIVE,
+            UPDATE_TIMESTAMP,
+            UPDATE_USER,
+            DESIGNATION
+        )
+        VALUES (
+            AV_AWARD_ID,
+            AV_AWARD_NUMBER,
+            AV_SEQUENCE_NUMBER,
+            LS_PERSON_ID,
+            CONCAT(LS_PERSON_NAME, ' (', LI_NAME_COUNT, ')'),
+            LS_PROJECT_ROLE,
+            'Y',
+            LD_PERCENT_EFFORT,
+            LD_START_DATE,
+            LD_END_DATE,
+            'Y',
+            NOW(),
+            AV_UPDATE_USER,
+            NULL
+        );
+
+    END LOOP;
+
+    CLOSE cur;
+    DROP TEMPORARY TABLE IF EXISTS TMP_NAME_COUNTER;
+
+END

@@ -1,0 +1,164 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10097-1
+      author: Shyla
+      labels: 'DML'
+      comment: Update Service Request dashboard criteria and column display names and widths
+      changes:
+        - sql:
+            sql: |
+              UPDATE dashboard_criteria_lookup
+              SET DISPLAY_NAME = 'Assignee',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE CRITERIA_KEY = 'CRT_SR_ASSI_PERSON';
+
+              UPDATE dashboard_criteria_lookup
+              SET DISPLAY_NAME = 'Admin Group',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE CRITERIA_KEY = 'CRT_SR_ADMIN_GROUP';
+
+              UPDATE dashboard_column_lookup
+              SET DISPLAY_NAME = 'Admin Group',
+                  WIDTH = '12',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE COLUMN_KEY = 'COL_SR_ADMIN_GROUP';
+
+              UPDATE dashboard_column_lookup
+              SET DISPLAY_NAME = 'Assignee',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE COLUMN_KEY = 'COL_SR_ASSI_PERSON';
+
+              UPDATE dashboard_column_lookup
+              SET WIDTH = '10',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE COLUMN_KEY = 'COL_SR_ID';
+
+              UPDATE dashboard_column_lookup
+              SET WIDTH = '35',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE COLUMN_KEY = 'COL_SR_SUBJECT';
+
+              UPDATE dashboard_column_lookup
+              SET WIDTH = '30',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE COLUMN_KEY = 'COL_SR_TYPE';
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10844-1
+      author: Hridya E K
+      labels: 'DML'
+      comment: Update Project Association label to Project Link.
+      changes:
+        - sql:
+            sql: |
+              UPDATE SECTION_TYPE SET DESCRIPTION = 'Project Links', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE SECTION_CODE = '2022';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE SECTION_TYPE SET DESCRIPTION = 'Project Association', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE SECTION_CODE = '2022';
+
+  - changeSet:
+      id: FIBI-10342-1
+      author: Hridya E K
+      labels: 'DML'
+      comment: Insert helptext for Service request dashboard widget.
+      changes:
+        - sql:
+            sql: |
+               INSERT INTO DYN_ELEMENT_CONFIG
+                (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+                SELECT
+                  'srvc-rqst-rsrch-smry-Not Submitted',
+                  'Not Submitted',
+                  '2016',
+                  'SR2007',
+                  'Tickets created but not submitted to RAS for processing',
+                  'admin',
+                  UTC_TIMESTAMP()
+                WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'srvc-rqst-rsrch-smry-Not Submitted'
+                    AND SUB_SECTION_CODE = '2016'
+                    AND SECTION_CODE = 'SR2007'
+                );
+
+               INSERT INTO DYN_ELEMENT_CONFIG
+                (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+                SELECT
+                  'srvc-rqst-rsrch-smry-In Progress',
+                  'In Progress',
+                  '2016',
+                  'SR2007',
+                  'Tickets that are processing by RAS',
+                  'admin',
+                  UTC_TIMESTAMP()
+                WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'srvc-rqst-rsrch-smry-In Progress'
+                    AND SUB_SECTION_CODE = '2016'
+                    AND SECTION_CODE = 'SR2007'
+                );
+
+               INSERT INTO DYN_ELEMENT_CONFIG
+                (UI_REFERENCE_ID, DESCRIPTION, SUB_SECTION_CODE, SECTION_CODE, HELP, UPDATE_USER, UPDATE_TIMESTAMP)
+                SELECT
+                  'srvc-rqst-rsrch-smry-Revision Requested',
+                  'Revision Requested',
+                  '2016',
+                  'SR2007',
+                  'Tickets that are returned by RAS for clarification',
+                  'admin',
+                  UTC_TIMESTAMP()
+                WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM DYN_ELEMENT_CONFIG
+                  WHERE UI_REFERENCE_ID = 'srvc-rqst-rsrch-smry-Revision Requested'
+                    AND SUB_SECTION_CODE = '2016'
+                    AND SECTION_CODE = 'SR2007'
+                );
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'srvc-rqst-rsrch-smry-Not Submitted'
+                AND SUB_SECTION_CODE = '2016'
+                AND SECTION_CODE = 'SR2007';
+
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'srvc-rqst-rsrch-smry-In Progress'
+                AND SUB_SECTION_CODE = '2016'
+                AND SECTION_CODE = 'SR2007';
+
+              DELETE FROM DYN_ELEMENT_CONFIG
+              WHERE UI_REFERENCE_ID = 'srvc-rqst-rsrch-smry-Revision Requested'
+                AND SUB_SECTION_CODE = '2016'
+                AND SECTION_CODE = 'SR2007';
+
+  - changeSet:
+      id: FIBI-10342-2
+      author: Hridya E K
+      labels: 'DML'
+      comment: Update helptext for Service request dashboard widget.
+      changes:
+        - sql:
+            sql: |
+               SET SQL_SAFE_UPDATES = 0;
+               UPDATE DYN_ELEMENT_CONFIG SET HELP = 'Tickets reopened as the resolution is incomplete' 
+                WHERE 
+               (UI_REFERENCE_ID = 'srvc-rqst-rsrch-smry-Reopened' 
+                AND SUB_SECTION_CODE = '2016' 
+                AND SECTION_CODE = 'SR2007');
+               SET SQL_SAFE_UPDATES = 1;
+      rollback: empty

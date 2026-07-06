@@ -1,0 +1,563 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7571-1
+      author: Farsana Khadar
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7504-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6680-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MORE_PROJECT_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_MORE_PROJECT_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7420-hotfix-1
+      author: Farsana Khadar
+      labels: 'PROCEDURES'
+      comment: Modified Procedure GET_KEY_PERSONS_DISCLOSURE_DETAILS
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_KEY_PERSONS_DISCLOSURE_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_KEY_PERSONS_DISCLOSURE_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7590-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS RULE_EVALUATE_QUESTION;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_QUESTION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7832-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7444-1
+      author: Farsana Khadar
+      labels: 'PROCEDURES'
+      comment: Modified Procedure GET_RULE_EVALUATE_REROUTING
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_RULE_EVALUATE_REROUTING;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_RULE_EVALUATE_REROUTING.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7444-2
+      author: Farsana Khadar
+      labels: 'PROCEDURES'
+      comment: Modified Procedure ROUTING_ADD_TO_INBOX
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS ROUTING_ADD_TO_INBOX;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/ROUTING_ADD_TO_INBOX.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7444-3
+      author: Farsana Khadar
+      labels: 'PROCEDURES'
+      comment: Modified Procedure RULE_EVALUATE_WORKFLOW_V2
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS RULE_EVALUATE_WORKFLOW_V2;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_WORKFLOW_V2.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7412-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure INSERT_QUESTIONNAIRE_ANSWERS.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS INSERT_QUESTIONNAIRE_ANSWERS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/INSERT_QUESTIONNAIRE_ANSWERS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7921-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure UPD_ANS_TO_NEW_QUEST_VERSN.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS UPD_ANS_TO_NEW_QUEST_VERSN;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/UPD_ANS_TO_NEW_QUEST_VERSN.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7849-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure SUPPORT_WIDGETS.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SUPPORT_WIDGETS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/SUPPORT_WIDGETS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8187-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure GET_APPROVERS_FOR_ROLE_TYPE.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_APPROVERS_FOR_ROLE_TYPE;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_APPROVERS_FOR_ROLE_TYPE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+        id: FIBI-7344-1
+        author: Manesh.MS
+        labels: 'PROCEDURES'
+        comment: Modified Procedure GET_WIDGET_DATA_IN_DETAIL.
+        runOnChange: true
+        changes:
+            - sql:
+                sql: DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+            - sqlFile:
+                path: ROUTINES/BASE/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+                relativeToChangelogFile: false
+                splitStatements: false
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-7344-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure GET_RESEARCH_SUMMARY_DETAILS
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8379-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MORE_PROJECT_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_MORE_PROJECT_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7368-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Created Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS RULE_EVALUATION_FOR_FN
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATION_FOR_FN.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8324-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure ROUTING_ADD_TO_INBOX
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS ROUTING_ADD_TO_INBOX;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/ROUTING_ADD_TO_INBOX.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8240-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure RULE_EVALUATE_VARIABLE
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS RULE_EVALUATE_VARIABLE;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_VARIABLE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8778-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS MIG_AWARD_PERSONS_TO_SR;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIG_AWARD_PERSONS_TO_SR.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_DASHBOARD_DETAILS;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_DASHBOARD_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_FILTER_DETAILS_FOR_TAB;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_FILTER_DETAILS_FOR_TAB.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-3
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS UPDATE_DASHBOARD_LOOKUPS_FOR_CUSTOM_DATA;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/UPDATE_DASHBOARD_LOOKUPS_FOR_CUSTOM_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS CHECK_USER_HAS_RIGHT_IN_DOC;
+                DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE;
+                DROP PROCEDURE IF EXISTS GET_APPROVERS_FOR_ROLE_TYPE;
+                DROP PROCEDURE IF EXISTS GET_PERSON_BASED_RIGHT_AND_UNIT;
+                DROP PROCEDURE IF EXISTS GET_PERSON_HAS_PERMISSION;
+                DROP PROCEDURE IF EXISTS GET_RESEARCH_SUMMARY_DETAILS;
+                DROP PROCEDURE IF EXISTS GET_RULE_EVALUATE_NOTIFICATION;
+                DROP PROCEDURE IF EXISTS GET_RULE_EVALUATE_REROUTING;
+                DROP PROCEDURE IF EXISTS GET_UNIT_HIERARCHY;
+                DROP PROCEDURE IF EXISTS GET_UNIT_NUMBER;
+                DROP PROCEDURE IF EXISTS GET_UNIT_ORGANIZATION;
+                DROP PROCEDURE IF EXISTS GET_UNIT_WITH_CHILDREN;
+                DROP PROCEDURE IF EXISTS GET_WIDGET_DATA_IN_DETAIL;
+                DROP PROCEDURE IF EXISTS GRANT_PI_PERMISSION;
+                DROP PROCEDURE IF EXISTS INSERT_WORKFLOW_FOR_ROLE_TYPE;
+                DROP PROCEDURE IF EXISTS LOAD_BUINESS_RULE;
+                DROP PROCEDURE IF EXISTS MIGRATE_AGREEMENT_GENERAL_INFO_TO_AGREEMENT;
+                DROP PROCEDURE IF EXISTS MIGRATE_AGREEMENT_SPONSOR_TO_AGREEMENT;
+                DROP PROCEDURE IF EXISTS MIGRATE_AWARD_GENERAL_INFO_TO_AGREEMENT;
+                DROP PROCEDURE IF EXISTS MIGRATE_AWARD_SPONSOR_TO_AGREEMENT;
+                DROP PROCEDURE IF EXISTS MIGRATE_IP_GENERAL_INFO_TO_AGREEMENT;
+                DROP PROCEDURE IF EXISTS MIGRATE_IP_SPONSOR_TO_AGREEMENT;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/CHECK_USER_HAS_RIGHT_IN_DOC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_APPROVERS_FOR_ROLE_TYPE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_PERSON_BASED_RIGHT_AND_UNIT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_PERSON_HAS_PERMISSION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_RESEARCH_SUMMARY_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_RULE_EVALUATE_NOTIFICATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_RULE_EVALUATE_REROUTING.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_UNIT_HIERARCHY.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_UNIT_NUMBER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_UNIT_ORGANIZATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_UNIT_WITH_CHILDREN.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_WIDGET_DATA_IN_DETAIL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GRANT_PI_PERMISSION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/INSERT_WORKFLOW_FOR_ROLE_TYPE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/LOAD_BUINESS_RULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_AGREEMENT_GENERAL_INFO_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_AGREEMENT_SPONSOR_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_AWARD_GENERAL_INFO_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_AWARD_SPONSOR_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_IP_GENERAL_INFO_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_IP_SPONSOR_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8678-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MIGRATE_PROPOSAL_GENERAL_INFO_TO_AGREEMENT;
+                DROP PROCEDURE IF EXISTS MIGRATE_PROPOSAL_SPONSOR_TO_AGREEMENT;
+                DROP PROCEDURE IF EXISTS MIGRATION_METARULE;
+                DROP PROCEDURE IF EXISTS MIGRATION_PRE_VALIDATION;
+                DROP PROCEDURE IF EXISTS MIG_DP_PERSONS_TO_SR;
+                DROP PROCEDURE IF EXISTS MIG_IP_PERSONS_TO_SR;
+                DROP PROCEDURE IF EXISTS PERSON_ROLE_SYNCH;
+                DROP PROCEDURE IF EXISTS REFRESH_UNIT_HIERARCHY_LEVEL;
+                DROP PROCEDURE IF EXISTS REFRESH_UNIT_WITH_CHILDREN;
+                DROP PROCEDURE IF EXISTS ROLE_RIGHTS_AUDIT_PROC;
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_ADMIN_ASSIGNMENT;
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_FUNCTION;
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_WORKFLOW;
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_WORKFLOW_V2;
+                DROP PROCEDURE IF EXISTS SP_ASSIGN_ADMIN_OR_ADMIN_GROUP;
+                DROP PROCEDURE IF EXISTS SYNC_UNIT_WITH_CHILDREN;
+                DROP PROCEDURE IF EXISTS UPD_UNIT_HIERARCHY_PARENT_ROOT;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_PROPOSAL_GENERAL_INFO_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATE_PROPOSAL_SPONSOR_TO_AGREEMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATION_METARULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIGRATION_PRE_VALIDATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIG_DP_PERSONS_TO_SR.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIG_IP_PERSONS_TO_SR.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/PERSON_ROLE_SYNCH.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/REFRESH_UNIT_HIERARCHY_LEVEL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/REFRESH_UNIT_WITH_CHILDREN.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/ROLE_RIGHTS_AUDIT_PROC.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_ADMIN_ASSIGNMENT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_FUNCTION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_WORKFLOW.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_WORKFLOW_V2.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/SP_ASSIGN_ADMIN_OR_ADMIN_GROUP.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/SYNC_UNIT_WITH_CHILDREN.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/UPD_UNIT_HIERARCHY_PARENT_ROOT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

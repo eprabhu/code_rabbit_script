@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8868-1
+      author: Solih.N
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS fn_person_training_completed
+        - sqlFile:
+            path: ROUTINES/JHU/DEV_PROPOSAL/FUNCTIONS/fn_person_training_completed.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

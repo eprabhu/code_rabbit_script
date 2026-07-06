@@ -1,0 +1,215 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10618-1
+      author: Prabhu.E
+      labels: 'DML'
+      comment: Update JOIN_QUERY for DEV_PROPOSAL
+      changes:
+        - sql:
+            sql: |
+                  SET SQL_SAFE_UPDATES = 0;
+                  UPDATE `REPORT_TYPE_JOIN` 
+                  SET `JOIN_QUERY` = ' LEFT JOIN (\n SELECT DISTINCT\n	 BH.PROPOSAL_ID,\n     BH.BUDGET_HEADER_ID,\n     BH.TOTAL_DIRECT_COST \n       - COALESCE(SUM(BD.SPONSOR_REQUESTED_AMOUNT), 0) AS MODIFIED_DIRECT_COST\n FROM BUDGET_HEADER BH\n INNER JOIN BUDGET_PERIOD BP ON BP.BUDGET_HEADER_ID = BH.BUDGET_HEADER_ID\n LEFT JOIN BUDGET_DETAIL BD \n        ON  BD.BUDGET_PERIOD_ID = BP.BUDGET_PERIOD_ID\n LEFT JOIN BUDGET_CATEGORY BC \n     ON BC.BUDGET_CATEGORY_CODE = BD.BUDGET_CATEGORY_CODE\n    AND BC.BUDGET_CATEGORY_TYPE_CODE IN (\'E\',\'S\')\n GROUP BY \n     BH.BUDGET_HEADER_ID,\n     BH.TOTAL_DIRECT_COST\n ) CHILD ON CHILD.PROPOSAL_ID = MASTER.PROPOSAL_ID\n LEFT JOIN EPS_PROPOSAL_PERSONNEL_V VIEWS ON VIEWS.BUDGET_HEADER_ID = MASTER.BUDGET_HEADER_ID \n INNER JOIN (SELECT \n EPS.PROPOSAL_ID,\n BC.DESCRIPTION AS BUDGET_CATEGORY,\n BD.BUDGET_CATEGORY_CODE,\n \n SUM(CASE \n       WHEN BP.budget_period = \'1\' \n       THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0)  \n       ELSE 0 \n     END) AS PERIOD_1,\n \n SUM(CASE WHEN BP.budget_period = \'2\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_2,\n SUM(CASE WHEN BP.budget_period = \'3\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_3,\n SUM(CASE WHEN BP.budget_period = \'4\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_4,\n SUM(CASE WHEN BP.budget_period = \'5\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_5,\n SUM(CASE WHEN BP.budget_period = \'6\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_6,\n SUM(CASE WHEN BP.budget_period = \'7\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_7,\n SUM(CASE WHEN BP.budget_period = \'8\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_8,\n SUM(CASE WHEN BP.budget_period = \'9\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_9,\n SUM(CASE WHEN BP.budget_period = \'10\' THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0) ELSE 0 END) AS PERIOD_10,\n \n SUM(\n     CASE \n       WHEN BP.budget_period = \'1\' \n       THEN IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0)  \n       ELSE IFNULL(BD.SPONSOR_REQUESTED_AMOUNT,0)\n     END\n ) AS TOTAL,\n SUM(IFNULL(BD.COST_SHARING_AMOUNT, 0)+ IFNULL(bd.UNDERRECOVERY_AMOUNT,0)) AS TOTAL_IN_KIND_COST, \n SUM(IFNULL(BD.LINE_ITEM_COST, 0)) AS BUDGET_CATEGORY_TOTAL_COST\n FROM EPS_PROPOSAL EPS \n INNER JOIN BUDGET_HEADER BH ON BH.PROPOSAL_ID = EPS.PROPOSAL_ID\n INNER JOIN BUDGET_PERIOD BP ON BP.BUDGET_HEADER_ID = BH.BUDGET_HEADER_ID\n LEFT JOIN BUDGET_DETAIL BD \n        ON  BD.BUDGET_PERIOD_ID = BP.BUDGET_PERIOD_ID\n INNER JOIN BUDGET_CATEGORY BC \n        ON BC.BUDGET_CATEGORY_CODE = BD.BUDGET_CATEGORY_CODE\n \n WHERE  (\n     BH.IS_FINAL_BUDGET = \'Y\'\n     OR (\n         BH.IS_LATEST_VERSION = \'Y\' \n         AND NOT EXISTS (\n             SELECT 1 \n             FROM BUDGET_HEADER \n             WHERE PROPOSAL_ID = BH.PROPOSAL_ID \n             AND IS_FINAL_BUDGET = \'Y\'\n         )\n     )\n )\n \n GROUP BY EPS.PROPOSAL_ID, BC.DESCRIPTION, BD.BUDGET_CATEGORY_CODE) SUB_CHILD ON SUB_CHILD.PROPOSAL_ID = MASTER.PROPOSAL_ID\n  LEFT JOIN(\n  SELECT PROPOSAL_ID,ACCOUNT_NUMBER, \n  A.AWARD_ID,A.TITLE AS AWARD_TITLE ,\n  AAS.DESCRIPTION AS AWARD_STATUS,\n  ATT.DESCRIPTION AS AWARD_ACCOUNT_TYPE,\n  A.BEGIN_DATE AS AWARD_EFFECTIVE_DATE,\n  A.FINAL_EXPIRATION_DATE\n  FROM AWARD_FUNDING_PROPOSALS AFP\n  LEFT JOIN AWARD A ON A.AWARD_ID = AFP.AWARD_ID\n  LEFT JOIN AWARD_STATUS AAS ON AAS.STATUS_CODE = A.STATUS_CODE\n  LEFT JOIN ACCOUNT_TYPE ATT ON ATT.ACCOUNT_TYPE_CODE = A.ACCOUNT_TYPE_CODE\n  WHERE ((A.AWARD_SEQUENCE_STATUS IN(\'PENDING\') AND A.SEQUENCE_NUMBER = 1)\nOR A.AWARD_SEQUENCE_STATUS IN(\'ACTIVE\'))\n  ) AWD ON MASTER.IP_PROPOSAL_ID = AWD.PROPOSAL_ID  '
+                  ,UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                  ,UPDATE_USER = 'admin'
+                  WHERE (`TYPE_CODE` = '156');
+                  SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+                  UPDATE `REPORT_TYPE_JOIN`
+                  SET `JOIN_QUERY` = '  LEFT JOIN (\nSELECT DISTINCT\n    BH.BUDGET_HEADER_ID,\n    BH.TOTAL_DIRECT_COST \n      - COALESCE(SUM(BD.SPONSOR_REQUESTED_AMOUNT), 0) AS MODIFIED_DIRECT_COST\nFROM BUDGET_HEADER BH\nLEFT JOIN BUDGET_DETAIL BD \n    ON BD.BUDGET_HEADER_ID = BH.BUDGET_HEADER_ID\nLEFT JOIN BUDGET_CATEGORY BC \n    ON BC.BUDGET_CATEGORY_CODE = BD.BUDGET_CATEGORY_CODE\n   AND BC.BUDGET_CATEGORY_TYPE_CODE IN (\'E\',\'S\')\nGROUP BY \n    BH.BUDGET_HEADER_ID,\n    BH.TOTAL_DIRECT_COST\n) CHILD ON CHILD.BUDGET_HEADER_ID = MASTER.BUDGET_HEADER_ID\nLEFT JOIN EPS_PROPOSAL_PERSONNEL_V VIEWS ON VIEWS.BUDGET_HEADER_ID = MASTER.BUDGET_HEADER_ID  '
+                  ,UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                  ,UPDATE_USER = 'admin'
+                  WHERE (`TYPE_CODE` = '156');
+
+  - changeSet:
+      id: FIBI-10618-2
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  Update CONFIG_METADATA for DEV_PROPOSAL
+      changes:
+        - sql:
+            sql: |
+                    SET SQL_SAFE_UPDATES = 0;
+                    UPDATE `REPORT_TYPE` 
+                    SET `CONFIG_METADATA` = '{\n    \"reports\": [\n        {\n            \"index\": \"null\",\n            \"width\": 4600,\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.PROPOSAL_ID\",\n            \"filterType\": \"freetext\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Proposal ID\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 18000,\n            \"summable\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"MASTER.TITLE\",\n            \"filterType\": \"freetext\",\n            \"valueField\": \"\",\n            \"displayName\": \"Proposal Title\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"N\",\n            \"queryType\": \"BETWEEN\",\n            \"columnName\": \"MASTER.START_DATE\",\n            \"filterType\": \"date\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Proposed Start Date\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"N\",\n            \"queryType\": \"BETWEEN\",\n            \"columnName\": \"MASTER.END_DATE\",\n            \"filterType\": \"date\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Proposed End Date\"\n        },\n        {\n            \"index\": \"unitName\",\n            \"width\": 11000,\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.LEAD_UNIT_NAME\",\n            \"filterType\": \"endpoint\",\n            \"valueField\": \"unitName\",\n            \"displayName\": \"Lead Unit\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 4600,\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.GRANT_HEADER_ID\",\n            \"filterType\": \"freetext\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Grant Call ID\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 18000,\n            \"summable\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"MASTER.GRANT_CALL_TITLE\",\n            \"filterType\": \"freetext\",\n            \"valueField\": \"\",\n            \"displayName\": \"Grant Call Title\"\n        },\n        {\n            \"index\": \"sponsorName\",\n            \"width\": 11000,\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.SPONSOR_NAME\",\n            \"filterType\": \"endpoint\",\n            \"valueField\": \"sponsorName\",\n            \"displayName\": \"Sponsor\"\n        },\n        {\n            \"index\": \"sponsorName\",\n            \"width\": 11000,\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.PRIME_SPONSOR_NAME\",\n            \"filterType\": \"endpoint\",\n            \"valueField\": \"sponsorName\",\n            \"displayName\": \"Prime Sponsor\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 7000,\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.RESEARCH_CENTER\",\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"RESEARCH_CENTER#CENTER_ID#true#true\",\n            \"displayName\": \"Research Center\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 18000,\n            \"summable\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"MASTER.HORIZONTAL_AREA\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Horizontal Area\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 18000,\n            \"summable\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"MASTER.VERTICAL_AREA\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Vertical Area\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 4600,\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.BUDGET_VERSION_NUMBER\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Budget Version Number\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 7000,\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.BUDGET_STATUS\",\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"BUDGET_STATUS#BUDGET_STATUS_CODE#true#true\",\n            \"displayName\": \"Budget Status\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 7000,\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.OVERHEAD_RATE_TYPE\",\n            \"filterType\": \"lookUp\",\n            \"valueField\": \"RATE_TYPE#RATE_CLASS_CODE#true#true\",\n            \"displayName\": \"Overhead Rate Type\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"MASTER.TOTAL_DIRECT_COST\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Direct Cost(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"CHILD.MODIFIED_DIRECT_COST\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Modified Direct Cost(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"MASTER.TOTAL_INDIRECT_COST\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Indirect Cost(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"MASTER.TOTAL_REQUESTED_COST\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Total Requested Cost(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"MASTER.IN_KIND_CONTRIBUTION\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Total In-Kind(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"MASTER.TOTAL_COST\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Total Cost(AED)\"\n        },\n        {\n            \"index\": \"IS_PI_EMPLOYEE\",\n            \"width\": 11000,\n            \"queryType\": \"IN\",\n            \"columnName\": \"MASTER.PI_NAME\",\n            \"filterType\": \"elasticComposite\",\n            \"valueField\": \"full_name\",\n            \"displayName\": \"PI (Principal Investigator)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 11000,\n            \"queryType\": \"null\",\n            \"columnName\": \"VIEWS.BUDGET_PERSONNEL_NAME\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Budget Personnel Name\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 11000,\n            \"summable\": \"N\",\n            \"queryType\": \"null\",\n            \"columnName\": \"VIEWS.BUDGET_PERSONNEL_JOB_TYPE\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Budget Personnel Job Type\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 11000,\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"VIEWS.BUDGET_PERSONNEL_APPOINTMENT_TYPE\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Budget Personnel Appointment Type\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"innerJoin\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"SUB_CHILD.BUDGET_CATEGORY\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Budget Category\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.PERIOD_1\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Period 1\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.PERIOD_2\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Period 2\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.PERIOD_3\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Period 3\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.PERIOD_4\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Period 4\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.PERIOD_5\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Period 5\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.TOTAL\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Total Requested Budget Category cost(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.TOTAL_IN_KIND_COST\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Total Budget Category In-Kind(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"width\": 5800,\n            \"summable\": \"Y\",\n            \"queryType\": \"null\",\n            \"columnName\": \"SUB_CHILD.BUDGET_CATEGORY_TOTAL_COST\",\n            \"filterType\": \"null\",\n            \"isCurrency\": \"true\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Total Budget Category Cost(AED)\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"innerJoin\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"MASTER.PROPOSAL_STATUS\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Proposal Status\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"innerJoin\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"AWD.ACCOUNT_NUMBER\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Project Code\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"AWD.AWARD_ID\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Award ID\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"queryType\": \"LIKE\",\n            \"columnName\": \"AWD.AWARD_TITLE\",\n            \"filterType\": \"null\",\n            \"valueField\": \"title\",\n            \"displayName\": \"Award Title\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"AWD.AWARD_STATUS\",\n            \"filterType\": \"null\",\n            \"valueField\": \"AWARD_STATUS#STATUS_CODE#true#true\",\n            \"displayName\": \"Award Status\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"queryType\": \"IN\",\n            \"columnName\": \"AWD.AWARD_ACCOUNT_TYPE\",\n            \"filterType\": \"null\",\n            \"valueField\": \"ACCOUNT_TYPE#ACCOUNT_TYPE_CODE#true#true\",\n            \"displayName\": \"Account Type\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"queryType\": \"BETWEEN\",\n            \"columnName\": \"AWD.AWARD_EFFECTIVE_DATE\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Award Effective Date\"\n        },\n        {\n            \"index\": \"null\",\n            \"summable\": \"N\",\n            \"queryType\": \"BETWEEN\",\n            \"columnName\": \"AWD.FINAL_EXPIRATION_DATE\",\n            \"filterType\": \"null\",\n            \"valueField\": \"null\",\n            \"displayName\": \"Final Expiration Date\"\n        }\n    ],\n    \"tempTable\": \"WITH ACCESS_TMP AS (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID WHERE T1.DESCEND_FLAG = \'N\' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN (\'VIEW_PROPOSAL\',\'CREATE_PROPOSAL\',\'MODIFY_PROPOSAL\') UNION SELECT CHILD_UNIT_NUMBER FROM UNIT_WITH_CHILDREN WHERE UNIT_NUMBER IN (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID WHERE T1.DESCEND_FLAG = \'Y\' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN (\'VIEW_PROPOSAL\',\'CREATE_PROPOSAL\',\'MODIFY_PROPOSAL\')))\",\n    \"extraCondition\": \"(MASTER.LEAD_UNIT_NUMBER IN (SELECT DISTINCT UNIT_NUMBER FROM ACCESS_TMP)) AND MASTER.FINAL_VERSION_FLAG = \'Y\'\",\n    \"extraSelection\": \"\",\n    \"selectDistinct\": \"Y\"\n} ',
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                    UPDATE_USER = 'admin'
+                    WHERE (`TYPE_CODE` = '156');
+                    SET SQL_SAFE_UPDATES = 1;
+
+      rollback:
+        - sql:
+            sql: |
+                    
+                    UPDATE `REPORT_TYPE` 
+                    SET `CONFIG_METADATA` = NULL,
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                    UPDATE_USER = 'admin'
+                    WHERE (`TYPE_CODE` = '156');
+                    
+  - changeSet:
+      id: FIBI-10323-1
+      author: Shyla
+      labels: 'DML'
+      comment: Development proposal module — insert Default dashboard filter criterion CRT_DEV_IP_STATUS.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DASHBOARD_FILTER_CRITERIA
+                (FILTER_ID, CRITERIA_ID, VALUE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT
+                DFP.FILTER_ID,
+                DCL.CRITERIA_ID,
+                NULL AS VALUE,
+                (SELECT COALESCE(MAX(DFC2.SORT_ORDER), 0) + 1
+                   FROM DASHBOARD_FILTER_CRITERIA DFC2
+                  WHERE DFC2.FILTER_ID = DFP.FILTER_ID) AS SORT_ORDER,
+                UTC_TIMESTAMP() AS UPDATE_TIMESTAMP,
+                'admin' AS UPDATE_USER
+              FROM DASHBOARD_CRITERIA_LOOKUP DCL
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_NAME = 'Default'
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 3
+                AND DCL.CRITERIA_KEY = 'CRT_DEV_IP_STATUS'
+                AND DTT.MODULE_CODE = 3
+                AND DFP.MODULE_CODE = 3
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM DASHBOARD_FILTER_CRITERIA DFC
+                  WHERE DFC.FILTER_ID = DFP.FILTER_ID
+                    AND DFC.CRITERIA_ID = DCL.CRITERIA_ID
+                );
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10323-2
+      author: Shyla
+      labels: 'DML'
+      comment: Development proposal module — delete Default dashboard filter criterion CRT_DEV_PROP_FUNDING_SCHEME.
+      changes:
+        - sql:
+            sql: |
+              DELETE DFC
+              FROM DASHBOARD_FILTER_CRITERIA DFC
+              JOIN DASHBOARD_CRITERIA_LOOKUP DCL
+                ON DCL.CRITERIA_ID = DFC.CRITERIA_ID
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 3
+                AND DCL.CRITERIA_KEY = 'CRT_DEV_PROP_FUNDING_SCHEME'
+                AND DFP.FILTER_NAME = 'Default'
+                AND DTT.MODULE_CODE = 3;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10323-3
+      author: Shyla
+      labels: 'DML'
+      comment: Development proposal module — insert Default dashboard filter column COL_DEV_IP_STATUS.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO DASHBOARD_FILTER_COLUMN
+                (FILTER_ID, COLUMN_ID, IS_ACTIVE, SORT_ORDER, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT
+                DFP.FILTER_ID,
+                DCL.COLUMN_ID,
+                'Y',
+                (SELECT COALESCE(MAX(DFC2.SORT_ORDER), 0) + 1
+                   FROM DASHBOARD_FILTER_COLUMN DFC2
+                  WHERE DFC2.FILTER_ID = DFP.FILTER_ID) AS SORT_ORDER,
+                UTC_TIMESTAMP() AS UPDATE_TIMESTAMP,
+                'admin' AS UPDATE_USER
+              FROM DASHBOARD_COLUMN_LOOKUP DCL
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_NAME = 'Default'
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 3
+                AND DCL.COLUMN_KEY = 'COL_DEV_IP_STATUS'
+                AND DTT.MODULE_CODE = 3
+                AND DFP.MODULE_CODE = 3
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM DASHBOARD_FILTER_COLUMN DFC
+                  WHERE DFC.FILTER_ID = DFP.FILTER_ID
+                    AND DFC.COLUMN_ID = DCL.COLUMN_ID
+                );
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10323-4
+      author: Shyla
+      labels: 'DML'
+      comment: Development proposal module — delete Default dashboard filter column COL_DEV_PROP_FUNDING_SCHEME.
+      changes:
+        - sql:
+            sql: |
+              DELETE DFC
+              FROM DASHBOARD_FILTER_COLUMN DFC
+              JOIN DASHBOARD_COLUMN_LOOKUP DCL
+                ON DCL.COLUMN_ID = DFC.COLUMN_ID
+              JOIN DASHBOARD_FILTER_PREFERENCE DFP
+                ON DFP.FILTER_ID = DFC.FILTER_ID
+              JOIN DASHBOARD_TAB_TYPE DTT
+                ON DTT.TAB_TYPE_ID = DFP.TAB_TYPE_ID
+              WHERE DCL.MODULE_CODE = 3
+                AND DCL.COLUMN_KEY = 'COL_DEV_PROP_FUNDING_SCHEME'
+                AND DFP.FILTER_NAME = 'Default'
+                AND DTT.MODULE_CODE = 3;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10422-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert Script to the DASHBOARD_CRITERIA_LOOKUP table for the Key Persons Role Filter
+      changes:
+        - sql:
+            sql: |
+             UPDATE PARAMETER
+              SET VALUE = 'N',
+                  UPDATE_USER = 'admin',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+              WHERE PARAMETER_NAME = 'IS_BUDGET_PERSONNEL_ENABLED';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE PARAMETER
+                SET VALUE = 'Y',
+                    UPDATE_USER = 'admin',
+                    UPDATE_TIMESTAMP = UTC_TIMESTAMP()
+                WHERE PARAMETER_NAME = 'IS_BUDGET_PERSONNEL_ENABLED';
+
+  - changeSet:
+      id: FIBI-10395-1
+      author: Vishnu B H
+      labels: 'DML'
+      comment: Update MODULE_CODE and PRINT_FILE_TYPE for LETTER_TEMPLATE_TYPE_CODE 3001.
+      changes:
+        - sql:
+            sql: |
+              UPDATE LETTER_TEMPLATE_TYPE
+              SET
+                MODULE_CODE = 3,
+                PRINT_FILE_TYPE = 'docx',
+                UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                UPDATE_USER = 'admin'
+              WHERE LETTER_TEMPLATE_TYPE_CODE = '3001';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE LETTER_TEMPLATE_TYPE
+              SET
+                MODULE_CODE = NULL,
+                PRINT_FILE_TYPE = NULL,
+                UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                UPDATE_USER = 'admin'
+              WHERE LETTER_TEMPLATE_TYPE_CODE = '3001';

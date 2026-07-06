@@ -1,0 +1,166 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-6813-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS MERGE_AWD_MASTER_MANPOWER
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_MASTER_MANPOWER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6813-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_MANPOWER
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/MERGE_AWD_SECTION_MANPOWER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6813-3
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS MNPR_ACTIVE_AWARD_ACTIONS
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/MNPR_ACTIVE_AWARD_ACTIONS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6811-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS DELETE_INACTIVE_PERSONS
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/DELETE_INACTIVE_PERSONS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6812-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MANPOWER_COST_ALLOCATION_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/GET_MANPOWER_COST_ALLOCATION_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6812-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MANPOWER_COST_ALLOCATION_DETAILS_COUNT
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/GET_MANPOWER_COST_ALLOCATION_DETAILS_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-6823-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS VALIDATE_CREATE_TASK
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/VALIDATE_CREATE_TASK.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8460-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MANPOWER_COST_ALLOCATION_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/GET_MANPOWER_COST_ALLOCATION_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8460-2
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_MANPOWER_COST_ALLOCATION_DETAILS_COUNT
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/GET_MANPOWER_COST_ALLOCATION_DETAILS_COUNT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8161-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS INSERT_AWARD_MANPOWER
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/INSERT_AWARD_MANPOWER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8463-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Created Procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_NEGATIVE_UNCOMMITTED_BALANCE
+        - sqlFile:
+            path: ROUTINES/BASE/MANPOWER/PROCEDURES/GET_NEGATIVE_UNCOMMITTED_BALANCE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

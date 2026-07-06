@@ -1,0 +1,18 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9439
+      author: Sreejith T
+      labels: 'DML'
+      comment: Insert into dyn section for questionnaire as a tab or within the overview page
+      changes:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config` SET `DESCRIPTION` = 'Questionnaire - Overview', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2005');
+              INSERT IGNORE INTO `dyn_section_config` (`SECTION_CODE`, `MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('SR2014', 'SR20', 'Questionnaire - Tab', 'N', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE `dyn_section_config` SET `DESCRIPTION` = 'Questionnaire', `UPDATE_TIMESTAMP` = utc_timestamp(), `UPDATE_USER` = 'admin' WHERE (`SECTION_CODE` = 'SR2005');
+              DELETE FROM `dyn_section_config` WHERE `SECTION_CODE` = 'SR2014' AND `MODULE_CODE` = 'SR20';
+

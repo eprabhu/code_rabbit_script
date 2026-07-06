@@ -1,0 +1,280 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9803-1
+      author: Adarsh 
+      labels: 'DDL'
+      comment: Create New table 
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIBI_APPS (
+                APP_ID INT NOT NULL AUTO_INCREMENT,
+                APP_NAME VARCHAR(50) NOT NULL,
+                DESCRIPTION VARCHAR(100) DEFAULT NULL,
+                DISPLAY_IN_LOOKUP VARCHAR(1) DEFAULT NULL,
+                CONTEXT_PATH VARCHAR(50) DEFAULT NULL,
+                UPDATE_TIMESTAMP DATETIME DEFAULT NULL,
+                UPDATE_USER VARCHAR(60) DEFAULT NULL,
+                PRIMARY KEY (APP_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+                DROP TABLE IF EXISTS FIBI_APPS;
+
+  - changeSet:
+      id: FIBI-9803-2
+      author: Adarsh 
+      labels: 'DML'
+      comment: Insert into Fibi Apps
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO FIBI_APPS (APP_ID,APP_NAME,DESCRIPTION,DISPLAY_IN_LOOKUP,UPDATE_TIMESTAMP,UPDATE_USER) VALUES (1,'fibi-base','Base','Y',UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO FIBI_APPS (APP_ID,APP_NAME,DESCRIPTION,DISPLAY_IN_LOOKUP,UPDATE_TIMESTAMP,UPDATE_USER) VALUES (2,'fibi-landing','Landing','Y',UTC_TIMESTAMP(),'admin');
+              INSERT IGNORE INTO FIBI_APPS (APP_ID,APP_NAME,DESCRIPTION,DISPLAY_IN_LOOKUP,UPDATE_TIMESTAMP,UPDATE_USER) VALUES (3,'fibi-coi','COI ','Y',UTC_TIMESTAMP(),'admin');
+      rollback:
+        - sql:
+            sql: |
+                DELETE FROM FIBI_APPS WHERE APP_ID IN (1,2,3);
+
+  - changeSet:
+      id: FIBI-9803-3
+      author: Adarsh 
+      labels: 'DML'
+      comment: Alter table LANDING_QUICK_LINKS
+      changes:
+        - sql:
+            sql: |
+              SET @SQL := IF(
+                EXISTS (
+                  SELECT 1
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LANDING_QUICK_LINKS'
+                    AND COLUMN_NAME = 'ADDITIONAL_INFO'
+                ),
+                'DO 1',
+                'ALTER TABLE LANDING_QUICK_LINKS ADD COLUMN ADDITIONAL_INFO JSON DEFAULT NULL COMMENT ''JSON object for additional information'''
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+
+              SET @SQL := IF(
+                EXISTS (
+                  SELECT 1
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LANDING_QUICK_LINKS'
+                    AND COLUMN_NAME = 'APP_ID'
+                ),
+                'DO 1',
+                'ALTER TABLE LANDING_QUICK_LINKS ADD COLUMN APP_ID INT NULL'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+
+              SET @SQL := IF(
+                EXISTS (
+                  SELECT 1
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LANDING_QUICK_LINKS'
+                    AND COLUMN_NAME = 'IS_ACTIVE'
+                ),
+                'DO 1',
+                'ALTER TABLE LANDING_QUICK_LINKS ADD COLUMN IS_ACTIVE VARCHAR(1) DEFAULT ''Y'' NULL'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+
+              SET @SQL := IF(
+                EXISTS (
+                  SELECT 1
+                  FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'LANDING_QUICK_LINKS'
+                    AND CONSTRAINT_NAME = 'LANDING_QUICK_LINKS_FK1'
+                    AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+                ),
+                'DO 1',
+                'ALTER TABLE LANDING_QUICK_LINKS ADD CONSTRAINT LANDING_QUICK_LINKS_FK1 FOREIGN KEY (APP_ID) REFERENCES FIBI_APPS(APP_ID)'
+              );
+              PREPARE STMT FROM @SQL;
+              EXECUTE STMT;
+              DEALLOCATE PREPARE STMT;
+      rollback:
+        - sql:
+            sql: |
+                ALTER TABLE LANDING_QUICK_LINKS
+                DROP FOREIGN KEY LANDING_QUICK_LINKS_FK1;
+
+                ALTER TABLE LANDING_QUICK_LINKS
+                DROP COLUMN ADDITIONAL_INFO,
+                DROP COLUMN APP_ID,
+                DROP COLUMN IS_ACTIVE;
+
+
+  - changeSet:
+      id: FIBI-9803-5
+      author: Adarsh 
+      labels: 'DML'
+      comment: Create New table 
+      changes:
+        - sql:
+            sql: |
+              TRUNCATE TABLE LANDING_QUICK_LINKS;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9803-6
+      author: Adarsh 
+      labels: 'DML'
+      comment: Insert into LANDING_QUICK_LINKS
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Engagement',19,'{"icon":"arrow_forward","title":"Click here to create engagement","ariaLabel":"Click here to create engagement","actionType":"CREATE_ENGAGEMENTS"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Engagement' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Revise Disclosure',20,'{"icon":"arrow_forward","title":"Click here to revise disclosure","ariaLabel":"Click here to revise disclosure","actionType":"REVISE_DISCLOSURE"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Revise Disclosure' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Award Disclosure',21,'{"icon":"arrow_forward","title":"Click here to create award disclosure","ariaLabel":"Click here to create award disclosure","actionType":"CREATE_AWARD_DISCLOSURE"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Award Disclosure' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create OPA Disclosure',22,'{"icon":"arrow_forward","title":"Click here to create OPA disclosure","ariaLabel":"Click here to create OPA disclosure","actionType":"CREATE_OPA_DISCLOSURE"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create OPA Disclosure' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Travel Disclosure',23,'{"icon":"arrow_forward","title":"Click here to create travel disclosure","ariaLabel":"Click here to create travel disclosure","actionType":"CREATE_TRAVEL_DISCLOSURE"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Travel Disclosure' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Consulting Disclosure',24,'{"icon":"arrow_forward","title":"Click here to create consulting disclosure","ariaLabel":"Click here to create consulting disclosure","actionType":"CREATE_CONSULTING_DISCLOSURE"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Consulting Disclosure' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','View Revised Disclosure',25,'{"icon":"arrow_forward","title":"Click here to view revised disclosure","ariaLabel":"Click here to view revised disclosure","actionType":"VIEW_REVISED_DISCLOSURE"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'View Revised Disclosure' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create MFTRP',26,'{"icon":"arrow_forward","title":"Click here to create MFTRP","ariaLabel":"Click here to create MFTRP","actionType":"CREATE_DECLARATION","declarationTypeCode":"1"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create MFTRP' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Revise MFTRP',27,'{"icon":"arrow_forward","title":"Click here to revise MFTRP","ariaLabel":"Click here to revise MFTRP","actionType":"REVISE_DECLARATION","declarationTypeCode":"1"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Revise MFTRP' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','View MFTRP',28,'{"icon":"arrow_forward","title":"Click here to view MFTRP","ariaLabel":"Click here to view MFTRP","actionType":"VIEW_DECLARATION","declarationTypeCode":"1"}',3,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'View MFTRP' AND APP_ID = 3);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Engagement',1,'{"icon":"arrow_forward","title":"Click here to create engagement","ariaLabel":"Click here to create engagement","actionType":"CREATE_ENGAGEMENTS"}',2,'Y',UTC_TIMESTAMP(),'willsmith'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Engagement' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Revise Disclosure',2,'{"icon":"arrow_forward","title":"Click here to revise disclosure","ariaLabel":"Click here to revise disclosure","actionType":"REVISE_DISCLOSURE"}',2,'Y',UTC_TIMESTAMP(),'willsmith'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Revise Disclosure' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Award Disclosure',3,'{"icon":"arrow_forward","title":"Click here to create award disclosure","ariaLabel":"Click here to create award disclosure","actionType":"CREATE_AWARD_DISCLOSURE"}',2,'Y',UTC_TIMESTAMP(),'willsmith'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Award Disclosure' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create OPA Disclosure',4,'{"icon":"arrow_forward","title":"Click here to create OPA disclosure","ariaLabel":"Click here to create OPA disclosure","actionType":"CREATE_OPA_DISCLOSURE"}',2,'Y',UTC_TIMESTAMP(),'willsmith'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create OPA Disclosure' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Travel Disclosure',5,'{"icon":"arrow_forward","title":"Click here to create travel disclosure","ariaLabel":"Click here to create travel disclosure","actionType":"CREATE_TRAVEL_DISCLOSURE"}',2,'Y',UTC_TIMESTAMP(),'willsmith'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Travel Disclosure' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create Consulting Disclosure',6,'{"icon":"arrow_forward","title":"Click here to create consulting disclosure","ariaLabel":"Click here to create consulting disclosure","actionType":"CREATE_CONSULTING_DISCLOSURE"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Consulting Disclosure' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','View Revised Disclosure',7,'{"icon":"arrow_forward","title":"Click here to view revised disclosure","ariaLabel":"Click here to view revised disclosure","actionType":"VIEW_REVISED_DISCLOSURE"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'View Revised Disclosure' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Create MFTRP',8,'{"icon":"arrow_forward","title":"Click here to create MFTRP","ariaLabel":"Click here to create MFTRP","actionType":"CREATE_DECLARATION","declarationTypeCode":"1"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create MFTRP' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','Revise MFTRP',9,'{"icon":"arrow_forward","title":"Click here to revise MFTRP","ariaLabel":"Click here to revise MFTRP","actionType":"REVISE_DECLARATION","declarationTypeCode":"1"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Revise MFTRP' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/externalAction/Q/','View MFTRP',10,'{"icon":"arrow_forward","title":"Click here to view MFTRP","ariaLabel":"Click here to view MFTRP","actionType":"VIEW_DECLARATION","declarationTypeCode":"1"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'View MFTRP' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/award/overview','Create Award',11,'{"icon":"arrow_forward","title":"Click here to create an award","ariaLabel":"Click here to create an award","actionType":"CREATE_AWARD"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Award' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/proposal/overview','Create Proposal',12,'{"icon":"arrow_forward","title":"Click here to create a proposal","ariaLabel":"Click here to create a proposal","actionType":"CREATE_PROPOSAL"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Proposal' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/person/person-details','Create Person',13,'{"icon":"arrow_forward","title":"Click here to create a person","ariaLabel":"Click here to create a person","actionType":"CREATE_PERSON"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Person' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/grant/overview?Mode=create','Create Grant Call',14,'{"icon":"arrow_forward","title":"Click here to create a grant call","ariaLabel":"Click here to create a grant call","actionType":"CREATE_GRANT_CALL"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Grant Call' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/service-request/overview','Create Service Request',15,'{"icon":"arrow_forward","title":"Click here to create a service request","ariaLabel":"Click here to create a service request","actionType":"CREATE_SERVICE_REQUEST"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Service Request' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/agreement/form','Create Agreement',16,'{"icon":"arrow_forward","title":"Click here to create an agreement","ariaLabel":"Click here to create an agreement","actionType":"CREATE_AGREEMENT"}',2,'Y',UTC_TIMESTAMP(),'willsmith'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Agreement' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/dashboard/progressReportList?create','Create Progress Report',17,'{"icon":"arrow_forward","title":"Click here to create a progress report","ariaLabel":"Click here to create a progress report","actionType":"CREATE_PROGRESS_REPORT"}',2,'Y',UTC_TIMESTAMP(),'admin'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'Create Progress Report' AND APP_ID = 2);
+
+              INSERT INTO LANDING_QUICK_LINKS
+              (URL, NAME, SORT_ORDER, ADDITIONAL_INFO, APP_ID, IS_ACTIVE, UPDATE_TIMESTAMP, UPDATE_USER)
+              SELECT '/fibi/dashboard/claim-list','View Claims',18,'{"icon":"arrow_forward","title":"Click here to view claims","ariaLabel":"Click here to view claims","actionType":"VIEW_CLAIMS"}',2,'Y',UTC_TIMESTAMP(),'willsmith'
+              WHERE NOT EXISTS (SELECT 1 FROM LANDING_QUICK_LINKS WHERE NAME = 'View Claims' AND APP_ID = 2);
+      rollback: empty

@@ -1,0 +1,889 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-6813-1
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add ALLOCATION_LAST_UPDATED_DATE column to MANPOWER_WORKDAY_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table MANPOWER_WORKDAY_RESOURCE;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'MANPOWER_WORKDAY_RESOURCE' AND COLUMN_NAME = 'ALLOCATION_LAST_UPDATED_DATE') = 0,
+                    'ALTER TABLE MANPOWER_WORKDAY_RESOURCE ADD COLUMN ALLOCATION_LAST_UPDATED_DATE DATETIME NULL DEFAULT NULL AFTER UPDATE_TIMESTAMP;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'MANPOWER_WORKDAY_RESOURCE' AND COLUMN_NAME = 'ALLOCATION_LAST_UPDATED_DATE') = 1,
+                    'ALTER TABLE MANPOWER_WORKDAY_RESOURCE DROP COLUMN ALLOCATION_LAST_UPDATED_DATE;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6813-2
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add ALLOCATION_LAST_UPDATED_DATE column to WORKDAY_RESOURCE_LOG table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table WORKDAY_RESOURCE_LOG;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'WORKDAY_RESOURCE_LOG' AND COLUMN_NAME = 'ALLOCATION_LAST_UPDATED_DATE') = 0,
+                    'ALTER TABLE WORKDAY_RESOURCE_LOG ADD COLUMN ALLOCATION_LAST_UPDATED_DATE DATETIME NULL DEFAULT NULL AFTER UPDATE_TIMESTAMP;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'WORKDAY_RESOURCE_LOG' AND COLUMN_NAME = 'ALLOCATION_LAST_UPDATED_DATE') = 1,
+                    'ALTER TABLE WORKDAY_RESOURCE_LOG DROP COLUMN ALLOCATION_LAST_UPDATED_DATE;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6813-3
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add COMMITTED_AMOUNT_USED column to MANPOWER_WORKDAY_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table MANPOWER_WORKDAY_RESOURCE;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'MANPOWER_WORKDAY_RESOURCE' AND COLUMN_NAME = 'COMMITTED_AMOUNT_USED') = 0,
+                    'ALTER TABLE MANPOWER_WORKDAY_RESOURCE ADD COLUMN COMMITTED_AMOUNT_USED DECIMAL(12,2) NULL DEFAULT NULL;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'MANPOWER_WORKDAY_RESOURCE' AND COLUMN_NAME = 'COMMITTED_AMOUNT_USED') = 1,
+                    'ALTER TABLE MANPOWER_WORKDAY_RESOURCE DROP COLUMN COMMITTED_AMOUNT_USED;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6813-4
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add COMMITTED_AMOUNT_USED column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table AWARD_MANPOWER_RESOURCE;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'COMMITTED_AMOUNT_USED') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN COMMITTED_AMOUNT_USED DECIMAL(12,2) NULL DEFAULT NULL;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'COMMITTED_AMOUNT_USED') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN COMMITTED_AMOUNT_USED;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6813-5
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add COMMITTED_AMOUNT_USED column to WORKDAY_RESOURCE_LOG table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table WORKDAY_RESOURCE_LOG;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'WORKDAY_RESOURCE_LOG' AND COLUMN_NAME = 'COMMITTED_AMOUNT_USED') = 0,
+                    'ALTER TABLE WORKDAY_RESOURCE_LOG ADD COLUMN COMMITTED_AMOUNT_USED DECIMAL(12,2) NULL DEFAULT NULL;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'WORKDAY_RESOURCE_LOG' AND COLUMN_NAME = 'COMMITTED_AMOUNT_USED') = 1,
+                    'ALTER TABLE WORKDAY_RESOURCE_LOG DROP COLUMN COMMITTED_AMOUNT_USED;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6813-6
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Add COST_ALLOCATION_DAY_COUNT configuration to MANPOWER_CONFIGURATION_DATA table.
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO MANPOWER_CONFIGURATION_DATA (CONFIGURATION_KEY, CONFIGURATION_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER) VALUES 
+                ('COST_ALLOCATION_DAY_COUNT', '-1', 'This is to configure the Cost allocation day count', UTC_TIMESTAMP(), 'admin');
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                DELETE FROM MANPOWER_CONFIGURATION_DATA WHERE (CONFIGURATION_KEY = 'COST_ALLOCATION_DAY_COUNT');
+                SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+        id: FIBI-6811-1
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update description for INTERFACE_TYPE_CODE 19 in MANPOWER_INTERFACE_TYPE table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE MANPOWER_INTERFACE_TYPE SET DESCRIPTION = 'Person Cost Allocation Termination' , UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER ='admin'  WHERE (INTERFACE_TYPE_CODE = '19');
+                SET SQL_SAFE_UPDATES = 1;
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE MANPOWER_INTERFACE_TYPE SET DESCRIPTION = 'Allocation Status Change' , UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER ='admin' WHERE (INTERFACE_TYPE_CODE = '19');
+                SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+        id: FIBI-6811-2
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update notification message for NOTIFICATION_TYPE_ID 804 in NOTIFICATION_TYPE table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE NOTIFICATION_TYPE SET DESCRIPTION = 'Person Termination', SUBJECT = 'Person Termination', MESSAGE = '<p>Dear CITS team,</p><p>Please find the below list of persons who are terminated today : </p><p>{TERMINATION_PERSON_DETAILS}</p>' , UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER ='admin' WHERE (NOTIFICATION_TYPE_ID = '804');
+                SET SQL_SAFE_UPDATES = 1;
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE NOTIFICATION_TYPE SET DESCRIPTION = 'Person Reactive after 21 days', SUBJECT = 'Person Reactive after 21 days', MESSAGE = '<p>Dear CITS team,</p><p>Please find the below list of persons who are reactivated again within 21 days from the inactive date : </p><p>{REACTIVATED_PERSON_DETAILS}</p>' , UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER ='admin' WHERE (NOTIFICATION_TYPE_ID = '804');
+                SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+        id: FIBI-6811-3
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Remove PERSON_INACTIVE_THRESHOLD configuration from MANPOWER_CONFIGURATION_DATA table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                DELETE FROM MANPOWER_CONFIGURATION_DATA WHERE (CONFIGURATION_KEY = 'PERSON_INACTIVE_THRESHOLD');
+                SET SQL_SAFE_UPDATES = 1;
+        rollback:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('PERSON_INACTIVE_THRESHOLD', '21', 'This value is the number of days after which the committed cost is to be recalculated when a person becomes inactive', utc_timestamp(), 'admin');
+
+  - changeSet:
+        id: FIBI-6811-4
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Add TERMINATION_DAY_COUNT configuration to MANPOWER_CONFIGURATION_DATA table.
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO MANPOWER_CONFIGURATION_DATA (CONFIGURATION_KEY, CONFIGURATION_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('TERMINATION_DAY_COUNT', '-1', 'This is set to configure the termination day count', utc_timestamp(), 'admin');
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                DELETE FROM MANPOWER_CONFIGURATION_DATA WHERE (CONFIGURATION_KEY = 'TERMINATION_DAY_COUNT');
+                SET SQL_SAFE_UPDATES = 1;
+  - changeSet:
+        id: FIBI-6811-5
+        author: Prabhu.E
+        labels: 'DDL'
+        comment: Drop table MANPOWER_PERSON_ACTIVITY_LOG.
+        changes:
+          - sql:
+              sql: |
+                DROP TABLE IF EXISTS MANPOWER_PERSON_ACTIVITY_LOG;
+        rollback:
+          - sql:
+              sql: |
+                CREATE TABLE IF NOT EXISTS MANPOWER_PERSON_ACTIVITY_LOG (
+                  `PERSON_ID` varchar(40) NOT NULL,
+                  `PERSON_STATUS_CHANGE_DATE` datetime DEFAULT NULL,
+                  `FULL_NAME` varchar(90),
+                  `PERSON_STATUS` varchar(3) DEFAULT NULL,
+                  `UPDATE_USER` varchar(60) DEFAULT NULL,
+                  `UPDATE_TIMESTAMP` datetime DEFAULT NULL,
+                  PRIMARY KEY (`PERSON_ID`)
+                );
+
+  - changeSet:
+        id: FIBI-8076-1
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update report template JSON for TYPE_CODE 37 and TEMPLATE_TYPE 'S' in REPORT_TEMPLATE table.
+        changes:
+          - sql:
+              sql: |
+                UPDATE `report_template` SET `TEMPLATE_JSON` = '{\n    \"fields\": [\n        \"AWARD_ID\",\n        \"AWARD_NUMBER\",\n        \"MANPOWER_WORKDAY_RESOURCE_ID\",\n        \"POSITION_ID\",\n        \"POSITION_STATUS\",\n        \"DEFAULT_JOB_PROFILE_TYPE\",\n        \"PERSON_ID\",\n        \"FULL_NAME\",\n        \"PERSON_STATUS\",\n        \"UNIT_NAME\",\n        \"GRANT_CALL_TITLE\",\n        \"FUNDING_SCHEME\",\n        \"WBS_NUMBER\",\n        \"COST_ALLOCATION\",\n        \"CHARGE_START_DATE\",\n        \"CHARGE_END_DATE\",\n        \"CHARGE_DURATION\",\n        \"BASE_SALARY_USED\",\n        \"COMMITTED_COST\",\n        \"MULTIPLIER_USED\",\n        \"ADJUSTED_COMMITTED_COST\",\n        \"CREATE_TIMESTAMP\",\n        \"CREATE_USER\"\n    ],\n    \"filters\": [\n        \"AWARD_ID\",\n        \"AWARD_NUMBER\",\n        \"FULL_NAME\",\n        \"PI_NAME\",\n        \"WBS_NUMBER\",\n        \"SPONSOR_AWARD_NUMBER\",\n        \"UNIT_NAME\",\n        \"BEGIN_DATE\",\n        \"FINAL_EXPIRATION_DATE\",\n        \"ACCOUNT_NUMBER\",\n        \"GRANT_CALL_TITLE\",\n        \"FUNDING_SCHEME\",\n        \"MANPOWER_WORKDAY_RESOURCE_ID\",\n        \"WBS_NUMBER\",\n        \"POSITION_ID\",\n        \"COST_ALLOCATION\",\n        \"CHARGE_START_DATE\",\n        \"CHARGE_END_DATE\",\n        \"CHARGE_DURATION\",\n        \"BASE_SALARY_USED\",\n        \"COMMITTED_COST\",\n        \"MULTIPLIER_USED\",\n        \"ADJUSTED_COMMITTED_COST\",\n        \"JOB_PROFILE_TYPE\",\n        \"CREATE_TIMESTAMP\",\n        \"CREATE_USER\"\n    ],\n    \"headers\": [\n        \"AwardId\",\n        \"Awardnumber\",\n        \"MANPOWER_WORKDAY_RESOURCE_ID\",\n        \"DefaultJobProfileType\",\n        \"PositionID\",\n        \"PositionStatus\",\n        \"PersonId\",\n        \"FullName\",\n        \"PersonStatus\",\n        \"UnitName\",\n        \"GrantCallTitle\",\n        \"FundingScheme\",\n        \"CostAllocation\",\n        \"ChargeStartDate\",\n        \"ChargeEndDate\",\n        \"ChargeDuration\",\n        \"BaseSalaryUsed\",\n        \"CommittedCost\",\n        \"MultiplierUsed\",\n        \"AdjustedCommitedCost\",\n        \"CreateTimestamp\",\n        \"CreateUser\"\n    ],\n    \"values\": {}\n}', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER ='admin' WHERE ((`TYPE_CODE` = '37' and `TEMPLATE_TYPE`= 'S'));
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-6825-1
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add PI_SUP_ORG_ID_USED column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table AWARD_MANPOWER_RESOURCE;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'PI_SUP_ORG_ID_USED') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD PI_SUP_ORG_ID_USED VARCHAR(20) DEFAULT NULL;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                Analyze table AWARD_MANPOWER_RESOURCE;
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'PI_SUP_ORG_ID_USED') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN PI_SUP_ORG_ID_USED;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6825-2
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Migration script to populate PI_SUP_ORG_ID_USED column in AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE AWARD_MANPOWER_RESOURCE AS T1 LEFT JOIN AWARD_SUP_ORG_MAPPING AS T2 ON T2.AWARD_NUMBER = T1.AWARD_NUMBER SET T1.PI_SUP_ORG_ID_USED = T2.SUP_ORG_ID , T1.UPDATE_TIMESTAMP = utc_timestamp(), T1.UPDATE_USER ='admin';
+                SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-6825-3
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update notification message for NOTIFICATION_TYPE_ID 1417 in NOTIFICATION_TYPE table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE NOTIFICATION_TYPE SET MESSAGE = '<p>Dear {PRINCIPAL_INVESTIGATOR},</p><p>New hire request has been submitted.</p><p><i>Note: No Position ID will be created for new hire request if Main Account is not selected when Multi Account is selected (Multiple hiring account sequential /co-funding) as only 1 position ID is required for 1 staff.</i></p><p> </p><p>Award Number :<strong> {AWARD_NUMBER}</strong></p><p>Award Title : <strong>{AWARD_TITLE}</strong></p><p>Name of Principal Investigator : <strong>{PRINCIPAL_INVESTIGATOR}</strong></p><p>Lead Unit : <strong>{LEAD_UNIT_DETAILS}</strong></p><p>Project Start Date:<strong> {AWARD_START_DATE}</strong></p><p>Project End Date:<strong> {AWARD_END_DATE}</strong></p><p> </p><p><u>Detail of manpower request:</u></p><p>Plan Job Profile Name : {PLANNED_JOB_PROFILE_NAME}</p><p>Plan Start Date : {PLAN_START_DATE}</p><p>Plan End Date : {PLAN_END_DATE}</p><p>Cost Allocation (%): {COST_ALLOCATION}</p><p>Proposed Base Salary: S$ {PLANNED_BASE_SALARY}</p><p>Commitment Amount: S$ {PLANNED_SALARY}</p><p>Comments: {COMMENTS}</p><p>Message to PI: Please submit this email together with the main charging account approval email for new hire request.</p><p>Message to UMO: Please add the position id which is created in the main charging account by creating an Admin Correction.</p><p>Please go to {APPLICATION_URL} to view the task and award details.</p><p>Thank you.</p>',  UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE NOTIFICATION_TYPE_ID = '1417';
+                SET SQL_SAFE_UPDATES = 1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-6817-1
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update CRON_EXPRESSION for 'Workday Cost Reconcilation' job in SCHEDULER_JOB_INFO table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE `SCHEDULER_JOB_INFO` SET `CRON_EXPRESSION` = '0 30 8 ? * SUN', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER ='admin' WHERE (`JOB_NAME` = 'Workday Cost Reconcilation');
+                SET SQL_SAFE_UPDATES= 1;
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE `SCHEDULER_JOB_INFO` SET `CRON_EXPRESSION` = '0 0 0 * * ?', UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER ='admin' WHERE (`JOB_NAME` = 'Workday Cost Reconcilation');
+                SET SQL_SAFE_UPDATES= 1;
+
+  - changeSet:
+        id: FIBI-6816-1
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add CPFC_AMOUNT column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table AWARD_MANPOWER_RESOURCE;
+                -- Drop column only if it exists
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'POSITION_TRIGGER_DATE') > 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN POSITION_TRIGGER_DATE;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                -- Add IS_MULTI_ACCOUNT if not exists
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'IS_MULTI_ACCOUNT') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN IS_MULTI_ACCOUNT VARCHAR(1) NULL AFTER IS_RESOURCE_CREATED_OR_UPDATED;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                -- Add IS_MAIN_ACCOUNT if not exists
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'IS_MAIN_ACCOUNT') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN IS_MAIN_ACCOUNT VARCHAR(1) NULL AFTER IS_MULTI_ACCOUNT;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'CPFC_AMOUNT') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN CPFC_AMOUNT DECIMAL(12,2) NULL DEFAULT NULL AFTER IS_MAIN_ACCOUNT;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'POSITION_TRIGGER_DATE') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN POSITION_TRIGGER_DATE DATE NULL;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                -- Drop IS_MULTI_ACCOUNT if exists
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'IS_MULTI_ACCOUNT') > 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN IS_MULTI_ACCOUNT;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                -- Drop IS_MAIN_ACCOUNT if exists
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'IS_MAIN_ACCOUNT') > 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN IS_MAIN_ACCOUNT;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'CPFC_AMOUNT') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN CPFC_AMOUNT;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6816-2
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add CPFE_PERCENTAGE column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'CPFE_PERCENTAGE') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN CPFE_PERCENTAGE DECIMAL(12,2) NULL DEFAULT NULL AFTER CPFC_AMOUNT;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'CPFE_PERCENTAGE') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN CPFE_PERCENTAGE;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6816-3
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add SDL_PERCENTAGE column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'SDL_PERCENTAGE') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN SDL_PERCENTAGE DECIMAL(12,2) NULL DEFAULT NULL AFTER CPFE_PERCENTAGE;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'SDL_PERCENTAGE') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN SDL_PERCENTAGE;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6816-4
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add SDLC_AMOUNT column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'SDLC_AMOUNT') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN SDLC_AMOUNT DECIMAL(12,2) NULL DEFAULT NULL AFTER SDL_PERCENTAGE;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'SDLC_AMOUNT') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN SDLC_AMOUNT;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6816-5
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add ONB_PERCENTAGE column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'ONB_PERCENTAGE') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN ONB_PERCENTAGE DECIMAL(12,2) NULL DEFAULT NULL AFTER SDLC_AMOUNT;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'ONB_PERCENTAGE') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN ONB_PERCENTAGE;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6816-6
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add YEARLY_BENEFIT_AMOUNT column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'YEARLY_BENEFIT_AMOUNT') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN YEARLY_BENEFIT_AMOUNT DECIMAL(12,2) NULL DEFAULT NULL AFTER ONB_PERCENTAGE;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'YEARLY_BENEFIT_AMOUNT') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN YEARLY_BENEFIT_AMOUNT;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6816-7
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add ANNUAL_WORKING_DAYS column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'ANNUAL_WORKING_DAYS') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN ANNUAL_WORKING_DAYS DECIMAL(12,2) NULL DEFAULT NULL AFTER YEARLY_BENEFIT_AMOUNT;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE' AND COLUMN_NAME = 'ANNUAL_WORKING_DAYS') = 1,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE DROP COLUMN ANNUAL_WORKING_DAYS;',
+                    'DO 1');
+                PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-6816-9
+        author: Manesh.MS
+        labels: 'DDL'
+        comment: Add BONUS_MULTIPLIER column to AWARD_MANPOWER_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*)
+                    FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'BONUS_MULTIPLIER') = 0,
+                    'ALTER TABLE AWARD_MANPOWER_RESOURCE ADD COLUMN BONUS_MULTIPLIER DECIMAL(12,2) NULL DEFAULT NULL AFTER ANNUAL_WORKING_DAYS;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*)
+                    FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                      AND COLUMN_NAME = 'BONUS_MULTIPLIER') = 1,
+
+  - changeSet:
+        id: FIBI-6816-8
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Insert configuration keys in MANPOWER_CONFIGURATION_DATA table.
+        changes:
+          - sql:
+              sql: |
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('CPFc', '8000', 'This value are set for CPF Cap to calculate proposed committed amount', UTC_TIMESTAMP(), 'admin');
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('CPFe_PERCENTAGE', '17', 'This value are set for CPF employer rate  to calculate proposed committed amount', UTC_TIMESTAMP(), 'admin');
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('SDL_PERCENTAGE', '0.25', 'This value are set for Monthly SDL amount to calculate proposed committed amount', UTC_TIMESTAMP(), 'admin');
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('SDLC', '4500', 'This value are set for SDL cap to calculate proposed committed amount', UTC_TIMESTAMP(), 'admin');
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('ONB_PERCENTAGE', '15', 'This value are set for One NTU Bonus to calculate proposed committed amount', UTC_TIMESTAMP(), 'admin');
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('BEN', '2452', 'This value are set for yearly benefits to calculate proposed committed amount', UTC_TIMESTAMP(), 'admin');
+                INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('ANNUAL_WORKING_DAYS', '8', 'This is set for working days of manpower', UTC_TIMESTAMP(), 'admin');
+                INSERT IGNORE INTO MANPOWER_CONFIGURATION_DATA (CONFIGURATION_KEY, CONFIGURATION_VALUE, DESCRIPTION, UPDATE_TIMESTAMP, UPDATE_USER) VALUES ('BONUS_MULTIPLIER', '1', 'This value is used as a Bonus multiplier', UTC_TIMESTAMP(), 'admin');
+        rollback:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                DELETE FROM MANPOWER_CONFIGURATION_DATA WHERE CONFIGURATION_KEY IN ('CPFc', 'CPFe_PERCENTAGE', 'SDL_PERCENTAGE', 'SDLC', 'ONB_PERCENTAGE', 'BEN', 'ANNUAL_WORKING_DAYS', 'BONUS_MULTIPLIER');
+                SET SQL_SAFE_UPDATES = 1;
+
+  - changeSet:
+        id: FIBI-8210-1
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update help text for CATEGORY 'committedBalance' and PARENT_HELP_TEXT_ID 19 in HELP_TEXT table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE HELP_TEXT SET HELP_TEXT = 'Balance after subtracting expenses(E) from SAP against ALL committed amount [Proposed Committed Amount (B), Committed Amount (C) or Adjusted Committed Amount (D)]. \nIf this amount is negative, it means there are additional expenses charged into this WBS line (e.g. reclass)' WHERE (CATEGORY = 'committedBalance' AND PARENT_HELP_TEXT_ID = 19);
+                SET SQL_SAFE_UPDATES= 1;
+        rollback: empty
+
+  - changeSet:
+        id: FIBI-8417-1
+        author: Manesh.MS
+        labels: 'DML'
+        comment: Update POSITION_STATUS_CODE in MANPOWER_WORKDAY_RESOURCE table.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE MANPOWER_WORKDAY_RESOURCE SET POSITION_STATUS_CODE = '6', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE POSITION_STATUS_CODE IN ('11','4');
+                SET SQL_SAFE_UPDATES= 1;
+        rollback: empty
+
+  - changeSet:
+      id: FIBI-8458-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update TERMINATION_DAY_COUNT configuration in MANPOWER_CONFIGURATION_DATA table.
+      changes:
+        - sql:
+            sql: |
+              UPDATE MANPOWER_CONFIGURATION_DATA SET CONFIGURATION_VALUE = '-7', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (CONFIGURATION_KEY = 'TERMINATION_DAY_COUNT');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE MANPOWER_CONFIGURATION_DATA SET CONFIGURATION_VALUE = '-1', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (CONFIGURATION_KEY = 'TERMINATION_DAY_COUNT');
+
+  - changeSet:
+      id: FIBI-8458-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Remove existing 'Person Expiry' job from Quartz tables.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              DELETE FROM QRTZ_CRON_TRIGGERS  WHERE TRIGGER_NAME = 'Person Expiry';
+              DELETE FROM QRTZ_BLOB_TRIGGERS WHERE TRIGGER_NAME = 'Person Expiry';
+              DELETE FROM QRTZ_TRIGGERS WHERE JOB_NAME  = 'Person Expiry';
+              DELETE FROM QRTZ_JOB_DETAILS WHERE JOB_NAME='Person Expiry';
+              SET SQL_SAFE_UPDATES= 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8458-3
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update CRON_EXPRESSION for 'Person Expiry' job in SCHEDULER_JOB_INFO table.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE SCHEDULER_JOB_INFO SET CRON_EXPRESSION = '0 0 11 ? * SUN', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (`JOB_NAME` = 'Person Expiry');
+              SET SQL_SAFE_UPDATES= 1;
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE SCHEDULER_JOB_INFO SET CRON_EXPRESSION = '0 0 0 * * ?', UPDATE_TIMESTAMP = UTC_TIMESTAMP(), UPDATE_USER = 'admin' WHERE (`JOB_NAME` = 'Person Expiry');
+              SET SQL_SAFE_UPDATES= 1;
+
+  - changeSet:
+      id: FIBI-8419-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Remove unused POSITION_STATUS_CODEs from MANPOWER_POSITION_STATUS table.
+      changes:
+        - sql:
+            sql: |
+              DELETE FROM MANPOWER_POSITION_STATUS WHERE POSITION_STATUS_CODE IN ('7', '4', '11');
+      rollback:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO manpower_position_status (POSITION_STATUS_CODE,DESCRIPTION,IS_ACTIVE,UPDATE_USER,UPDATE_TIMESTAMP)
+                VALUES ('11','Inactive','Y','admin',UTC_TIMESTAMP());
+              INSERT IGNORE INTO manpower_position_status (POSITION_STATUS_CODE,DESCRIPTION,IS_ACTIVE,UPDATE_USER,UPDATE_TIMESTAMP)
+                VALUES ('4','Pending Approval','Y','admin',UTC_TIMESTAMP());
+              INSERT IGNORE INTO manpower_position_status (POSITION_STATUS_CODE,DESCRIPTION,IS_ACTIVE,UPDATE_USER,UPDATE_TIMESTAMP)
+                VALUES ('7','Hiring on Existing Position','Y','admin',UTC_TIMESTAMP());
+
+  - changeSet:
+      id: FIBI-8419-2
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Clear person related fields in AWARD_MANPOWER_RESOURCE for MANPOWER_TYPE_CODE 1.
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+
+              UPDATE AWARD_MANPOWER_RESOURCE AMR
+              INNER JOIN AWARD_MANPOWER AM ON AM.AWARD_MANPOWER_ID = AMR.AWARD_MANPOWER_ID
+              SET
+                  PERSON_ID = NULL,
+                  FULL_NAME = NULL,
+                  COMMITTED_COST = NULL,
+                  JOB_PROFILE_TYPE_CODE = NULL,
+                  CHARGE_START_DATE = NULL,
+                  CHARGE_END_DATE = NULL,
+                  CHARGE_DURATION = NULL,
+                  FREEZE_DATE = NULL,
+                  PREVIOUS_CHARGE_END_DATE = NULL,
+                  PREVIOUS_CHARGE_START_DATE = NULL
+              WHERE
+                  AM.MANPOWER_TYPE_CODE = 1;
+
+              SET SQL_SAFE_UPDATES = 1;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8463-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Add 'Negative Committed Balance Check' job to SCHEDULER_JOB_INFO table.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO SCHEDULER_JOB_INFO (CRON_EXPRESSION, IS_CRON_JOB, JOB_CLASS, JOB_GROUP, JOB_NAME, REPEAT_TIME, DESCRIPTION, CRON_STATUS, 
+                  UPDATE_USER, UPDATE_TIMESTAMP, PREVIOUS_FIRE_TIME, LAST_FIRE_END_TIME, IS_ACTIVE )
+              SELECT
+                  '0 0 9 ? * SUN',
+                  'Y',
+                  'com.polus.fibicomp.quartzscheduler.scheduler.award.manpower.NegativeCommittedAmountScheduler',
+                  'fibi-base',
+                  'Negative Committed Balance Check',
+                  NULL,
+                  'This job is to run NegativeCommittedAmountScheduler',
+                  'SCHEDULED',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  NULL,
+                  NULL,
+                  'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM SCHEDULER_JOB_INFO
+                  WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME = 'Negative Committed Balance Check'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.award.manpower.NegativeCommittedAmountScheduler'
+              );
+      rollback:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              DELETE FROM SCHEDULER_JOB_INFO WHERE JOB_GROUP = 'fibi-base' AND JOB_NAME = 'Negative Committed Balance Check' AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler;
+              SET SQL_SAFE_UPDATES= 1;
+
+  - changeSet:
+      id: FIBI-8464-1
+      author: Manesh.MS
+      labels: 'DML'
+      comment: Update VIEW_NAME in REPORT_TYPE table for TYPE_CODEs 18, 37 and 124.
+      changes:
+        - sql:
+            sql: |
+              UPDATE REPORT_TYPE SET VIEW_NAME = 'award_manpower_payroll_v as MASTER_DATA' , UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (`TYPE_CODE` = '37');
+              UPDATE REPORT_TYPE SET VIEW_NAME = 'award_manpower_compr_report_v as MASTER_DATA', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (`TYPE_CODE` = '124');
+              UPDATE REPORT_TYPE SET VIEW_NAME = 'AWARD_MANPOWER_REPORT_V as MASTER_DATA', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (`TYPE_CODE` = '18');
+      rollback: empty
+
+  # - changeSet:
+  #     id: FIBI-8464-2
+  #     author: Manesh.MS
+  #     labels: 'DML'
+  #     comment: Insert JOIN_QUERY in REPORT_TYPE_JOIN table for TYPE_CODEs 37 and 124.
+  #     changes:
+  #       - sql:
+  #           sql: |
+  #             INSERT IGNORE INTO REPORT_TYPE (`TYPE_CODE`, `DESCRIPTION`, `JSON_NAME`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `VIEW_NAME`, `IS_ACTIVE`) VALUES ('124', 'Manpower Comprehensive Report', 'manpowerComprehensiveReport.json', UTC_TIMESTAMP(), 'admin', 'award_manpower_compr_report_v', 'Y');
+
+  #             INSERT INTO
+  #                 REPORT_TYPE_JOIN (TYPE_JOIN_ID,TYPE_CODE, JOIN_QUERY, UPDATE_TIMESTAMP,UPDATE_USER)
+  #             SELECT 
+  #                     COALESCE((SELECT MAX(TYPE_JOIN_ID) + 1 FROM REPORT_TYPE_JOIN), 1) AS TYPE_JOIN_ID,
+  #                     '124',
+  #                     "LEFT JOIN (
+  #               WITH ACCESS_TMP AS (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.DESCEND_FLAG = 'N' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT') UNION SELECT CHILD_UNIT_NUMBER FROM UNIT_WITH_CHILDREN 
+  #               WHERE UNIT_NUMBER IN (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.DESCEND_FLAG = 'Y' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT'))), 
+  #               AWARD_TEMP AS (SELECT T1.AWARD_ID FROM AWARD_PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.PERSON_ID =<<PERSON_ID>> AND (T3.RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT')))
+  #               (SELECT concat('FIBI-', amr.AWARD_MANPOWER_RESOURCE_ID) AS ID, amr.COMMITTED_COST AS COMMITTED_COST, null AS ADJUSTED_COMMITTED_COST FROM award_manpower_resource amr)
+  #               union
+  #               (SELECT concat('WD-', mwr.MANPOWER_WORKDAY_RESOURCE_ID) AS ID, mwr.COMMITTED_COST AS COMMITTED_COST, mwr.ADJUSTED_COMMITTED_COST AS ADJUSTED_COMMITTED_COST
+  #               FROM manpower_workday_resource mwr
+  #               JOIN award_master_dataset_rt rt ON rt.ACCOUNT_NUMBER = SUBSTRING_INDEX(mwr.WBS_NUMBER, 'EOM', 1) AND rt.AWARD_SEQUENCE_STATUS = 'ACTIVE' AND rt.PERSON_ROLE_ID = 3
+  #               where ( rt.LEAD_UNIT_NUMBER IN (SELECT DISTINCT UNIT_NUMBER FROM ACCESS_TMP) OR rt.AWARD_ID IN (SELECT AWARD_ID FROM AWARD_TEMP)))) CHILD ON MASTER_DATA.ID = CHILD.ID",
+  #                     UTC_TIMESTAMP(),
+  #                     'admin'
+
+  #                 WHERE NOT EXISTS (
+  #                     SELECT 1 FROM REPORT_TYPE_JOIN
+  #                     WHERE TYPE_CODE = '124'
+  #                 );
+
+  #             INSERT INTO
+  #                 REPORT_TYPE_JOIN (TYPE_JOIN_ID, TYPE_CODE, JOIN_QUERY, UPDATE_TIMESTAMP,UPDATE_USER)
+  #             SELECT
+  #                     COALESCE((SELECT MAX(TYPE_JOIN_ID) + 1 FROM REPORT_TYPE_JOIN), 1) AS TYPE_JOIN_ID,
+  #                     '37',
+  #                     "LEFT JOIN (
+  #               WITH ACCESS_TMP AS (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.DESCEND_FLAG = 'N' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT') UNION SELECT CHILD_UNIT_NUMBER FROM UNIT_WITH_CHILDREN 
+  #               WHERE UNIT_NUMBER IN (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.DESCEND_FLAG = 'Y' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT'))), 
+  #               AWARD_TEMP AS (SELECT T1.AWARD_ID FROM AWARD_PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.PERSON_ID =<<PERSON_ID>> AND (T3.RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT')))
+  #               (SELECT concat('FIBI-', amr.AWARD_MANPOWER_RESOURCE_ID) AS ID, amr.COMMITTED_COST AS COMMITTED_COST, null AS ADJUSTED_COMMITTED_COST FROM award_manpower_resource amr)
+  #               union
+  #               (SELECT concat('WD-', mwr.MANPOWER_WORKDAY_RESOURCE_ID) AS ID, mwr.COMMITTED_COST AS COMMITTED_COST, mwr.ADJUSTED_COMMITTED_COST AS ADJUSTED_COMMITTED_COST
+  #               FROM manpower_workday_resource mwr
+  #               JOIN award_master_dataset_rt rt ON rt.ACCOUNT_NUMBER = SUBSTRING_INDEX(mwr.WBS_NUMBER, 'EOM', 1) AND rt.AWARD_SEQUENCE_STATUS = 'ACTIVE' AND rt.PERSON_ROLE_ID = 3
+  #               where ( rt.LEAD_UNIT_NUMBER IN (SELECT DISTINCT UNIT_NUMBER FROM ACCESS_TMP) OR rt.AWARD_ID IN (SELECT AWARD_ID FROM AWARD_TEMP)))) CHILD ON MASTER_DATA.ID = CHILD.ID",
+  #                 UTC_TIMESTAMP(),
+  #                 'admin'
+
+  #                 WHERE NOT EXISTS (
+  #                     SELECT 1 FROM REPORT_TYPE_JOIN
+  #                     WHERE TYPE_CODE = '37'
+  #                 );
+
+  #             INSERT INTO
+  #                 REPORT_TYPE_JOIN (TYPE_JOIN_ID, TYPE_CODE, JOIN_QUERY, UPDATE_TIMESTAMP,UPDATE_USER)
+  #             SELECT
+  #                     COALESCE((SELECT MAX(TYPE_JOIN_ID) + 1 FROM REPORT_TYPE_JOIN), 1) AS TYPE_JOIN_ID,
+  #                     '18',
+  #                     "LEFT JOIN (
+  #               WITH ACCESS_TMP AS (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.DESCEND_FLAG = 'N' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT') UNION SELECT CHILD_UNIT_NUMBER FROM UNIT_WITH_CHILDREN 
+  #               WHERE UNIT_NUMBER IN (SELECT UNIT_NUMBER FROM PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.DESCEND_FLAG = 'Y' AND T1.PERSON_ID = <<PERSON_ID>> AND RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT'))), 
+  #               AWARD_TEMP AS (SELECT T1.AWARD_ID FROM AWARD_PERSON_ROLES T1 INNER JOIN ROLE_RIGHTS T2 ON T1.ROLE_ID = T2.ROLE_ID INNER JOIN RIGHTS T3 ON T2.RIGHT_ID = T3.RIGHT_ID 
+  #               WHERE T1.PERSON_ID =<<PERSON_ID>> AND (T3.RIGHT_NAME IN ('VIEW_COMMITTED_AND_ADJUSTED_COMMITTED_AMOUNT')))
+  #               (SELECT concat('FIBI-', amr.AWARD_MANPOWER_RESOURCE_ID) AS ID, amr.COMMITTED_COST AS COMMITTED_COST, null AS ADJUSTED_COMMITTED_COST FROM award_manpower_resource amr)
+  #               union
+  #               (SELECT concat('WD-', mwr.MANPOWER_WORKDAY_RESOURCE_ID) AS ID, mwr.COMMITTED_COST AS COMMITTED_COST, mwr.ADJUSTED_COMMITTED_COST AS ADJUSTED_COMMITTED_COST
+  #               FROM manpower_workday_resource mwr
+  #               JOIN award_master_dataset_rt rt ON rt.ACCOUNT_NUMBER = SUBSTRING_INDEX(mwr.WBS_NUMBER, 'EOM', 1) AND rt.AWARD_SEQUENCE_STATUS = 'ACTIVE' AND rt.PERSON_ROLE_ID = 3
+  #               where ( rt.LEAD_UNIT_NUMBER IN (SELECT DISTINCT UNIT_NUMBER FROM ACCESS_TMP) OR rt.AWARD_ID IN (SELECT AWARD_ID FROM AWARD_TEMP)))) CHILD ON MASTER_DATA.ID = CHILD.ID",
+  #                     UTC_TIMESTAMP(),
+  #                     'admin'
+
+  #                 WHERE NOT EXISTS (
+  #                     SELECT 1 FROM REPORT_TYPE_JOIN
+  #                     WHERE TYPE_CODE = '18'
+  #                 );
+  #     rollback:
+  #       - sql:
+  #           sql: |
+  #             SET SQL_SAFE_UPDATES = 0;
+  #             DELETE FROM REPORT_TYPE_JOIN WHERE TYPE_CODE IN ('18', '37', '124');
+  #             SET SQL_SAFE_UPDATES= 1;

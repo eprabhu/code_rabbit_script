@@ -1,0 +1,81 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10792-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment: Update in Procedure GET_ALL_RIGHTS_FOR_A_MODULE
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10787-22
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment: Update RULE_EVALUATE_FUNCTION for SPONSOR_AWARD_NUMBER VARCHAR(255) support
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_FUNCTION;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_FUNCTION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9478-1
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: Update Procedure ROUTING_ADD_TO_INBOX to include Service Request type in user message
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS ROUTING_ADD_TO_INBOX;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/ROUTING_ADD_TO_INBOX.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9478-2
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: Update Procedure INSERT_WORKFLOW_ALTER_APPROVER to include Service Request type in user message
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS INSERT_WORKFLOW_ALTER_APPROVER;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/INSERT_WORKFLOW_ALTER_APPROVER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9478-3
+      author: Shyla
+      labels: 'PROCEDURES'
+      comment: Update Procedure RULE_EVALUATE_WORKFLOW to include Service Request type in user message
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_WORKFLOW;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_WORKFLOW.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

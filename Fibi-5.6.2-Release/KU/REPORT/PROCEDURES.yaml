@@ -1,0 +1,33 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10345-1
+      author: Suganya S
+      labels: 'PROCEDURES'
+      comment: Optimized procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS LOAD_PROP_PRE_RPT_DTLS_NW;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/PROCEDURES/LOAD_PROP_PRE_RPT_DTLS_NW.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-8953-1
+      author: Suganya S
+      labels: 'PROCEDURES'
+      comment: Added logic to trigger reminder emails from the cut off date
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS FETCH_AWARD_REPORT_TRACKING_FOR_REMINDERS;
+        - sqlFile:
+            path: ROUTINES/KU/REPORT/PROCEDURES/FETCH_AWARD_REPORT_TRACKING_FOR_REMINDERS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

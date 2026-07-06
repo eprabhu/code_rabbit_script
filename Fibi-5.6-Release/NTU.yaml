@@ -1,0 +1,19 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6-Release/NTU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/NTU/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #AWARD
+    - include:
+        file: Fibi-5.6-Release/NTU/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+
+    #MANPOWER
+    - include:
+        file: Fibi-5.6-Release/NTU/MANPOWER/PROCEDURES.yaml
+        labels: 'MANPOWER'

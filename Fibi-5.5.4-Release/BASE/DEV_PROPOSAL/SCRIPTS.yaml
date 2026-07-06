@@ -1,0 +1,25 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7562-11
+      author: Mohamed Fazil
+      labels: 'DML'
+      comment: Rename BUSINESS_RULE_VARIABLE Award Type to Award Type(Proposal) for EPS_PROPOSAL
+      changes:
+        - sql:
+            sql: |
+              UPDATE BUSINESS_RULE_VARIABLE
+              SET VARIABLE_NAME = 'Award Type(Proposal)',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE VARIABLE_NAME = 'Award Type'
+                AND TABLE_NAME = 'EPS_PROPOSAL';
+      rollback:
+        - sql:
+            sql: |
+              UPDATE BUSINESS_RULE_VARIABLE
+              SET VARIABLE_NAME = 'Award Type',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE VARIABLE_NAME = 'Award Type(Proposal)'
+                AND TABLE_NAME = 'EPS_PROPOSAL';

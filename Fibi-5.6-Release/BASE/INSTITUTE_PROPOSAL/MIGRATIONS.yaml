@@ -1,0 +1,12 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9680-1
+      author: Adarsh
+      labels: 'DML'
+      comment: CALL STATEMENT FOR IP_PERSON_ATTACHMENT_MIGRATION
+      changes:
+        - sql:
+            sql: |
+              CALL IP_PERSON_ATTACHMENT_MIGRATION();
+      rollback: empty

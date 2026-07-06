@@ -1,0 +1,246 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-8329-1
+        author: Reshma Antony
+        labels: 'DML'
+        comment: Insert Task Report data in REPORT_TYPE table.
+        changes:
+          - sql:
+              sql: |
+                INSERT INTO `REPORT_TYPE` (`TYPE_CODE`,`DESCRIPTION`,`JSON_NAME`,`UPDATE_TIMESTAMP`,`UPDATE_USER`,`VIEW_NAME`,`IS_ACTIVE`,`TYPE`,`MAX_RESULT_COUNT`)
+                VALUES (142,'Award Tasks Summary','AwardTaskSummary.json',utc_timestamp(),'admin','AWARD_MASTER_DATASET_RT AS AWARD_MASTER_DATA','Y',NULL,'20000');
+      
+        rollback: 
+         - sql:
+            sql: |             
+              DELETE FROM REPORT_TYPE WHERE TYPE_CODE = 142;            
+
+  - changeSet:
+        id: FIBI-8329-2
+        author: Reshma Antony
+        labels: 'DML'
+        comment: Insert Task Report data in REPORT_TEMPLATE table.
+        changes:
+          - sql:
+              sql: |
+                INSERT INTO REPORT_TEMPLATE
+                (
+                    TEMPLATE_NAME,
+                    TEMPLATE_DESCRIPTION,
+                    TEMPLATE_OWNER_PERSON_ID,
+                    TEMPLATE_SQL,
+                    TEMPLATE_JSON,
+                    CREATE_TIMESTAMP,
+                    UPDATE_USER,
+                    UPDATE_TIMESTAMP,
+                    CREATE_USER,
+                    TEMPLATE_TYPE,
+                    MODULE_CODE,
+                    SUB_MODULE_CODE,
+                    TYPE_CODE,
+                    SORT_ORDER,
+                    MODULE_DESCRIPTION
+                )
+                SELECT
+                    'Award Tasks Summary',
+                    'Award Tasks Summary Report',
+                    '10000000001',
+                    '',
+                    '{
+                        "fields": [
+                            "TASK_DATA.TASK_ASIGNEE_PERSON",
+                            "TASK_DATA.TASK_TYPE",
+                            "TASK_DATA.TASK_STATUS",
+                            "AWARD_MASTER_DATA.AWARD_NUMBER",
+                            "AWARD_MASTER_DATA.TITLE",
+                            "AWARD_MASTER_DATA.UNIT_NAME",
+                            "AWARD_MASTER_DATA.SPONSOR_NAME",
+                            "AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE",
+                            "TASK_DATA.TASK_ASSIGNED_DATE",
+                            "TASK_DATA.DUE_DAYS_PASSED_DIFF",
+                            "TASK_DATA.TASK_DUE_DATE"
+                        ],
+                        "headers": [
+                            "Assignee",
+                            "Task Type",
+                            "Task Status",
+                            "Award Number",
+                            "Award Title",
+                            "Award Lead Unit",
+                            "Sponsor",
+                            "Award Effective Date",
+                            "Date Assigned",
+                            "# of Days Outstanding",
+                            "# Task Due Date"
+                        ],
+                        "values": {},
+                        "filters": [
+                            "TASK_DATA.TASK_ASIGNEE_PERSON",
+                            "AWARD_MASTER_DATA.UNIT_NAME",
+                            "AWARD_MASTER_DATA.PI_NAME",
+                            "AWARD_MASTER_DATA.AWARD_NUMBER",
+                            "AWARD_MASTER_DATA.BEGIN_DATE",
+                            "AWARD_MASTER_DATA.FINAL_EXPIRATION_DATE",
+                            "AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE",
+                            "TASK_DATA.DUE_DAYS_PASSED_DIFF",
+                            "TASK_DATA.TASK_STATUS",
+                            "TASK_DATA.TASK_TYPE",
+                            "AWARD_MASTER_DATA.SPONSOR_NAME"
+                        ]
+                    }',
+                    UTC_TIMESTAMP(),
+                    'admin',
+                    UTC_TIMESTAMP(),
+                    'admin',
+                    'S',
+                    1,
+                    0,
+                    '142',
+                    1,
+                    NULL
+                FROM DUAL
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM REPORT_TEMPLATE
+                    WHERE TEMPLATE_NAME = 'Award Tasks Summary' AND TYPE_CODE = '142'
+                );
+        rollback: 
+            - sql:
+                sql: |             
+                    DELETE FROM REPORT_TEMPLATE WHERE TYPE_CODE = 142 and TEMPLATE_NAME = 'Award Tasks Summary';             
+
+  - changeSet:
+        id: FIBI-8329-3
+        author: Reshma Antony
+        labels: 'DML'
+        comment: Insert Task Report data in REPORT_TYPE_JOIN table.
+        changes:
+          - sql:
+              sql: |         
+                INSERT INTO REPORT_TYPE_JOIN
+                (
+                    TYPE_JOIN_ID,
+                    TYPE_CODE,
+                    JOIN_QUERY,
+                    UPDATE_TIMESTAMP,
+                    UPDATE_USER
+                )
+                SELECT
+                    (SELECT COALESCE(MAX(TYPE_JOIN_ID), 0) + 1 FROM REPORT_TYPE_JOIN),
+                    '142',
+                    ' INNER JOIN (
+                        SELECT
+                            t1.MODULE_ITEM_KEY,
+                            CASE
+                                WHEN TIMESTAMPDIFF(DAY, t1.DUE_DATE, UTC_TIMESTAMP()) <= 0
+                                THEN 0
+                                ELSE TIMESTAMPDIFF(DAY, t1.DUE_DATE, UTC_TIMESTAMP())
+                            END AS DUE_DAYS_PASSED_DIFF,
+                            CASE
+                                WHEN TIMESTAMPDIFF(DAY, UTC_TIMESTAMP(), t1.DUE_DATE) <= 0
+                                THEN 0
+                                ELSE TIMESTAMPDIFF(DAY, UTC_TIMESTAMP(), t1.DUE_DATE)
+                            END AS DAYS_LEFT_FOR_DUE_DATE,
+                            p1.FULL_NAME AS TASK_ASIGNEE_PERSON,
+                            t3.DESCRIPTION AS TASK_NAME,
+                            t2.DESCRIPTION AS TASK_STATUS,
+                            t1.DUE_DATE AS TASK_DUE_DATE,
+                            t3.DESCRIPTION AS TASK_TYPE,
+                            t1.START_DATE AS TASK_ASSIGNED_DATE
+                        FROM TASK t1
+                        JOIN TASK_STATUS t2 ON t1.TASK_STATUS_CODE = t2.TASK_STATUS_CODE
+                        JOIN PERSON p1 ON t1.ASSIGNEE_PERSON_ID = p1.PERSON_ID
+                        JOIN TASK_TYPE t3 ON t3.TASK_TYPE_CODE = t1.TASK_TYPE_CODE
+                        WHERE t1.MODULE_CODE = 1
+                    ) TASK_DATA
+                      ON TASK_DATA.MODULE_ITEM_KEY = AWARD_MASTER_DATA.AWARD_NUMBER ',
+                    UTC_TIMESTAMP(),
+                    'admin'
+                FROM DUAL
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM REPORT_TYPE_JOIN
+                    WHERE TYPE_CODE = '142'
+                );        
+        rollback: 
+            - sql:
+                sql: |            
+                    DELETE FROM REPORT_TYPE_JOIN WHERE TYPE_CODE = 142 and JOIN_QUERY = ' INNER JOIN (\nSELECT\nt1.MODULE_ITEM_KEY,  \n CASE \n            WHEN TIMESTAMPDIFF(DAY, t1.DUE_DATE, UTC_TIMESTAMP()) <= 0 \n            THEN 0 \n            ELSE TIMESTAMPDIFF(DAY, t1.DUE_DATE, UTC_TIMESTAMP()) \n        END AS DUE_DAYS_PASSED_DIFF,\n        CASE \n            WHEN TIMESTAMPDIFF(DAY, UTC_TIMESTAMP(), t1.DUE_DATE) <= 0\n            THEN 0 \n            ELSE TIMESTAMPDIFF(DAY, UTC_TIMESTAMP(), t1.DUE_DATE) \n        END AS DAYS_LEFT_FOR_DUE_DATE,\np1.FULL_NAME AS TASK_ASIGNEE_PERSON,\nt3.DESCRIPTION AS TASK_NAME,\nt2.DESCRIPTION As TASK_STATUS,\nt1.DUE_DATE AS TASK_DUE_DATE,\nt3.DESCRIPTION AS Task_TYPE,\nt1.START_DATE AS TASK_ASSIGNED_DATE\nFROM TASK t1\nJOIN TASK_STATUS t2 ON t1.TASK_STATUS_CODE = t2.TASK_STATUS_CODE\nJOIN PERSON p1 ON t1.ASSIGNEE_PERSON_ID = p1.PERSON_ID\nJOIN TASK_TYPE t3 ON t3.TASK_TYPE_CODE = t1.TASK_TYPE_CODE\n where t1.MODULE_CODE = 1\n)TASK_DATA ON TASK_DATA.MODULE_ITEM_KEY =AWARD_MASTER_DATA.AWARD_NUMBER ';             
+
+  - changeSet:
+        id: FIBI-8198-1
+        author: Hridya.EK
+        labels: 'DDL'
+        comment: Add SPECIAL_REVIEW column to AWARD_MASTER_DATASET_RT table.
+        changes:
+          - sql:
+              sql: |
+                Analyze table AWARD_MASTER_DATASET_RT;
+
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MASTER_DATASET_RT' AND COLUMN_NAME = 'SPECIAL_REVIEW') = 0,
+                    'ALTER TABLE AWARD_MASTER_DATASET_RT ADD COLUMN SPECIAL_REVIEW VARCHAR(200) NULL DEFAULT NULL;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+        rollback:
+          - sql:
+              sql: |
+                SET @sql := IF(
+                    (SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'AWARD_MASTER_DATASET_RT' AND COLUMN_NAME = 'SPECIAL_REVIEW') = 1,
+                    'ALTER TABLE AWARD_MASTER_DATASET_RT DROP COLUMN SPECIAL_REVIEW;',
+                    'DO 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+
+  - changeSet:
+        id: FIBI-8329-Suggestions-1
+        author: Reshma Antony
+        labels: 'DML'
+        comment: update Task Report data in REPORT_TYPE table.
+        changes:
+          - sql:
+              sql: |
+                UPDATE `report_template` SET `TEMPLATE_JSON` = '{\n    \"fields\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n         \"TASK_DATA.TASK_TYPE\",\n         \"TASK_DATA.TASK_STATUS\",\n         \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n         \"AWARD_MASTER_DATA.TITLE\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.TASK_ASSIGNED_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_DUE_DATE\"\n    ],\n    \"headers\": [\n        \"Assignee\",\n       \"Task Type\",\n       \"Task Status\",\n       \"Award Number\",\n       \"Award Title\",\n       \"Award Lead Unit\",\n       \"Sponsor\",\n       \"Award Notice Date\",\n       \"Date Assigned\",\n       \"# of Days Outstanding\",\n       \"# Task Due Date\"\n    ],\n    \"values\": {},\n    \"filters\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.PI_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n        \"AWARD_MASTER_DATA.BEGIN_DATE\",\n        \"AWARD_MASTER_DATA.FINAL_EXPIRATION_DATE\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_STATUS\",\n        \"TASK_DATA.TASK_TYPE\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\"\n    ]\n}', UPDATE_USER = 'admin', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (`TYPE_CODE` = '142' and `TEMPLATE_TYPE` = 'S');
+        
+        rollback: 
+         - sql:
+            sql: |             
+                UPDATE `report_template` SET `TEMPLATE_JSON` = '{\n    \"fields\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n         \"TASK_DATA.TASK_TYPE\",\n         \"TASK_DATA.TASK_STATUS\",\n         \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n         \"AWARD_MASTER_DATA.TITLE\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.TASK_ASSIGNED_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_DUE_DATE\"\n    ],\n    \"headers\": [\n        \"Assignee\",\n       \"Task Type\",\n       \"Task Status\",\n       \"Award Number\",\n       \"Award Title\",\n       \"Award Lead Unit\",\n       \"Sponsor\",\n       \"Award Effective Date\",\n       \"Date Assigned\",\n       \"# of Days Outstanding\",\n       \"# Task Due Date\"\n    ],\n    \"values\": {},\n    \"filters\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.PI_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n        \"AWARD_MASTER_DATA.BEGIN_DATE\",\n        \"AWARD_MASTER_DATA.FINAL_EXPIRATION_DATE\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_STATUS\",\n        \"TASK_DATA.TASK_TYPE\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\"\n    ]\n}', UPDATE_USER = 'admin', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (`TYPE_CODE` = '142' and `TEMPLATE_TYPE` = 'S');
+
+  - changeSet:
+        id: FIBI-8329-Suggestions-2
+        author: Reshma Antony
+        labels: 'DML'
+        comment: Update Task Report data in REPORT_TYPE table.
+        changes:
+          - sql:
+              sql: |
+                UPDATE `report_template` SET `TEMPLATE_JSON` = '{\n    \"fields\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n        \"TASK_DATA.TASK_TYPE\",\n        \"TASK_DATA.TASK_STATUS\",\n        \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n        \"AWARD_MASTER_DATA.TITLE\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.TASK_ASSIGNED_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_DUE_DATE\"\n    ],\n    \"headers\": [\n        \"Assignee\",\n        \"Task Type\",\n        \"Task Status\",\n        \"Award Number\",\n        \"Award Title\",\n        \"Award Lead Unit\",\n        \"Sponsor\",\n        \"Award Notice Date\",\n        \"Date Assigned\",\n        \"# of Days Outstanding\",\n        \"# Task Due Date\"\n    ],\n    \"values\": {\n        \"TASK_DATA.TASK_STATUS\": [\n            \"In Progress\"\n        ]\n    },\n    \"filters\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.PI_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n        \"AWARD_MASTER_DATA.BEGIN_DATE\",\n        \"AWARD_MASTER_DATA.FINAL_EXPIRATION_DATE\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_STATUS\",\n        \"TASK_DATA.TASK_TYPE\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\"\n    ]\n}', UPDATE_USER = 'admin', UPDATE_TIMESTAMP = UTC_TIMESTAMP()  WHERE (`TYPE_CODE` = '142' and `TEMPLATE_TYPE` = 'U');
+
+        rollback: 
+         - sql:
+            sql: |             
+                UPDATE `report_template` SET `TEMPLATE_JSON` = '{\n    \"fields\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n        \"TASK_DATA.TASK_TYPE\",\n        \"TASK_DATA.TASK_STATUS\",\n        \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n        \"AWARD_MASTER_DATA.TITLE\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.TASK_ASSIGNED_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_DUE_DATE\"\n    ],\n    \"headers\": [\n        \"Assignee\",\n        \"Task Type\",\n        \"Task Status\",\n        \"Award Number\",\n        \"Award Title\",\n        \"Award Lead Unit\",\n        \"Sponsor\",\n        \"Award Effective Date\",\n        \"Date Assigned\",\n        \"# of Days Outstanding\",\n        \"# Task Due Date\"\n    ],\n    \"values\": {\n        \"TASK_DATA.TASK_STATUS\": [\n            \"In Progress\"\n        ]\n    },\n    \"filters\": [\n        \"TASK_DATA.TASK_ASIGNEE_PERSON\",\n        \"AWARD_MASTER_DATA.UNIT_NAME\",\n        \"AWARD_MASTER_DATA.PI_NAME\",\n        \"AWARD_MASTER_DATA.AWARD_NUMBER\",\n        \"AWARD_MASTER_DATA.BEGIN_DATE\",\n        \"AWARD_MASTER_DATA.FINAL_EXPIRATION_DATE\",\n        \"AWARD_MASTER_DATA.AWARD_EFFECTIVE_DATE\",\n        \"TASK_DATA.DUE_DAYS_PASSED_DIFF\",\n        \"TASK_DATA.TASK_STATUS\",\n        \"TASK_DATA.TASK_TYPE\",\n        \"AWARD_MASTER_DATA.SPONSOR_NAME\"\n    ]\n}', UPDATE_USER = 'admin', UPDATE_TIMESTAMP = UTC_TIMESTAMP() WHERE (`TYPE_CODE` = '142' and `TEMPLATE_TYPE` = 'U');
+
+  - changeSet:
+        id: FIBI-9468
+        author: Shyla
+        labels: 'DML'
+        comment: Update Award Tasks Summary Report Join in REPORT_TYPE_JOIN table.
+        changes:
+          - sql:
+              sql: |
+               UPDATE `REPORT_TYPE_JOIN` SET UPDATE_TIMESTAMP = utc_timestamp(), UPDATE_USER = 'admin',
+                `JOIN_QUERY` = ' INNER JOIN (\nSELECT\nt1.MODULE_ITEM_KEY,  \n CASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            DATE(t1.DUE_DATE),\n            DATE(UTC_TIMESTAMP())\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            DATE(t1.DUE_DATE),\n            DATE(UTC_TIMESTAMP())\n         )\nEND AS DUE_DAYS_PASSED_DIFF,\nCASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            DATE(UTC_TIMESTAMP()),\n            DATE(t1.DUE_DATE)\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            DATE(UTC_TIMESTAMP()),\n            DATE(t1.DUE_DATE)\n         )\nEND AS DAYS_LEFT_FOR_DUE_DATE,\np1.FULL_NAME AS TASK_ASIGNEE_PERSON,\nt3.DESCRIPTION AS TASK_NAME,\nt2.DESCRIPTION As TASK_STATUS,\nt1.DUE_DATE AS TASK_DUE_DATE,\nt3.DESCRIPTION AS Task_TYPE,\nt1.START_DATE AS TASK_ASSIGNED_DATE\nFROM TASK t1\nJOIN TASK_STATUS t2 ON t1.TASK_STATUS_CODE = t2.TASK_STATUS_CODE\nJOIN PERSON p1 ON t1.ASSIGNEE_PERSON_ID = p1.PERSON_ID\nJOIN TASK_TYPE t3 ON t3.TASK_TYPE_CODE = t1.TASK_TYPE_CODE\n where t1.MODULE_CODE = 1\n)TASK_DATA ON TASK_DATA.MODULE_ITEM_KEY =AWARD_MASTER_DATA.AWARD_NUMBER ' WHERE (`TYPE_CODE` = '142');
+        rollback: 
+         - sql:
+            sql: |            
+             UPDATE `REPORT_TYPE_JOIN` SET `JOIN_QUERY` = ' INNER JOIN (\nSELECT\nt1.MODULE_ITEM_KEY,  \n CASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            t1.DUE_DATE,\n            UTC_TIMESTAMP()\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            t1.DUE_DATE,\n            UTC_TIMESTAMP()\n         )\nEND AS DUE_DAYS_PASSED_DIFF,\nCASE \n    WHEN TIMESTAMPDIFF(\n            DAY,\n            UTC_TIMESTAMP(),\n            t1.DUE_DATE\n         ) <= 0\n    THEN 0\n    ELSE TIMESTAMPDIFF(\n            DAY,\n            UTC_TIMESTAMP(),\n            t1.DUE_DATE\n         )\nEND AS DAYS_LEFT_FOR_DUE_DATE,\np1.FULL_NAME AS TASK_ASIGNEE_PERSON,\nt3.DESCRIPTION AS TASK_NAME,\nt2.DESCRIPTION As TASK_STATUS,\nt1.DUE_DATE AS TASK_DUE_DATE,\nt3.DESCRIPTION AS Task_TYPE,\nt1.START_DATE AS TASK_ASSIGNED_DATE\nFROM TASK t1\nJOIN TASK_STATUS t2 ON t1.TASK_STATUS_CODE = t2.TASK_STATUS_CODE\nJOIN PERSON p1 ON t1.ASSIGNEE_PERSON_ID = p1.PERSON_ID\nJOIN TASK_TYPE t3 ON t3.TASK_TYPE_CODE = t1.TASK_TYPE_CODE\n where t1.MODULE_CODE = 1\n)TASK_DATA ON TASK_DATA.MODULE_ITEM_KEY =AWARD_MASTER_DATA.AWARD_NUMBER ' WHERE (`TYPE_CODE` = '142');

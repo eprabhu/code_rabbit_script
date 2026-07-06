@@ -1,0 +1,8 @@
+# Default owner for all files in the repository
+*   @Polus-Software/db-team
+
+# Path-based ownership
+Elastic/**     @Polus-Software/fibi-core-team
+Templates/**   @Polus-Software/java-team
+Jenkinsfile @Polus-Software/it-team
+properties.yaml @Polus-Software/it-team

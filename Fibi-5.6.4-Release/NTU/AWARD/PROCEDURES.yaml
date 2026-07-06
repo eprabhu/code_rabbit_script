@@ -1,0 +1,65 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10730-1
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWARD_MASTER_DATA
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWARD_MASTER_DATA;
+        - sqlFile:
+            path: ROUTINES/NTU/AWARD/PROCEDURES/MERGE_AWARD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-2
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWD_MASTER_DATA
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_MASTER_DATA;
+        - sqlFile:
+            path: ROUTINES/NTU/AWARD/PROCEDURES/MERGE_AWD_MASTER_DATA.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-3
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWD_SECTION_GENERAL
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_GENERAL;
+        - sqlFile:
+            path: ROUTINES/NTU/AWARD/PROCEDURES/MERGE_AWD_SECTION_GENERAL.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-4
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Update in Procedure MERGE_AWD_SECTION_PAYMNT_INVOICE
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MERGE_AWD_SECTION_PAYMNT_INVOICE;
+        - sqlFile:
+            path: ROUTINES/NTU/AWARD/PROCEDURES/MERGE_AWD_SECTION_PAYMNT_INVOICE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty    

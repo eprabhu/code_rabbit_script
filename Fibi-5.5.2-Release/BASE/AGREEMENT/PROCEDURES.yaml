@@ -1,0 +1,33 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9155-1
+      author: Vishnu BH
+      labels: 'PROCEDURES'
+      comment: Modified GET_AGREEMENT_DASHBOARD_V1 to include data type 6 in custom criteria logic for elastic search
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGREEMENT_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-9547-1
+      author: Prabhu e
+      labels: 'PROCEDURES'
+      comment: Optimized GET_AGREEMENT_DASHBOARD_V1 procedure.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_AGREEMENT_DASHBOARD_V1;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_AGREEMENT_DASHBOARD_V1.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+

@@ -1,0 +1,152 @@
+databaseChangeLog: 
+
+- changeSet:
+      id: FIBI-6816-1
+      author: Prabhu.E
+      labels: 'DDL'
+      comment: added new columns in AWARD_MANPOWER_RESOURCE table
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AWARD_MANPOWER_RESOURCE;              
+              SET @sql := IF(
+                  (
+                      SELECT COUNT(*) 
+                      FROM information_schema.COLUMNS 
+                      WHERE TABLE_SCHEMA = DATABASE() 
+                        AND TABLE_NAME = 'AWARD_MANPOWER_RESOURCE'
+                        AND COLUMN_NAME IN (
+                            'CPFC_AMOUNT', 'CPFE_PERCENTAGE', 'SDL_PERCENTAGE',
+                            'SDLC_AMOUNT', 'ONB_PERCENTAGE',
+                            'YEARLY_BENEFIT_AMOUNT', 'ANNUAL_WORKING_DAYS'
+                        )
+                  ) < 7,
+                  'ALTER TABLE AWARD_MANPOWER_RESOURCE
+                      ADD COLUMN `CPFC_AMOUNT` DECIMAL(12,2) NULL DEFAULT NULL AFTER `IS_MAIN_ACCOUNT`,
+                      ADD COLUMN `CPFE_PERCENTAGE` DECIMAL(12,2) NULL DEFAULT NULL AFTER `CPFC_AMOUNT`,
+                      ADD COLUMN `SDL_PERCENTAGE` DECIMAL(12,2) NULL DEFAULT NULL AFTER `CPFE_PERCENTAGE`,
+                      ADD COLUMN `SDLC_AMOUNT` DECIMAL(12,2) NULL DEFAULT NULL AFTER `SDL_PERCENTAGE`,
+                      ADD COLUMN `ONB_PERCENTAGE` DECIMAL(12,2) NULL DEFAULT NULL AFTER `SDLC_AMOUNT`,
+                      ADD COLUMN `YEARLY_BENEFIT_AMOUNT` DECIMAL(12,2) NULL DEFAULT NULL AFTER `ONB_PERCENTAGE`,
+                      ADD COLUMN `ANNUAL_WORKING_DAYS` DECIMAL(12,2) NULL DEFAULT NULL AFTER `YEARLY_BENEFIT_AMOUNT`;',
+                  'DO 1'
+              );
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AWARD_MANPOWER_RESOURCE
+              DROP COLUMN CPFC_AMOUNT, 
+              DROP COLUMN CPFE_PERCENTAGE,
+              DROP COLUMN SDL_PERCENTAGE,
+              DROP COLUMN SDLC_AMOUNT,
+              DROP COLUMN ONB_PERCENTAGE,
+              DROP COLUMN YEARLY_BENEFIT_AMOUNT,
+              DROP COLUMN ANNUAL_WORKING_DAYS
+
+- changeSet:
+      id: FIBI-6816-2
+      author: Prabhu.E
+      labels: 'DML'
+      comment: 
+        - Add default value for CPFc in MANPOWER_CONFIGURATION_DATA
+        - This value is set for CPF Cap to calculate proposed committed amount
+      changes:
+        - sql:
+            sql: |
+               INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('CPFc', '8000', 'This value are set for CPF Cap to calculate proposed committed amount', now(), 'admin')
+      rollback:
+        - sql:
+            sql: |
+                DELETE FROM `MANPOWER_CONFIGURATION_DATA` WHERE `CONFIGURATION_KEY` = 'CPFc' AND `CONFIGURATION_VALUE` = '8000';
+- changeSet:
+      id: FIBI-6816-3
+      author: Prabhu.E
+      labels: 'DML'
+      comment: 
+        - Add default value for CP  
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('CPFe_PERCENTAGE', '17', 'This value are set for CPF employer rate  to calculate proposed committed amount', now(), 'admin')
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `MANPOWER_CONFIGURATION_DATA` WHERE `CONFIGURATION_KEY` = 'CPFe_PERCENTAGE' AND `CONFIGURATION_VALUE` = '17';
+- changeSet:
+      id: FIBI-6816-4
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  
+        - Add default value for SDL  
+        - This value are set for Monthly SDL amount to calculate proposed committed amount
+      changes:
+        - sql:
+            sql: |
+               INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('SDL_PERCENTAGE', '0.25', 'This value are set for Monthly SDL amount to calculate proposed committed amount', now(), 'admin')
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `MANPOWER_CONFIGURATION_DATA` WHERE `CONFIGURATION_KEY` = 'SDL_PERCENTAGE' AND `CONFIGURATION_VALUE` = '0.25';  
+- changeSet:
+      id: FIBI-6816-5
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  
+        - Add default value for SDLC  
+        - This value are set for SDL cap to calculate proposed committed amount
+      changes:
+        - sql:
+            sql: |
+             INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('SDLC', '4500', 'This value are set for SDL cap to calculate proposed committed amount', now(), 'admin')
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `MANPOWER_CONFIGURATION_DATA` WHERE `CONFIGURATION_KEY` = 'SDLC' AND `CONFIGURATION_VALUE` = '4500';
+- changeSet:
+      id: FIBI-6816-6
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  
+        - Add default value for ONB  
+        - This value are set for One NTU Bonus to calculate proposed committed amount
+      changes:
+        - sql:
+            sql: |
+             INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('ONB_PERCENTAGE', '15', 'This value are set for One NTU Bonus to calculate proposed committed amount', now(), 'admin')
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `MANPOWER_CONFIGURATION_DATA` WHERE `CONFIGURATION_KEY` = 'ONB_PERCENTAGE' AND `CONFIGURATION_VALUE` = '15';
+- changeSet:
+      id: FIBI-6816-7
+      author: Prabhu.E
+      labels: 'DML'
+      comment:  
+        - Add default value for BEN  
+        - This value are set for yearly benefits to calculate proposed committed amount
+      changes:
+        - sql:
+            sql: |
+             INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('BEN', '2542', 'This value are set for yearly benefits to calculate proposed committed amount', now(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `MANPOWER_CONFIGURATION_DATA` WHERE `CONFIGURATION_KEY` = 'BEN' AND `CONFIGURATION_VALUE` = '2542';
+- changeSet:
+      id: FIBI-6816-8
+      author: Prabhu.E
+      labels: 'DML'
+      comment:   
+        - Add default value for ANNUAL_WORKING_DAYS  
+        - This value are set for working days of manpower
+      changes:
+        - sql:
+            sql: |
+             INSERT IGNORE INTO `MANPOWER_CONFIGURATION_DATA` (`CONFIGURATION_KEY`, `CONFIGURATION_VALUE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('ANNUAL_WORKING_DAYS', '5', 'This is set for working days of manpower', now(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `MANPOWER_CONFIGURATION_DATA` WHERE `CONFIGURATION_KEY` = 'ANNUAL_WORKING_DAYS' AND `CONFIGURATION_VALUE` = '5';

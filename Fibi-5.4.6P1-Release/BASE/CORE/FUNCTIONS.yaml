@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7832-1
+      author: Manesh.MS
+      labels: 'FUNCTIONS'
+      comment: Modified Function
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP FUNCTION IF EXISTS FN_PERSON_HAS_AUTHORIZATION
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_PERSON_HAS_AUTHORIZATION.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-DynamicDashboard-1
+      author: Manesh.MS
+      labels: 'VIEWS'
+      comment: Modified View
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP VIEW IF EXISTS SR_ASSOC_DETAIL_V
+        - sqlFile:
+            path: ROUTINES/BASE/SERVICE_REQUEST/VIEWS/SR_ASSOC_DETAIL_V.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

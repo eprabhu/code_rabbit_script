@@ -1,0 +1,49 @@
+databaseChangeLog:
+
+- changeSet:
+      id: FIBI-10379-1
+      author: Vishnu BH.
+      labels: 'PROCEDURES'
+      comment: Create Procedure DATE_GENERATOR
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS DATE_GENERATOR;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/DATE_GENERATOR.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+- changeSet:
+      id: FIBI-10457
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment:  Create Procedure RULE_EVALUATE_VARIABLE
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS RULE_EVALUATE_VARIABLE;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/RULE_EVALUATE_VARIABLE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+- changeSet:
+      id: FIBI-10418
+      author: Nabeel Ahamed M
+      labels: 'PROCEDURES'
+      comment:  Create Procedure MIG_AWARD_PERSONS_TO_SR
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP PROCEDURE IF EXISTS MIG_AWARD_PERSONS_TO_SR;
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/MIG_AWARD_PERSONS_TO_SR.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

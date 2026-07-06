@@ -1,0 +1,34 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9439
+      author: Sreejith T
+      labels: 'DML'
+      comment: Insert into dyn section for questionnaire as a tab or within the overview page
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `dyn_section_config` (`SECTION_CODE`, `MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('AG1310', 'AG13', 'Questionnaire - Overview', 'Y', utc_timestamp(), 'admin');
+              INSERT IGNORE INTO `dyn_section_config` (`SECTION_CODE`, `MODULE_CODE`, `DESCRIPTION`, `IS_ACTIVE`, `UPDATE_TIMESTAMP`, `UPDATE_USER`) VALUES ('AG1311', 'AG13', 'Questionnaire - Tab', 'N', utc_timestamp(), 'admin');
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `dyn_section_config` WHERE `SECTION_CODE` = 'AG1310' AND `MODULE_CODE` = 'AG13';
+              DELETE FROM `dyn_section_config` WHERE `SECTION_CODE` = 'AG1311' AND `MODULE_CODE` = 'AG13';
+
+
+  - changeSet:
+      id: FIBI-9743-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Insert into build_details table
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO build_details (`BUILD_ID`, `BUILD_VERSION`, `STATUS`, `APPLICATION_NAME`, `BUILD_UPDATE_TIMESTAMP`) 
+              VALUES (NULL, 'Fibi 5.5.3', 'Success', 'FIBI-WEB', now());
+
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM `build_details` WHERE `BUILD_VERSION` = 'Fibi 5.5.3';

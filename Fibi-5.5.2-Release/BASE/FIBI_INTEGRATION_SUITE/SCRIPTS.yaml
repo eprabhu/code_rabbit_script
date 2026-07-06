@@ -1,0 +1,296 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-8936
+      author: SasiKumar
+      labels: 'DDL'
+      comment: Create table FIS_USER.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_USER (
+                FIS_USER_ID INT NOT NULL AUTO_INCREMENT,
+                FULL_NAME VARCHAR(90) NOT NULL,
+                USER_NAME VARCHAR(60) NOT NULL,
+                EMAIL_ADDRESS VARCHAR(60) NOT NULL,
+                PASSWORD VARCHAR(400) NOT NULL,
+                IS_ACTIVE VARCHAR(1) DEFAULT NULL,
+                CREATE_USER VARCHAR(60) DEFAULT NULL,
+                CREATE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER VARCHAR(60) DEFAULT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PERSON_ID VARCHAR(60) DEFAULT NULL,
+                PRIMARY KEY (FIS_USER_ID),
+                UNIQUE KEY UK_FIS_USER_EMAIL (EMAIL_ADDRESS),
+                UNIQUE KEY UK_FIS_USER_USERNAME (USER_NAME),
+                CONSTRAINT FIS_USER_FK1 FOREIGN KEY (PERSON_ID)
+                  REFERENCES person (PERSON_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_USER;
+
+  - changeSet:
+      id: FIBI-8936-1
+      author: SasiKumar
+      labels: 'DDL'
+      comment: Create table FIS_USER_TOKEN.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_USER_TOKEN (
+                TOKEN_ID INT NOT NULL AUTO_INCREMENT,
+                FIS_USER_ID INT DEFAULT NULL,
+                ACCESS_TOKEN LONGTEXT,
+                REFRESH_TOKEN LONGTEXT,
+                PREV_REFRESH_TOKEN LONGTEXT,
+                ACCESS_TOKEN_EXPIRY TIMESTAMP NULL,
+                REFRESH_TOKEN_EXPIRY TIMESTAMP NULL,
+                ISSUED_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                REVOKED VARCHAR(1),
+                IS_ACTIVE VARCHAR(1),
+                UPDATE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                SALT VARCHAR(255),
+                PRIMARY KEY (TOKEN_ID),
+                CONSTRAINT FIS_USER_TOKEN_FK1 FOREIGN KEY (FIS_USER_ID)
+                  REFERENCES FIS_USER (FIS_USER_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_USER_TOKEN;
+
+  - changeSet:
+      id: FIBI-8936-2
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_MODULE.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_MODULE (
+                MODULE_CODE INT NOT NULL,
+                SUB_MODULE INT DEFAULT NULL,
+                DESCRIPTION VARCHAR(200) NOT NULL,
+                IS_ACTIVE VARCHAR(1) NOT NULL DEFAULT 'Y',
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (MODULE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_MODULE;
+              
+  - changeSet:
+      id: FIBI-8936-3
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_API_DETAILS.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_API_DETAILS (
+                API_ID INT NOT NULL AUTO_INCREMENT,
+                MODULE_CODE INT DEFAULT NULL,
+                API_NAME VARCHAR(200) NOT NULL,
+                API_URL VARCHAR(500) NOT NULL,
+                API_VERSION VARCHAR(10) DEFAULT NULL,
+                HTTP_METHOD VARCHAR(10) DEFAULT NULL,
+                DESCRIPTION VARCHAR(200) DEFAULT NULL,
+                IS_GENERIC_API VARCHAR(1) NOT NULL DEFAULT 'N',
+                IS_ACTIVE VARCHAR(1) NOT NULL DEFAULT 'Y',
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (API_ID),
+                CONSTRAINT FIS_API_DETAILS_FK1 FOREIGN KEY (MODULE_CODE)
+                  REFERENCES FIS_MODULE (MODULE_CODE)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_API_DETAILS;
+
+  - changeSet:
+      id: FIBI-8936-4
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_API_FIELD_DETAILS.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_API_FIELD_DETAILS (
+                API_FIELD_ID INT NOT NULL AUTO_INCREMENT,
+                API_ID INT NOT NULL,
+                FIELD_JSON JSON DEFAULT NULL,
+                IS_ACTIVE VARCHAR(1) NOT NULL DEFAULT 'Y',
+                DESCRIPTION VARCHAR(200) DEFAULT NULL,
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (API_FIELD_ID),
+                KEY FIS_API_FIELD_DETAILS_FK1 (API_ID),
+                CONSTRAINT FIS_API_FIELD_DETAILS_FK1 FOREIGN KEY (API_ID)
+                  REFERENCES FIS_API_DETAILS (API_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_API_FIELD_DETAILS;
+
+
+  - changeSet:
+      id: FIBI-8936-5
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_USER_API_ACCESS.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_USER_API_ACCESS (
+                USER_API_ID INT NOT NULL AUTO_INCREMENT,
+                FIS_USER_ID INT NOT NULL,
+                API_ID INT NOT NULL,
+                UNIT_NUMBER VARCHAR(8) DEFAULT NULL,
+                DESCEND_FLAG VARCHAR(1) DEFAULT NULL,
+                IS_ACTIVE VARCHAR(1) NOT NULL DEFAULT 'Y',
+                CREATE_USER VARCHAR(60) NOT NULL,
+                CREATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UPDATE_USER VARCHAR(60) NOT NULL,
+                UPDATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (USER_API_ID),
+                CONSTRAINT FIS_USER_API_ACCESS_FK1 FOREIGN KEY (API_ID)
+                  REFERENCES FIS_API_DETAILS (API_ID),
+                CONSTRAINT FIS_USER_API_ACCESS_FK2 FOREIGN KEY (FIS_USER_ID)
+                  REFERENCES FIS_USER (FIS_USER_ID),
+                CONSTRAINT FIS_USER_API_ACCESS_FK3 FOREIGN KEY (UNIT_NUMBER)
+                  REFERENCES unit (UNIT_NUMBER)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_USER_API_ACCESS;
+
+  - changeSet:
+      id: FIBI-8947
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_API_USAGE_LOG.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_API_USAGE_LOG (
+                USAGE_LOG_ID INT NOT NULL AUTO_INCREMENT,
+                API_ID INT DEFAULT NULL,
+                FIS_USER_ID INT DEFAULT NULL,
+                STATUS_CODE INT DEFAULT NULL,
+                RESPONSE_TIME INT DEFAULT NULL,
+                CREATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CREATE_USER VARCHAR(60) NOT NULL,
+                PRIMARY KEY (USAGE_LOG_ID),
+                CONSTRAINT FIS_API_USAGE_LOG_FK1 FOREIGN KEY (API_ID)
+                  REFERENCES FIS_API_DETAILS (API_ID),
+                CONSTRAINT FIS_API_USAGE_LOG_FK2 FOREIGN KEY (FIS_USER_ID)
+                  REFERENCES FIS_USER (FIS_USER_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_API_USAGE_LOG;
+
+  - changeSet:
+      id: FIBI-8939
+      author: SasiKumar
+      labels: 'DDL'
+      comment: Create table FIS_EXCEPTION_LOG.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_EXCEPTION_LOG (
+                EXCEPTION_ID INT NOT NULL AUTO_INCREMENT,
+                FIS_USER_ID INT DEFAULT NULL,
+                API_ID INT DEFAULT NULL,
+                ERROR_MESSAGE VARCHAR(2000) DEFAULT NULL,
+                STACK_TRACE TEXT,
+                CREATE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CREATE_USER VARCHAR(60) NOT NULL,
+                PRIMARY KEY (EXCEPTION_ID),
+                CONSTRAINT FIS_EXCEPTION_LOG_FK1 FOREIGN KEY (FIS_USER_ID)
+                  REFERENCES FIS_USER (FIS_USER_ID),
+                CONSTRAINT FIS_EXCEPTION_LOG_FK2 FOREIGN KEY (API_ID)
+                  REFERENCES FIS_API_DETAILS (API_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_EXCEPTION_LOG;
+
+  - changeSet:
+      id: FIBI-8933
+      author: Kishore
+      labels: 'DDL'
+      comment: Create table FIS_BATCH_DETAILS.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_BATCH_DETAILS (
+                ID VARCHAR(36) NOT NULL,
+                EXTERNAL_BATCH_ID VARCHAR(100) DEFAULT NULL,
+                INTEGRATION_TYPE VARCHAR(50) NOT NULL,
+                STATUS VARCHAR(20) NOT NULL,
+                TOTAL_RECORDS INT DEFAULT NULL,
+                SUCCESS_COUNT INT DEFAULT NULL,
+                FAILURE_COUNT INT DEFAULT NULL,
+                CREATED_AT DATETIME(6) NOT NULL,
+                STARTED_AT DATETIME(6) DEFAULT NULL,
+                FINISHED_AT DATETIME(6) DEFAULT NULL,
+                PROCESSING_TIME_MILLIS BIGINT DEFAULT NULL,
+                REQUEST_PAYLOAD LONGTEXT,
+                RESULT_PAYLOAD LONGTEXT,
+                FILE_LOCATION VARCHAR(500) DEFAULT NULL,
+                PRIMARY KEY (ID),
+                KEY IDX_FIS_BATCH_INT_TYPE (INTEGRATION_TYPE),
+                KEY IDX_FIS_BATCH_STATUS (STATUS),
+                KEY IDX_FIS_BATCH_CREATED_AT (CREATED_AT),
+                KEY IDX_FIS_BATCH_EXT_ID (EXTERNAL_BATCH_ID)
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_BATCH_DETAILS;
+
+  - changeSet:
+      id: FIBI-8933-1
+      author: SasiKumar
+      labels: 'DDL'
+      comment: Create table FIS_JOB_DETAILS.
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE IF NOT EXISTS FIS_JOB_DETAILS (
+                ID VARCHAR(36) NOT NULL,
+                BATCH_ID VARCHAR(36) NOT NULL,
+                STATUS VARCHAR(20) NOT NULL,
+                ATTEMPT INT DEFAULT NULL,
+                CREATED_AT DATETIME(6) NOT NULL,
+                STARTED_AT DATETIME(6) DEFAULT NULL,
+                FINISHED_AT DATETIME(6) DEFAULT NULL,
+                PROCESSING_TIME_MILLIS BIGINT DEFAULT NULL,
+                ERROR_MESSAGE VARCHAR(1000) DEFAULT NULL,
+                PRIMARY KEY (ID),
+                KEY IDX_FIS_JOB_BATCH_ID (BATCH_ID),
+                KEY IDX_FIS_JOB_STATUS (STATUS),
+                KEY IDX_FIS_JOB_CREATED (CREATED_AT),
+                CONSTRAINT FK_FIS_JOB_BATCH FOREIGN KEY (BATCH_ID)
+                  REFERENCES FIS_BATCH_DETAILS (ID)
+                  ON DELETE CASCADE ON UPDATE CASCADE
+              );
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS FIS_JOB_DETAILS;
+

@@ -1,0 +1,16 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9548-1
+      author: Reshma Antony
+      labels: 'PROCEDURES'
+      comment:  Update the procedure to insert the Grant Code and Profit Center fields, along with a migration script to update the affected data in the SAP_FEED_BUDGET_REPORT table.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS SAP_FEED_BUDGET_REPORT;
+        - sqlFile:
+            path: ROUTINES/BASE/AWARD/PROCEDURES/SAP_FEED_BUDGET_REPORT.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,207 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10048-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Activate integration sync configuration entries
+      changes:
+        - sql:
+            sql: |
+              UPDATE integration_sync_config
+              SET IS_ACTIVE = 'Y',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE CONFIG_KEY IN (
+                'sync_awards',
+                'sync_ips',
+                'sync_agreements',
+                'sync_service_requests',
+                'sync_persons',
+                'sync_units'
+              );
+      rollback:
+        - sql:
+            sql: |
+              UPDATE integration_sync_config
+              SET IS_ACTIVE = 'N',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE CONFIG_KEY IN (
+                'sync_awards',
+                'sync_ips',
+                'sync_agreements',
+                'sync_service_requests',
+                'sync_persons',
+                'sync_units'
+              );
+
+  - changeSet:
+      id: FIBI-10234-1
+      author: Shyla M
+      labels: 'DDL'
+      comment: Update person table to increase FIRST_NAME column size to 50
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE person;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'person'
+                        AND COLUMN_NAME = 'FIRST_NAME'
+                        AND CHARACTER_MAXIMUM_LENGTH < 50
+                  ),
+                  'ALTER TABLE person
+                      MODIFY COLUMN `FIRST_NAME` VARCHAR(50) DEFAULT NULL;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE person
+              MODIFY COLUMN `FIRST_NAME` VARCHAR(30) DEFAULT NULL;
+
+  - changeSet:
+      id: FIBI-10234-2
+      author: Shyla M
+      labels: 'DDL'
+      comment: Update person table to increase LAST_NAME column size to 50
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE person;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'person'
+                        AND COLUMN_NAME = 'LAST_NAME'
+                        AND CHARACTER_MAXIMUM_LENGTH < 50
+                  ),
+                  'ALTER TABLE person
+                      MODIFY COLUMN `LAST_NAME` VARCHAR(50) DEFAULT NULL;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE person
+              MODIFY COLUMN `LAST_NAME` VARCHAR(30) DEFAULT NULL;
+
+  - changeSet:
+      id: FIBI-10234-3
+      author: Shyla M
+      labels: 'DDL'
+      comment: Update person table to increase MIDDLE_NAME column size to 50
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE person;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'person'
+                        AND COLUMN_NAME = 'MIDDLE_NAME'
+                        AND CHARACTER_MAXIMUM_LENGTH < 50
+                  ),
+                  'ALTER TABLE person
+                      MODIFY COLUMN `MIDDLE_NAME` VARCHAR(50) DEFAULT NULL;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE person
+              MODIFY COLUMN `MIDDLE_NAME` VARCHAR(30) DEFAULT NULL;
+              
+  - changeSet:
+      id: FIBI-10251-1
+      author: Shyla M
+      labels: 'DML'
+      comment: Insert business rule function and argument for SR award association check
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO business_rule_function (FUNCTION_NAME, MODULE_CODE, SUB_MODULE_CODE, DESCRIPTION, DB_FUNCTION_NAME, UPDATE_TIMESTAMP, UPDATE_USER)
+              VALUES ('Is Award Associated with SR Type', 20, 0, 'For checking whether atleast one award is linked to SR ', 'FN_SR_HAS_AWARD_ASSO_ON_TYPE', UTC_TIMESTAMP(), 'admin');
+
+              INSERT IGNORE INTO business_rule_function_arg (FUNCTION_NAME, ARGUMENT_SEQUENCE_NUMBER, ARGUMENT_NAME, DESCRIPTION, DATA_TYPE, DEFAULT_VALUE, UPDATE_TIMESTAMP, UPDATE_USER, LOOKUP_WINDOW_NAME, LOOKUP_TYPE, ARGUMENT_TYPE, ARGUMENT_LABEL)
+              VALUES ('Is Award Associated with SR Type', 1, 'SR_HEADER_ID', 'Service Request ID', NULL, NULL, UTC_TIMESTAMP(), 'admin', NULL, NULL, NULL, NULL);
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM business_rule_function_arg WHERE FUNCTION_NAME = 'Is Award Associated with SR Type';
+              DELETE FROM business_rule_function WHERE FUNCTION_NAME = 'Is Award Associated with SR Type';
+
+  - changeSet:
+      id: FIBI-10254-1
+      author: Vishnu BH
+      labels: 'DML'
+      comment: Set IS_ACTIVE to N for Person Maintenance sections like Orcid, Delegation, Timesheet, Training, Degree
+      changes:
+        - sql:
+            sql: |
+              UPDATE dyn_section_config
+              SET IS_ACTIVE = 'N',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE MODULE_CODE = 'PE06'
+                AND SECTION_CODE IN ('PE0601', 'PE0602', 'PE0603', 'PE0604', 'PE0605');
+      rollback:
+        - sql:
+            sql: |
+              UPDATE dyn_section_config
+              SET IS_ACTIVE = 'Y',
+                  UPDATE_TIMESTAMP = UTC_TIMESTAMP(),
+                  UPDATE_USER = 'admin'
+              WHERE MODULE_CODE = 'PE06'
+                AND SECTION_CODE IN ('PE0601', 'PE0602', 'PE0603', 'PE0604', 'PE0605');
+
+  - changeSet:
+      id: FIBI-10327-1
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: Update in module_derived_roles table
+      changes:
+        - sql:
+            sql: |
+              UPDATE module_derived_roles SET AUTO_GRANT_TO_MODULE_CREATOR = 'N' WHERE MODULE_CODE = 20 and ROLE_ID = 113;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10327-2
+      author: Nabeel Ahamed M
+      labels: 'DML'
+      comment: INSERT in role_rights table
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO role_rights (`RIGHT_ID`,`ROLE_ID`,`UPDATE_TIMESTAMP`,`UPDATE_USER`) 
+              VALUES 
+              (44,117,utc_timestamp(),'admin'),
+              (44,118,utc_timestamp(),'admin');
+      rollback: 
+        - sql:
+            sql: |
+              DELETE FROM role_rights WHERE RIGHT_ID = 44 AND ROLE_ID IN (117, 118);

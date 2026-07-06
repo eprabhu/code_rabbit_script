@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7420-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_KEY_PERSONS_DISCLOSURE_DETAILS
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_KEY_PERSONS_DISCLOSURE_DETAILS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7832-1
+      author: Manesh.MS
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS GET_ALL_RIGHTS_FOR_A_MODULE
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/GET_ALL_RIGHTS_FOR_A_MODULE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

@@ -1,0 +1,45 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.4.5-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+
+    #REPORT
+    - include:
+        file: Fibi-5.4.5-Release/BASE/REPORT/SCRIPTS.yaml
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.4.5-Release/BASE/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.4.5-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.4.5-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+
+    #CLAIMS
+    - include:
+        file: Fibi-5.4.5-Release/BASE/CLAIMS/SCRIPTS.yaml
+        labels: 'CLAIMS'
+
+    #FORM_BUILDER
+    - include:
+        file: Fibi-5.4.5-Release/BASE/FORM_BUILDER/SCRIPTS.yaml
+        labels: 'FORM_BUILDER'
+
+    #MANPOWER
+    - include:
+        file: Fibi-5.4.5-Release/BASE/MANPOWER/SCRIPTS.yaml
+        labels: 'MANPOWER'
+    - include:
+        file: Fibi-5.4.5-Release/BASE/MANPOWER/VIEWS.yaml
+        labels: 'MANPOWER'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.4.5-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'

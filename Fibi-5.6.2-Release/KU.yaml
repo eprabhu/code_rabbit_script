@@ -1,0 +1,44 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.2-Release/KU/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+
+    #REPORT
+    - include:
+        file: Fibi-5.6.2-Release/KU/REPORT/SCRIPTS.yaml  
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.6.2-Release/KU/REPORT/PROCEDURES.yaml  
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.6.2-Release/KU/REPORT/VIEWS.yaml  
+        labels: 'REPORT'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6.2-Release/KU/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.6.2-Release/KU/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.6.2-Release/KU/DEV_PROPOSAL/VIEWS.yaml
+        labels: 'DEV_PROPOSAL'
+        
+    #AWARD
+    - include:
+        file: Fibi-5.6.2-Release/KU/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.6.2-Release/KU/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6.2-Release/KU/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+

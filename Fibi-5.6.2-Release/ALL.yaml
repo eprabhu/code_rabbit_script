@@ -1,0 +1,49 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6.2-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6.2-Release/BASE/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+
+    #GRANT_CALL
+    - include:
+        file: Fibi-5.6.2-Release/BASE/GRANT_CALL/PROCEDURES.yaml
+        labels: 'GRANT_CALL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.6.2-Release/BASE/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+    #AWARD
+    - include:
+        file: Fibi-5.6.2-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'        
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6.2-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.6.2-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.6.2-Release/BASE/AGREEMENT/VIEWS.yaml
+        labels: 'AGREEMENT'
+
+    #EXTERNAL_REVIEWER
+    - include:
+        file: Fibi-5.6.2-Release/BASE/EXTERNAL_REVIEWER/SCRIPTS.yaml
+        labels: 'EXTERNAL_REVIEWER'
+
+    - include:
+        file: Fibi-5.6.2-Release/BASE/EXTERNAL_REVIEWER/PROCEDURES.yaml
+        labels: 'EXTERNAL_REVIEWER'
+
+    #LANDING      
+    - include:
+        file: Fibi-5.6.2-Release/BASE/LANDING/SCRIPTS.yaml
+        labels: 'LANDING'

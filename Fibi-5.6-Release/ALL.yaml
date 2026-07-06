@@ -1,0 +1,121 @@
+databaseChangeLog:
+
+    #CORE
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/SCRIPTS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/PROCEDURES.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/FUNCTIONS.yaml
+        labels: 'CORE'
+    - include:
+        file: Fibi-5.6-Release/BASE/CORE/VIEWS.yaml
+        labels: 'CORE'
+
+    #REPORT
+    - include:
+        file: Fibi-5.6-Release/BASE/REPORT/SCRIPTS.yaml
+        labels: 'REPORT'
+    - include:
+        file: Fibi-5.6-Release/BASE/REPORT/PROCEDURES.yaml
+        labels: 'REPORT'
+
+    #GRANT_CALL
+    - include:
+        file: Fibi-5.6-Release/BASE/GRANT_CALL/PROCEDURES.yaml
+        labels: 'GRANT_CALL'
+
+    #DEV_PROPOSAL
+    - include:
+        file: Fibi-5.6-Release/BASE/DEV_PROPOSAL/SCRIPTS.yaml
+        labels: 'DEV_PROPOSAL'
+    - include:
+        file: Fibi-5.6-Release/BASE/DEV_PROPOSAL/PROCEDURES.yaml
+        labels: 'DEV_PROPOSAL'
+
+    #INSTITUTE_PROPOSAL
+    - include:
+        file: Fibi-5.6-Release/BASE/INSTITUTE_PROPOSAL/SCRIPTS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+    - include:
+        file: Fibi-5.6-Release/BASE/INSTITUTE_PROPOSAL/PROCEDURES.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+    - include:
+        file: Fibi-5.6-Release/BASE/INSTITUTE_PROPOSAL/MIGRATIONS.yaml
+        labels: 'INSTITUTE_PROPOSAL'
+
+
+    #AWARD
+    - include:
+        file: Fibi-5.6-Release/BASE/AWARD/SCRIPTS.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.6-Release/BASE/AWARD/PROCEDURES.yaml
+        labels: 'AWARD'
+    - include:
+        file: Fibi-5.6-Release/BASE/AWARD/FUNCTIONS.yaml
+        labels: 'AWARD'
+
+    #MANPOWER
+    - include:
+        file: Fibi-5.6-Release/BASE/MANPOWER/PROCEDURES.yaml
+        labels: 'MANPOWER'
+
+    #CLAIMS
+    - include:
+        file: Fibi-5.6-Release/BASE/CLAIMS/SCRIPTS.yaml
+        labels: 'CLAIMS'
+    - include:
+        file: Fibi-5.6-Release/BASE/CLAIMS/VIEWS.yaml
+        labels: 'CLAIMS'
+
+    #PROGRESS_REPORT
+    - include:
+        file: Fibi-5.6-Release/BASE/PROGRESS_REPORT/PROCEDURES.yaml
+        labels: 'PROGRESS_REPORT'
+
+    #SERVICE_REQUEST
+    - include:
+        file: Fibi-5.6-Release/BASE/SERVICE_REQUEST/SCRIPTS.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.6-Release/BASE/SERVICE_REQUEST/PROCEDURES.yaml
+        labels: 'SERVICE_REQUEST'
+    - include:
+        file: Fibi-5.6-Release/BASE/SERVICE_REQUEST/VIEWS.yaml
+        labels: 'SERVICE_REQUEST'
+
+    #AGREEMENT
+    - include:
+        file: Fibi-5.6-Release/BASE/AGREEMENT/SCRIPTS.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.6-Release/BASE/AGREEMENT/PROCEDURES.yaml
+        labels: 'AGREEMENT'
+    - include:
+        file: Fibi-5.6-Release/BASE/AGREEMENT/VIEWS.yaml
+        labels: 'AGREEMENT'
+
+    #EXTERNAL_REVIEWER
+    - include:
+        file: Fibi-5.6-Release/BASE/EXTERNAL_REVIEWER/PROCEDURES.yaml
+        labels: 'EXTERNAL_REVIEWER'
+
+    #RESEARCHER_PROFILE
+    - include:
+        file: Fibi-5.6-Release/BASE/RESEARCHER_PROFILE/PROCEDURES.yaml
+        labels: 'RESEARCHER_PROFILE'
+        
+    #FORM_BUILDER
+    - include:
+        file: Fibi-5.6-Release/BASE/FORM_BUILDER/SCRIPTS.yaml
+        labels: 'FORM_BUILDER'
+
+    #LANDING
+    - include:
+        file: Fibi-5.6-Release/BASE/LANDING/SCRIPTS.yaml
+        labels: 'LANDING'
+
+

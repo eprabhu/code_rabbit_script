@@ -1,0 +1,158 @@
+// These commands should be used in elastic server for various things
+
+1. To delete and index from the elastic server (update the IP as required a dummy IP for refernce is added)
+
+    curl -XDELETE http://172.21.44.97:9200/awardfibi/ 
+
+2. To create an Index in elastic server , the command will create an index in elastic server named "awardfibi".
+(update the IP as required a dummy IP for refernce is added).
+
+    curl -XPUT 'http://172.21.44.97:9200/awardfibi/' -H 'Content-Type: application/json' -d '{"settings":{"number_of_shards":1,"analysis":{"filter":{"ngram_filter":{"type":"edge_ngram","min_gram":2,"max_gram":20}},"analyzer":{"ngram_analyzer":{"type":"custom","tokenizer":"whitespace","filter":["lowercase","ngram_filter"]}}}},"mappings":{"properties":{"award_id":{"type":"text","analyzer":"ngram_analyzer","search_analyzer":"whitespace","fields":{"sort":{"type":"keyword","index":true}}},"award_number":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"whitespace","fields":{"sort":{"type":"keyword","index":true}}},"pi_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"status":{"type":"text","analyzer":"ngram_analyzer","search_analyzer":"standard"},"sponsor":{"type":"text","index":"false"},"account_number":{"type":"text","analyzer":"ngram_analyzer","search_analyzer":"whitespace"},"lead_unit_number":{"type":"text","index":"false"},"lead_unit_name":{"type":"text","index":"false"},"title":{"type":"text","term_vector":"with_positions_offsets","analyzer":"ngram_analyzer","search_analyzer":"standard"},"obligation_expiration_date":{"type":"text","analyzer":"standard","search_analyzer":"standard"},"status_code":{"type":"integer","index":"false"},"unit_display_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"sponsor_display_name":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"},"@version":{"type":"integer"},"@timestamp":{"type":"date"},"funding_scheme":{"type":"text","term_vector":"yes","analyzer":"ngram_analyzer","search_analyzer":"standard"}}}}'
+    
+3. logstash configuration that need to used to sync elastic index from a Database
+	1.jdbc_driver_library = path to library for jar for mysqlconnector ( eg:/root/conf/mysql-connector.jar) 
+	2.jdbc_connection_string = The URL for the Database that need to be used.
+	3.hosts = the ip address of the elastic search sever thats used for data sync.
+	4.Other properties dont need to be changed. only add DB password and user details 
+	
+	
+	input {
+		jdbc {
+			jdbc_driver_library => ""
+			jdbc_driver_class => "Java::com.mysql.jdbc.Driver"
+			jdbc_connection_string => "jdbc:mysql://192.168.1.6:3306/fibi_base?useSSL=false&useTimezone=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+			jdbc_user => ""
+			jdbc_password =>"" 
+			jdbc_validate_connection => true 
+			statement => "SELECT t1.award_id, t1.award_number, t1.status, t1.pi_name, t1.sponsor,t1.sponsor_display_name, t1.account_number, t1.lead_unit_number, t1.lead_unit_name, t1.title,t1.status_code,t1.obligation_expiration_date,t1.grant_call_title as grant_call_name,t1.sp_awd_number,t1.funding_scheme, t1.unit_display_name FROM ELASTIC_AWARD_V t1
+		}
+	}
+	output {
+		elasticsearch {
+			index => "awardfibi"
+			document_id => "%{award_id}"
+			hosts => "192.168.1.242:9200" 
+		}
+	}
+
+4. The JSON object used for Developers and miantainers so that its easy to identify the propoerties used to create an index
+
+{
+  "settings": {
+    "number_of_shards": 1,
+    "analysis": {
+      "filter": {
+        "ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20
+        }
+      },
+      "analyzer": {
+        "ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": [
+            "lowercase",
+            "ngram_filter"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "award_id": {
+        "type": "text",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace",
+        "fields": {
+          "sort": {
+            "type": "keyword",
+            "index": true
+          }
+        }
+      },
+      "award_number": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace",
+        "fields": {
+            "sort": {
+              "type": "keyword",
+              "index": true
+            }
+        }
+      },
+      "pi_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "status": {
+        "type": "text",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "sponsor": {
+       "type": "text",
+        "index": "false"
+      },
+      "account_number": {
+        "type": "text",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "whitespace"
+      },
+      "lead_unit_number": {
+       "type": "text",
+        "index": "false"
+      },
+      "lead_unit_name": {
+       "type": "text",
+        "index": "false"
+      },
+      "title": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "obligation_expiration_date": {
+        "type": "text",
+        "analyzer": "standard",
+        "search_analyzer": "standard"
+      },
+      "status_code": {
+        "type": "integer",
+        "index": "false"
+      },
+      "unit_display_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "sponsor_display_name": {
+        "type": "text",
+        "term_vector": "yes",
+        "analyzer": "ngram_analyzer",
+        "search_analyzer": "standard"
+      },
+      "@version": {
+        "type": "integer"
+      },
+      "@timestamp": {
+        "type": "date"
+      },
+      "funding_scheme": {
+             "type": "text",
+             "term_vector": "yes",
+             "analyzer": "ngram_analyzer",
+             "search_analyzer": "standard"
+      }
+    }
+  }
+}
+

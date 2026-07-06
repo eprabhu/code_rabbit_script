@@ -1,0 +1,64 @@
+databaseChangeLog:
+
+    - changeSet:
+      id: FIBI-11202
+      author: Farsana Khadar
+      labels: 'DML'
+      comment: Missing Progress Report rights
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO rights (`RIGHT_ID`,`RIGHT_NAME`,`DESCRIPTION`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`RIGHTS_TYPE_CODE`) SELECT (SELECT IFNULL(MAX(RIGHT_ID),0)+1 FROM rights),'VIEW_PROGRESS_REPORT','To view award progress report','admin', UTC_TIMESTAMP(),'2'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM rights 
+                    WHERE RIGHT_NAME = 'VIEW_PROGRESS_REPORT'
+                );
+                INSERT INTO rights (`RIGHT_ID`,`RIGHT_NAME`,`DESCRIPTION`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`RIGHTS_TYPE_CODE`) SELECT (SELECT IFNULL(MAX(RIGHT_ID),0)+1 FROM rights),'MODIFY_PROGRESS_REPORT','To modify award progress report','admin', UTC_TIMESTAMP(),'2'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM rights 
+                    WHERE RIGHT_NAME = 'MODIFY_PROGRESS_REPORT'
+                );
+                INSERT INTO rights (`RIGHT_ID`,`RIGHT_NAME`,`DESCRIPTION`,`UPDATE_USER`,`UPDATE_TIMESTAMP`,`RIGHTS_TYPE_CODE`) SELECT (SELECT IFNULL(MAX(RIGHT_ID),0)+1 FROM rights),'PROGRESS_REPORT_FLIP_STATUS','For flipping the progress report status to “HOLD FOR FUNDING AGENCY REVIEW“','admin', UTC_TIMESTAMP(),'2'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM rights 
+                    WHERE RIGHT_NAME = 'PROGRESS_REPORT_FLIP_STATUS'
+                );
+      rollback: empty
+
+
+    - changeSet:
+      id: FIBI-11202-2
+      author: Farsana Khadar
+      labels: 'DML'
+      comment: Missing progress_report_status
+      changes:
+        - sql:
+            sql: |
+                    INSERT INTO progress_report_status (`PROGRESS_REPORT_STATUS_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `IS_ACTIVE`) VALUES ('1', 'In Progress', UTC_TIMESTAMP(), 'admin', 'Y');
+                    INSERT INTO progress_report_status (`PROGRESS_REPORT_STATUS_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `IS_ACTIVE`) VALUES ('2', 'Revision Requested', UTC_TIMESTAMP(), 'admin', 'Y');
+                    INSERT INTO progress_report_status (`PROGRESS_REPORT_STATUS_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `IS_ACTIVE`) VALUES ('3', 'Approval In Progress', UTC_TIMESTAMP(), 'admin', 'Y');
+                    INSERT INTO progress_report_status (`PROGRESS_REPORT_STATUS_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `IS_ACTIVE`) VALUES ('4', 'Approved', UTC_TIMESTAMP(), 'admin', 'Y');
+                    INSERT INTO progress_report_status (`PROGRESS_REPORT_STATUS_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `IS_ACTIVE`) VALUES ('5', 'Hold for Funding Agency Review', UTC_TIMESTAMP(), 'admin', 'Y');
+                    INSERT INTO progress_report_status (`PROGRESS_REPORT_STATUS_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `IS_ACTIVE`) VALUES ('6', 'Completed', UTC_TIMESTAMP(), 'admin', 'Y');
+
+      rollback: empty
+
+    - changeSet:
+      id: FIBI-11202-3
+      author: Farsana Khadar
+      labels: 'DML'
+      comment: Missing progress_report_achievement_type
+      changes:
+        - sql:
+            sql: |
+
+
+                    INSERT INTO progress_report_achievement_type (`ACHIEVEMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `SECTION_TYPE`, `IS_ACTIVE`, `TEMPLATE_DESCRIPTION`) VALUES ('1', 'Short Summary of the Project Achievement. This section should provide a succinct description of the project, outlining the core impact and the relevant insights or findings from this research', UTC_TIMESTAMP(), 'admin', 'S', 'Y', 'Short Summary of the Project Achievement.');
+                    INSERT INTO progress_report_achievement_type (`ACHIEVEMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `SECTION_TYPE`, `IS_ACTIVE`, `TEMPLATE_DESCRIPTION`) VALUES ('2', 'Please elaborate if there are any key information about the current research and the significance of it in relation to the impact.', UTC_TIMESTAMP(), 'admin', 'S', 'Y', 'Please elaborate if there are any key information about the current research and the significance of it in relation to the impact.');
+                    INSERT INTO progress_report_achievement_type (`ACHIEVEMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `SECTION_TYPE`, `IS_ACTIVE`, `TEMPLATE_DESCRIPTION`) VALUES ('3', 'What has been done to develop capabilities that would be relevant to the industry and society at large and/or push the frontier of science',UTC_TIMESTAMP(), 'admin', 'S', 'Y', 'What has been done to develop capabilities that would be relevant to the industry and society at large and/or push the frontier of science');
+                    INSERT INTO progress_report_achievement_type (`ACHIEVEMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `SECTION_TYPE`, `IS_ACTIVE`, `TEMPLATE_DESCRIPTION`) VALUES ('5', 'What are the capabilities that have been built up?', UTC_TIMESTAMP(), 'admin', 'F', 'Y', 'What are the capabilities that have been built up?');
+                    INSERT INTO progress_report_achievement_type (`ACHIEVEMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `SECTION_TYPE`, `IS_ACTIVE`, `TEMPLATE_DESCRIPTION`) VALUES ('6', 'What are your plans in Singapore beyond this award?', UTC_TIMESTAMP(), 'admin', 'F', 'Y', 'What are your plans in Singapore beyond this award?');
+                    INSERT INTO progress_report_achievement_type (`ACHIEVEMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `SECTION_TYPE`, `IS_ACTIVE`, `TEMPLATE_DESCRIPTION`) VALUES ('7', 'What are the capabilities that have been built up?', UTC_TIMESTAMP(), 'admin', 'F', 'Y', 'What are the capabilities that have been built up?');
+                    INSERT INTO progress_report_achievement_type (`ACHIEVEMENT_TYPE_CODE`, `DESCRIPTION`, `UPDATE_TIMESTAMP`, `UPDATE_USER`, `SECTION_TYPE`, `IS_ACTIVE`, `TEMPLATE_DESCRIPTION`) VALUES ('8', 'Any plans for further development of this project into a larger external grant or industrial partnership?', UTC_TIMESTAMP(), 'admin', 'F', 'Y', 'What are the capabilities that have been built up?');
+
+      rollback: empty

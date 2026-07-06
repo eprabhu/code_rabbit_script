@@ -1,0 +1,16 @@
+databaseChangeLog: 
+ 
+  - changeSet: 
+      id: FIBI-7554-1
+      author: Prabhu.E 
+      labels: 'FUNCTIONS'
+      comment: Update FN_WORKFLOW_APPROVE function to handle new attachment types
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP FUNCTION IF EXISTS FN_WORKFLOW_APPROVE; 
+        - sqlFile: 
+            path: ROUTINES/BASE/CORE/FUNCTIONS/FN_WORKFLOW_APPROVE.sql 
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty 

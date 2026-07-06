@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-7568-1
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS AGT_LOC_REVIEW_END_DATE_REMAINDER
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/AGT_LOC_REVIEW_END_DATE_REMAINDER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-7568-2
+      author: Prabhu.E
+      labels: 'PROCEDURES'
+      comment: Modified Procedure
+      runOnChange: true
+      changes:
+        - sql:
+            sql: DROP PROCEDURE IF EXISTS AGT_LOC_REVIEW_START_DATE_REMAINDER
+        - sqlFile:
+            path: ROUTINES/BASE/CORE/PROCEDURES/AGT_LOC_REVIEW_START_DATE_REMAINDER.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty

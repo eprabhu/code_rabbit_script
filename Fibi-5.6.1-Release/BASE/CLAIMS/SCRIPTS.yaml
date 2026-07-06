@@ -1,0 +1,137 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-9576-1
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert scheduler_job_info
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO scheduler_job_info (
+                  CRON_EXPRESSION,
+                  IS_CRON_JOB,
+                  JOB_CLASS,
+                  JOB_GROUP,
+                  JOB_NAME,
+                  REPEAT_TIME,
+                  DESCRIPTION,
+                  CRON_STATUS,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  PREVIOUS_FIRE_TIME,
+                  LAST_FIRE_END_TIME,
+                  IS_ACTIVE
+              )
+              SELECT
+                  '0 30 21 * * ?',
+                  'Y',
+                  'com.polus.fibicomp.quartzscheduler.scheduler.claim.SapConcurSftpScheduler',
+                  'fibi-base',
+                  'SAP Concur SFTP Scheduler',
+                  NULL,
+                  'This job retrieves the Grab Concur (ECS) file from SFTP, processes it, and moves the file to OutboundArchive/Concur (SFTP & Staff3).',
+                  'SCHEDULED',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  NULL,
+                  NULL,
+                  'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM scheduler_job_info
+                  WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME = 'SAP Concur SFTP Scheduler'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.SapConcurSftpScheduler'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM scheduler_job_info
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'SAP Concur SFTP Scheduler'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.claim.SapConcurSftpScheduler';
+
+  - changeSet:
+      id: FIBI-9576-2
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Insert scheduler_job_info
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO scheduler_job_info (
+                  CRON_EXPRESSION,
+                  IS_CRON_JOB,
+                  JOB_CLASS,
+                  JOB_GROUP,
+                  JOB_NAME,
+                  REPEAT_TIME,
+                  DESCRIPTION,
+                  CRON_STATUS,
+                  UPDATE_USER,
+                  UPDATE_TIMESTAMP,
+                  PREVIOUS_FIRE_TIME,
+                  LAST_FIRE_END_TIME,
+                  IS_ACTIVE
+              )
+              SELECT
+                  '0 15 7 * * ?',
+                  'Y',
+                  'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsSheduler',
+                  'fibi-base',
+                  'FastIntegration Revenue Payments Sheduler',
+                  NULL,
+                  'This job retrieves the Grab Revenue file from SFTP, processes it, and moves the file to OutboundArchive/Revenue (SFTP & Staff3).',
+                  'SCHEDULED',
+                  'admin',
+                  UTC_TIMESTAMP(),
+                  NULL,
+                  NULL,
+                  'Y'
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM scheduler_job_info
+                  WHERE JOB_GROUP = 'fibi-base'
+                    AND JOB_NAME = 'FastIntegration Revenue Payments Sheduler'
+                    AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsSheduler'
+              );
+      rollback:
+        - sql:
+            sql: |
+              DELETE FROM scheduler_job_info
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'FastIntegration Revenue Payments Sheduler'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsSheduler';
+
+  - changeSet:
+      id: FIBI-9576-3
+      author: Reshma Antony
+      labels: 'DML'
+      comment: Update scheduler_job_info FastIntegration Revenue Payments Scheduler
+      changes:
+        - sql:
+            sql: |
+              SET SQL_SAFE_UPDATES = 0;
+              UPDATE scheduler_job_info
+              SET
+                  CRON_EXPRESSION = '0 0 3 * * ?',
+                  JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsScheduler',
+                  JOB_NAME  = 'FastIntegration Revenue Payments Scheduler'
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'FastIntegration Revenue Payments Sheduler'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsSheduler';
+                SET SQL_SAFE_UPDATES = 1;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE scheduler_job_info
+              SET
+                  CRON_EXPRESSION = '0 15 7 * * ?',
+                  JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsSheduler',
+                  JOB_NAME  = 'FastIntegration Revenue Payments Sheduler'
+              WHERE JOB_GROUP = 'fibi-base'
+                AND JOB_NAME = 'FastIntegration Revenue Payments Scheduler'
+                AND JOB_CLASS = 'com.polus.fibicomp.quartzscheduler.scheduler.fastintegration.FastIntegrationRevenuePaymentsScheduler';
+
+

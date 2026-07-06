@@ -1,0 +1,18 @@
+databaseChangeLog:
+
+ - changeSet:
+      id: FIBI-10795 -1
+      author: robin
+      labels: 'PROCEDURES'
+      comment: Introduced procedure for updating agreement status
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                 DROP PROCEDURE IF EXISTS UPDATE_AGREEMENT_STATUS;
+        - sqlFile:
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/UPDATE_AGREEMENT_STATUS.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: DROP PROCEDURE IF EXISTS UPDATE_AGREEMENT_STATUS;
+

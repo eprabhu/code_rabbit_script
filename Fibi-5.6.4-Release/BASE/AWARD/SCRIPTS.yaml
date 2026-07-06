@@ -1,0 +1,70 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: FIBI-10787-1
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: Update Length of CFDA_NUMBER and SPONSOR_AWARD_NUMBER to varchar(255).
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AWARD;
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'AWARD'
+                        AND (
+                          (COLUMN_NAME = 'CFDA_NUMBER' AND CHARACTER_MAXIMUM_LENGTH < 255)
+                          OR
+                          (COLUMN_NAME = 'SPONSOR_AWARD_NUMBER' AND CHARACTER_MAXIMUM_LENGTH < 255)
+                      )
+                  ),
+                  'ALTER TABLE AWARD
+                      MODIFY COLUMN `CFDA_NUMBER` VARCHAR(255) DEFAULT NULL,
+                      MODIFY COLUMN `SPONSOR_AWARD_NUMBER` VARCHAR(255) DEFAULT NULL;',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback: empty
+
+  - changeSet:
+      id: FIBI-10730-1
+      author: Nabeel Ahamed M
+      labels: 'DDL'
+      comment: Update AWARD table to increase DFAFS_NUMBER column size to 50
+      changes:
+        - sql:
+            sql: |
+              ANALYZE TABLE AWARD;
+
+              SET @sql := IF(
+                  EXISTS (
+                      SELECT 1
+                      FROM information_schema.COLUMNS
+                      WHERE TABLE_SCHEMA = DATABASE()
+                        AND TABLE_NAME = 'AWARD'
+                        AND COLUMN_NAME = 'DFAFS_NUMBER'
+                         AND (
+                              CHARACTER_MAXIMUM_LENGTH < 50
+                              OR COLUMN_COMMENT <> 'In UI only allows 25 chars'
+                              )
+                  ),
+                  'ALTER TABLE AWARD
+                      MODIFY COLUMN `DFAFS_NUMBER` VARCHAR(50) DEFAULT NULL
+                      COMMENT ''UI currently restricts input to 25 characters'';',
+                  'DO 1'
+              );
+
+              PREPARE stmt FROM @sql;
+              EXECUTE stmt;
+              DEALLOCATE PREPARE stmt;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE AWARD
+              MODIFY COLUMN `DFAFS_NUMBER` VARCHAR(12) DEFAULT NULL;

@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+        id: FIBI-10018
+        author: Sasikumar Chandran
+        labels: 'DML'
+        comment: Update parameter SR_GLOBAL_SEARCH_ENABLED_MODULES.
+        changes:
+          - sql:
+              sql: |
+                UPDATE `PARAMETER` SET `VALUE` = 'SR20, AG13, RS52' WHERE (`PARAMETER_NAME` = 'SR_GLOBAL_SEARCH_ENABLED_MODULES');
+        rollback:
+          - sql:
+              sql: |
+                DELETE FROM `PARAMETER` WHERE `PARAMETER_NAME` = 'SR_GLOBAL_SEARCH_ENABLED_MODULES';
+
+  - changeSet:
+        id: FIBI-10018-1
+        author: Sasikumar Chandran
+        labels: 'DML'
+        comment: Deactivate section SR2013.
+        changes:
+          - sql:
+              sql: |
+                SET SQL_SAFE_UPDATES = 0;
+                UPDATE `DYN_SECTION_CONFIG` SET `IS_ACTIVE` = 'N' WHERE (`SECTION_CODE` = 'SR2013');
+                SET SQL_SAFE_UPDATES = 1;
+        rollback:
+          - sql:
+              sql: |
+                UPDATE `DYN_SECTION_CONFIG` SET `IS_ACTIVE` = 'Y' WHERE (`SECTION_CODE` = 'SR2013');
+
