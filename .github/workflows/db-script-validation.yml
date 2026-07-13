@@ -92,14 +92,14 @@ jobs:
               ? problems.map(p => `- ${p}`).join('\n')
               : "✅ PR description and title look good.";
 
-            const checklist = `
-            ### 📋 Reviewer Checklist (verify before merging)
-            - [ ] PR description clearly explains what changed and why
-            - [ ] SQL syntax errors above (if any) have been fixed
-            - [ ] Any \`DROP\` / \`ALTER\` statements have been reviewed for backward compatibility
-            - [ ] Migration has been tested against a non-production database
-            - [ ] Rollback plan exists for this change
-            `;
+            # const checklist = `
+            # ### 📋 Reviewer Checklist (verify before merging)
+            # - [ ] PR description clearly explains what changed and why
+            # - [ ] SQL syntax errors above (if any) have been fixed
+            # - [ ] Any \`DROP\` / \`ALTER\` statements have been reviewed for backward compatibility
+            # - [ ] Migration has been tested against a non-production database
+            # - [ ] Rollback plan exists for this change
+            # `;
 
             const body = `## 🤖 Automated DB Script Validation
 
