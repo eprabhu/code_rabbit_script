@@ -7,5 +7,5 @@
 -- DROP TABLE old_logs;
 
 -- ALTER TABLE users ADD COLUMN last_login DATETIME;
-ALTER TABLE users ADD COLUMN last_login DATETIME;
+-- ALTER TABLE users ADD COLUMN last_login DATETIME;
 SET @QUERY_STATEMENT = 'SELECT 1';
