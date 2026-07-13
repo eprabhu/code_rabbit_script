@@ -10,7 +10,7 @@ databaseChangeLog:
         - sql:
             sql: |
                  DROP PROCEDURE IF EXISTS UPDATE_AGREEMENT_STATUS;
-- sqlFile:
+        - sqlFile:
             path: ROUTINES/BASE/AGREEMENT/PROCEDURES/UPDATE_AGREEMENT_STATUS.sql
             relativeToChangelogFile: false
             splitStatements: false
