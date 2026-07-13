@@ -24,9 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # ---------------------------------------------------------------
-      # 1. PR Quality Checks — description present, title long enough
-      # ---------------------------------------------------------------
       - name: Check PR description and title
         id: pr_quality
         uses: actions/github-script@v7
@@ -35,30 +32,30 @@ jobs:
             const body = context.payload.pull_request.body || "";
             const title = context.payload.pull_request.title || "";
             const problems = [];
-      
+
             if (title.trim().length < 10) {
               problems.push(
                 `❌ PR title is too short (${title.trim().length} chars). Use at least 10 characters and make it descriptive.`
               );
             }
-      
+
             if (body.trim().length === 0) {
               problems.push(
-                "❌ PR description is empty. Please explain what changed and why."
+                "❌ PR description is empty."
               );
             } else {
               // Check for Jira ticket URL
               const jiraRegex = /https:\/\/polussolutions\.atlassian\.net\/browse\/[A-Z]+-\d+/;
-      
+
               if (!jiraRegex.test(body)) {
                 problems.push(
-                  "❌ PR description must include a Jira ticket link (e.g. https://polussolutions.atlassian.net/browse/FIBI-0000)."
+                  "❌ PR description must include a Jira ticket link (e.g. https://polussolutions.atlassian.net/browse/ABC-0000)."
                 );
               }
             }
 
-      core.setOutput("problems", JSON.stringify(problems));
-      core.setOutput("has_problems", problems.length > 0 ? "true" : "false");
+            core.setOutput("problems", JSON.stringify(problems));
+            core.setOutput("has_problems", problems.length > 0 ? "true" : "false");
 
       # # ---------------------------------------------------------------
       # # 2. Find changed .sql files in this PR
@@ -117,13 +114,17 @@ jobs:
             - [ ] Rollback plan exists for this change
             `;
 
-            const body = `## 🤖 Automated DB Script Validation
-
+            const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
+            
+            const body = `![Polus Logo](${logoUrl})
+            
+            ## Automated DB Script Validation
+            
             ### PR Quality
             ${prQualitySection}
-
+            
             ${sqlReport}
-
+            
             ${checklist}
             `;
 
