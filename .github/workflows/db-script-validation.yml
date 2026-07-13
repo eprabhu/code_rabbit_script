@@ -38,6 +38,15 @@ jobs:
                 `❌ PR title is too short (${title.trim().length} chars). Use at least 10 characters and make it descriptive.`
               );
             }
+            
+            // Reject titles containing file extensions like .sql, .txt, .pdf, etc.
+            const fileExtensionRegex = /\.\w+\b/;
+            
+            if (fileExtensionRegex.test(title)) {
+              problems.push(
+                "❌ PR title is invalid. It must not contain file names or file extensions (e.g. .sql, .txt, .pdf)."
+              );
+            }
 
             if (body.trim().length === 0) {
               problems.push(
