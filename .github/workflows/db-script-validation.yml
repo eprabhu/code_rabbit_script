@@ -116,7 +116,7 @@ jobs:
 
             const logoUrl = `
               <h2>
-                <img src="${logoUrl}" alt="Polus Logo" width="40" style="vertical-align: middle; margin-right: 10px;">
+                <img src="${logoUrl}" alt="Polus Logo" width="40" style="vertical-align: middle; margin-right: 10px; align="left";">
                 Automated DB Script Validation
               </h2>
 
