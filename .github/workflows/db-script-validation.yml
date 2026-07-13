@@ -32,7 +32,6 @@ jobs:
             const body = context.payload.pull_request.body || "";
             const title = context.payload.pull_request.title || "";
             const problems = [];
-            const branch = context.payload.repository.default_branch;
 
             if (title.trim().length < 10) {
               problems.push(
@@ -115,10 +114,7 @@ jobs:
             - [ ] Rollback plan exists for this change
             `;
 
-            const logoUrl =
-              `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${branch}/.github/images/polus-logo.png`;
-
-            const body = `## ![Polus Logo]${logoUrl} Automated DB Script Validation
+            const body = `![Polus Logo](/.github/images/polus-logo.png) ##Automated DB Script Validation
 
             ### PR Quality
             ${prQualitySection}
