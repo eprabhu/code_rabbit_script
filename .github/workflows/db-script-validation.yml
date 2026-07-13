@@ -49,7 +49,7 @@ jobs:
 
               if (!jiraRegex.test(body)) {
                 problems.push(
-                  "❌ PR description must include a Jira ticket link (e.g. https://polussolutions.atlassian.net/browse/FIBI-0000)."
+                  "❌ PR description must include a Jira ticket link (e.g. https://polussolutions.atlassian.net/browse/ABC-0000)."
                 );
               }
             }
@@ -114,7 +114,7 @@ jobs:
             - [ ] Rollback plan exists for this change
             `;
 
-            const body = `## 🤖 Automated DB Script Validation
+            const body = `## (https://www.polussolutions.com/logo.png) Automated DB Script Validation
 
             ### PR Quality
             ${prQualitySection}
