@@ -115,16 +115,19 @@ jobs:
             `;
 
             const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
-            
-            const body = `![Polus Logo](${logoUrl})
-            
+
+            const body = `
+            <p align="center">
+              <img src="${logoUrl}" alt="Polus Logo" width="100"/>
+            </p>
+
             ## Automated DB Script Validation
-            
+
             ### PR Quality
             ${prQualitySection}
-            
+
             ${sqlReport}
-            
+
             ${checklist}
             `;
 
