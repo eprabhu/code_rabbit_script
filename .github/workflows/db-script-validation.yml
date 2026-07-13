@@ -114,7 +114,7 @@ jobs:
             - [ ] Rollback plan exists for this change
             `;
 
-            const body = `## (https://www.polussolutions.com/logo.png) Automated DB Script Validation
+            const body = `## ![Polus Logo](https://www.polussolutions.com/logo.png) Automated DB Script Validation
 
             ### PR Quality
             ${prQualitySection}
