@@ -114,17 +114,24 @@ jobs:
             - [ ] Rollback plan exists for this change
             `;
 
-            const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
-            
-            const body = `![Polus Logo](${logoUrl})
-            
+            const logoUrl = `
+              <h2>
+                <img src="${logoUrl}" alt="Polus Logo" width="40" style="vertical-align: middle; margin-right: 10px; align="left";">
+                Automated DB Script Validation
+              </h2>
+
+            const body = `
+            <p align="center">
+              <img src="${logoUrl}" alt="Polus Logo" width="100"/>
+            </p>
+
             ## Automated DB Script Validation
-            
+
             ### PR Quality
             ${prQualitySection}
-            
+
             ${sqlReport}
-            
+
             ${checklist}
             `;
 
