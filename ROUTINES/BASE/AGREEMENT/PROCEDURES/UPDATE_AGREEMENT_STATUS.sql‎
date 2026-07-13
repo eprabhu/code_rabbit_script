@@ -27,7 +27,7 @@ BEGIN
     WHERE
         (AC.CATEGORY_CODE = '1' AND AH.AGREEMENT_STATUS_CODE = 15)
         OR
-        (AC.CATEGORY_CODE IN ('2','3') AND AH.AGREEMENT_STATUS_CODE = 12)
+        (AC.CATEGORY_CODE IN ('2','3') AND AH.AGREEMENT_STATUS_CODE = 12);
 
     -- Step 3: Log ONLY if rows were actually updated
     IF ROW_COUNT() > 0 THEN
