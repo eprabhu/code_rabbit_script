@@ -73,67 +73,67 @@ jobs:
       #     echo "exit_code=$?" >> "$GITHUB_OUTPUT"
       #     cat sql_report.md
 
-      # # ---------------------------------------------------------------
-      # # 4. Post / update a single PR comment with results + checklist
-      # # ---------------------------------------------------------------
-      # - name: Post PR comment
-      #   uses: actions/github-script@v7
-      #   with:
-      #     script: |
-      #       const fs = require('fs');
-      #       const problems = JSON.parse('${{ steps.pr_quality.outputs.problems }}' || '[]');
+      # ---------------------------------------------------------------
+      # 4. Post / update a single PR comment with results + checklist
+      # ---------------------------------------------------------------
+      - name: Post PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const problems = JSON.parse('${{ steps.pr_quality.outputs.problems }}' || '[]');
 
-      #       let sqlReport = "_No .sql files changed in this PR._";
-      #       if (fs.existsSync('sql_report.md')) {
-      #         sqlReport = fs.readFileSync('sql_report.md', 'utf8');
-      #       }
+            let sqlReport = "_No .sql files changed in this PR._";
+            if (fs.existsSync('sql_report.md')) {
+              sqlReport = fs.readFileSync('sql_report.md', 'utf8');
+            }
 
-      #       const prQualitySection = problems.length
-      #         ? problems.map(p => `- ${p}`).join('\n')
-      #         : "✅ PR description and title look good.";
+            const prQualitySection = problems.length
+              ? problems.map(p => `- ${p}`).join('\n')
+              : "✅ PR description and title look good.";
 
-      #       const checklist = `
-      #       ### 📋 Reviewer Checklist (verify before merging)
-      #       - [ ] PR description clearly explains what changed and why
-      #       - [ ] SQL syntax errors above (if any) have been fixed
-      #       - [ ] Any \`DROP\` / \`ALTER\` statements have been reviewed for backward compatibility
-      #       - [ ] Migration has been tested against a non-production database
-      #       - [ ] Rollback plan exists for this change
-      #       `;
+            const checklist = `
+            ### 📋 Reviewer Checklist (verify before merging)
+            - [ ] PR description clearly explains what changed and why
+            - [ ] SQL syntax errors above (if any) have been fixed
+            - [ ] Any \`DROP\` / \`ALTER\` statements have been reviewed for backward compatibility
+            - [ ] Migration has been tested against a non-production database
+            - [ ] Rollback plan exists for this change
+            `;
 
-      #       const body = `## 🤖 Automated DB Script Validation
+            const body = `## 🤖 Automated DB Script Validation
 
-      #       ### PR Quality
-      #       ${prQualitySection}
+            ### PR Quality
+            ${prQualitySection}
 
-      #       ${sqlReport}
+            ${sqlReport}
 
-      #       ${checklist}
-      #       `;
+            # ${checklist}
+            `;
 
-      #       // Find an existing bot comment to update instead of spamming new ones
-      #       const { data: comments } = await github.rest.issues.listComments({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         issue_number: context.issue.number,
-      #       });
-      #       const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes('Automated DB Script Validation'));
+            // Find an existing bot comment to update instead of spamming new ones
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes('Automated DB Script Validation'));
 
-      #       if (existing) {
-      #         await github.rest.issues.updateComment({
-      #           owner: context.repo.owner,
-      #           repo: context.repo.repo,
-      #           comment_id: existing.id,
-      #           body,
-      #         });
-      #       } else {
-      #         await github.rest.issues.createComment({
-      #           owner: context.repo.owner,
-      #           repo: context.repo.repo,
-      #           issue_number: context.issue.number,
-      #           body,
-      #         });
-      #       }
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
 
       # ---------------------------------------------------------------
       # 5. Fail the workflow if there were PR-quality or SQL errors
