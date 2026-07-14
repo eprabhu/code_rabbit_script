@@ -47,3 +47,19 @@ databaseChangeLog:
             relativeToChangelogFile: false
             splitStatements: false
       rollback: empty
+
+  - changeSet:
+      id: FIBI-11131-1
+      author: Robin
+      labels: 'FUNCTIONS'
+      comment: Drop and create FN_EVAL_TRIAGE_QUESTIONNAIRE
+      runOnChange: true
+      changes:
+        - sql:
+            sql: |
+                DROP FUNCTION IF EXISTS FN_EVAL_TRIAGE_QUESTIONNAIRE;
+        - sqlFile:
+            path: ROUTINES/JHU/AGREEMENT/FUNCTIONS/FN_EVAL_TRIAGE_QUESTIONNAIRE.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+      rollback: empty
