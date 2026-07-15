@@ -3,12 +3,6 @@ name: DB Script Validation
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    paths:
-      - "**/*.sql"
-      - "**/*.yaml"
-      - ".github/workflows/db-script-validation.yml"
-      - "scripts/validate_files.py"
-      - "scripts/validate_sql.py"
 
 permissions:
   contents: read
@@ -83,6 +77,8 @@ jobs:
 
           if [ ${#FILES[@]} -eq 0 ]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
+            # Clear any previous Level 2 report so the sticky comment drops File Naming
+            : > level2_report.md
             echo "_No .sql or .yaml files changed in this PR._" > file_report.md
             echo "No .sql / .yaml files changed."
           else
@@ -156,6 +152,12 @@ jobs:
             if (fs.existsSync("level2_report.md")) {
               level2Report = fs.readFileSync("level2_report.md", "utf8").trim();
             }
+            // Only keep File Naming when there is at least one suggestion bullet
+            if (!level2Report.includes("\n- ") && !level2Report.startsWith("- ")) {
+              level2Report = "";
+            }
+
+            const hasDbFiles = '${{ steps.changed_files.outputs.has_files }}' === 'true';
 
             const prQualitySection = problems.length
               ? problems.map(p => `- ${p}`).join('\n')
@@ -163,15 +165,17 @@ jobs:
 
             const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
 
-            // Order: PR Quality -> File Naming (if any) -> Changed files last
+            // Order: PR Quality -> File Naming (only if suggestions) -> Changed files last
             const sections = [
               `### PR Quality`,
               prQualitySection,
             ];
-            if (level2Report) {
+            if (hasDbFiles && level2Report) {
               sections.push("", level2Report);
             }
-            sections.push("", fileReport);
+            if (hasDbFiles) {
+              sections.push("", fileReport);
+            }
 
             const body = [
               `<p align="left"><img src="${logoUrl}" alt="Polus Logo" width="100" /></p>`,
