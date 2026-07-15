@@ -71,19 +71,20 @@ def check_file_name(path: str):
     stem, ext = os.path.splitext(base)
 
     if ext.lower() == ".sql":
-        if stem != stem.upper():
-            suggestions.append(
-                f"`{norm}`: file name should be UPPERCASE. "
-                f"Consider renaming `{stem}` to `{stem.upper()}`."
-            )
-
         routine_name = read_routine_name(path)
+
+        # Prefer a single clear suggestion: rename to match the routine (uppercase).
         if routine_name and routine_name.upper() != stem.upper():
             expected = routine_name.upper()
             suggestions.append(
                 f"`{norm}`: file name `{stem}` does not match the routine name "
                 f"`{routine_name}` inside the file. "
                 f"Consider renaming the file to `{expected}.sql`."
+            )
+        elif stem != stem.upper():
+            suggestions.append(
+                f"`{norm}`: file name should be UPPERCASE. "
+                f"Consider renaming `{stem}` to `{stem.upper()}`."
             )
 
         return suggestions
