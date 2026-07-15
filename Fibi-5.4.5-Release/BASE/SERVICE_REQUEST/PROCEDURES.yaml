@@ -15,7 +15,7 @@ databaseChangeLog:
             splitStatements: false
       rollback: empty
 
-  - changeSet: 
+ - changeSet: 
       id: FIBI-7346-1
       author: Prabhu.E 
       labels: 'PROCEDURES' 
