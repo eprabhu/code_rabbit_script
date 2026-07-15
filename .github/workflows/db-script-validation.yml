@@ -5,7 +5,6 @@ on:
     types: [opened, edited, synchronize, reopened]
     paths:
       - "**/*.sql"
-      - "**/*.yml"
       - "**/*.yaml"
 
 permissions:
@@ -68,18 +67,18 @@ jobs:
             core.setOutput("has_problems", problems.length > 0 ? "true" : "false");
 
       # ---------------------------------------------------------------
-      # 2. Find changed .sql / .yaml / .yml files in this PR
+      # 2. Find changed .sql / .yaml files in this PR
       # ---------------------------------------------------------------
       - name: Get changed DB script files
         id: changed_files
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1
-          mapfile -t FILES < <(git diff --name-only "origin/${{ github.base_ref }}" "${{ github.sha }}" -- '*.sql' '*.yaml' '*.yml')
+          mapfile -t FILES < <(git diff --name-only "origin/${{ github.base_ref }}" "${{ github.sha }}" -- '*.sql' '*.yaml')
 
           if [ ${#FILES[@]} -eq 0 ]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
-            echo "_No .sql or .yaml/.yml files changed in this PR._" > file_report.md
-            echo "No .sql / .yaml / .yml files changed."
+            echo "_No .sql or .yaml files changed in this PR._" > file_report.md
+            echo "No .sql / .yaml files changed."
           else
             echo "has_files=true" >> "$GITHUB_OUTPUT"
             printf '%s\n' "${FILES[@]}" > changed_db_files.txt
@@ -95,6 +94,21 @@ jobs:
             echo "Changed files:"
             printf '%s\n' "${FILES[@]}"
           fi
+
+      # ---------------------------------------------------------------
+      # Level 2. File-level review (file naming) - suggestions only
+      # ---------------------------------------------------------------
+      - name: Set up Python
+        if: steps.changed_files.outputs.has_files == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Level 2 - File naming suggestions
+        if: steps.changed_files.outputs.has_files == 'true'
+        run: |
+          python3 scripts/validate_files.py $(cat changed_db_files.txt) > level2_report.md
+          cat level2_report.md
 
       # # ---------------------------------------------------------------
       # # 3. Run the SQL syntax / breaking-change validator
@@ -124,24 +138,20 @@ jobs:
             const fs = require('fs');
             const problems = JSON.parse('${{ steps.pr_quality.outputs.problems }}' || '[]');
 
-            let fileReport = "_No .sql or .yaml/.yml files changed in this PR._";
+            let fileReport = "_No .sql or .yaml files changed in this PR._";
 
             if (fs.existsSync("file_report.md")) {
               fileReport = fs.readFileSync("file_report.md", "utf8");
             }
 
+            let level2Report = "";
+            if (fs.existsSync("level2_report.md")) {
+              level2Report = fs.readFileSync("level2_report.md", "utf8");
+            }
+
             const prQualitySection = problems.length
               ? problems.map(p => `- ${p}`).join('\n')
               : "✅ PR description and title look good.";
-
-            const checklist = `
-            ### 📋 Reviewer Checklist (verify before merging)
-            - [ ] PR description clearly explains what changed and why
-            - [ ] SQL syntax errors above (if any) have been fixed
-            - [ ] Any \`DROP\` / \`ALTER\` statements have been reviewed for backward compatibility
-            - [ ] Migration has been tested against a non-production database
-            - [ ] Rollback plan exists for this change
-            `;
 
               const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
 
@@ -157,7 +167,7 @@ jobs:
 
               ${fileReport}
 
-             
+              ${level2Report}
               `;
 
             // Find an existing bot comment to update instead of spamming new ones
@@ -192,3 +202,4 @@ jobs:
         run: |
           echo "Validation failed — see PR comment for details."
           exit 1
+ 
