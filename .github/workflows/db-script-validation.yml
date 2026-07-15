@@ -106,9 +106,10 @@ jobs:
             const fs = require('fs');
             const problems = JSON.parse('${{ steps.pr_quality.outputs.problems }}' || '[]');
 
-            let sqlReport = "_No .sql files changed in this PR._";
-            if (fs.existsSync('sql_report.md')) {
-              sqlReport = fs.readFileSync('sql_report.md', 'utf8');
+            let fileReport = "_No .sql or .yaml/.yml files changed in this PR._";
+
+            if (fs.existsSync("file_report.md")) {
+              fileReport = fs.readFileSync("file_report.md", "utf8");
             }
 
             const prQualitySection = problems.length
@@ -136,7 +137,7 @@ jobs:
               ### PR Quality
               ${prQualitySection}
 
-              ${sqlReport}
+              ${fileReport}
 
              
               `;
