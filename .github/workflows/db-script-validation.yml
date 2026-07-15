@@ -67,16 +67,34 @@ jobs:
             core.setOutput("problems", JSON.stringify(problems));
             core.setOutput("has_problems", problems.length > 0 ? "true" : "false");
 
-      # # ---------------------------------------------------------------
-      # # 2. Find changed .sql files in this PR
-      # # ---------------------------------------------------------------
-      # - name: Get changed SQL files
-      #   id: changed_files
-      #   run: |
-      #     git fetch origin ${{ github.base_ref }} --depth=1
-      #     FILES=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} -- '*.sql' | tr '\n' ' ')
-      #     echo "files=$FILES" >> "$GITHUB_OUTPUT"
-      #     echo "Changed SQL files: $FILES"
+      # ---------------------------------------------------------------
+      # 2. Find changed .sql / .yaml / .yml files in this PR
+      # ---------------------------------------------------------------
+      - name: Get changed DB script files
+        id: changed_files
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          mapfile -t FILES < <(git diff --name-only "origin/${{ github.base_ref }}" "${{ github.sha }}" -- '*.sql' '*.yaml' '*.yml')
+
+          if [ ${#FILES[@]} -eq 0 ]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "_No .sql or .yaml/.yml files changed in this PR._" > file_report.md
+            echo "No .sql / .yaml / .yml files changed."
+          else
+            echo "has_files=true" >> "$GITHUB_OUTPUT"
+            printf '%s\n' "${FILES[@]}" > changed_db_files.txt
+
+            {
+              echo "### Changed DB script files"
+              echo ""
+              for f in "${FILES[@]}"; do
+                echo "- \`$f\`"
+              done
+            } > file_report.md
+
+            echo "Changed files:"
+            printf '%s\n' "${FILES[@]}"
+          fi
 
       # # ---------------------------------------------------------------
       # # 3. Run the SQL syntax / breaking-change validator
