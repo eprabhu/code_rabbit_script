@@ -6,10 +6,14 @@ on:
     paths:
       - "**/*.sql"
       - "**/*.yaml"
+      - ".github/workflows/db-script-validation.yml"
+      - "scripts/validate_files.py"
+      - "scripts/validate_sql.py"
 
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   validate:
@@ -73,7 +77,9 @@ jobs:
         id: changed_files
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1
-          mapfile -t FILES < <(git diff --name-only "origin/${{ github.base_ref }}" "${{ github.sha }}" -- '*.sql' '*.yaml')
+          # Only Added/Copied/Modified/Renamed/Type-changed — skip Deleted paths
+          # so a rename away from a bad name does not keep flagging the old file.
+          mapfile -t FILES < <(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" "${{ github.sha }}" -- '*.sql' '*.yaml')
 
           if [ ${#FILES[@]} -eq 0 ]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
@@ -107,8 +113,11 @@ jobs:
       - name: Level 2 - File naming suggestions
         if: steps.changed_files.outputs.has_files == 'true'
         run: |
+          # Always rewrite so a previous sticky comment does not keep stale suggestions
+          : > level2_report.md
           python3 scripts/validate_files.py $(cat changed_db_files.txt) > level2_report.md
           cat level2_report.md
+        # When has_files is false, leave no level2_report.md — comment omits File Naming.
 
       # # ---------------------------------------------------------------
       # # 3. Run the SQL syntax / breaking-change validator
@@ -139,59 +148,71 @@ jobs:
             const problems = JSON.parse('${{ steps.pr_quality.outputs.problems }}' || '[]');
 
             let fileReport = "_No .sql or .yaml files changed in this PR._";
-
             if (fs.existsSync("file_report.md")) {
-              fileReport = fs.readFileSync("file_report.md", "utf8");
+              fileReport = fs.readFileSync("file_report.md", "utf8").trim();
             }
 
             let level2Report = "";
             if (fs.existsSync("level2_report.md")) {
-              level2Report = fs.readFileSync("level2_report.md", "utf8");
+              level2Report = fs.readFileSync("level2_report.md", "utf8").trim();
             }
 
             const prQualitySection = problems.length
               ? problems.map(p => `- ${p}`).join('\n')
               : "✅ PR description and title look good.";
 
-              const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
+            const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
 
-              const body = `
-              <p align="left">
-                <img src="${logoUrl}" alt="Polus Logo" width="100" />
-              </p>
+            // Order: PR Quality -> File Naming (if any) -> Changed files last
+            const sections = [
+              `### PR Quality`,
+              prQualitySection,
+            ];
+            if (level2Report) {
+              sections.push("", level2Report);
+            }
+            sections.push("", fileReport);
 
-              ## Automated DB Script Validation
+            const body = [
+              `<p align="left"><img src="${logoUrl}" alt="Polus Logo" width="100" /></p>`,
+              ``,
+              `## Automated PR Validation`,
+              ``,
+              ...sections,
+            ].join("\n");
 
-              ### PR Quality
-              ${prQualitySection}
-
-              ${fileReport}
-
-              ${level2Report}
-              `;
-
-            // Find an existing bot comment to update instead of spamming new ones
+            // Keep a single sticky bot comment: update the first match, delete extras
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes('Automated DB Script Validation'));
+            const botComments = comments.filter(
+              c => c.user.type === 'Bot' && c.body.includes('Automated PR Validation')
+            );
 
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
+            if (botComments.length === 0) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
                 body,
               });
+            } else {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComments[0].id,
+                body,
+              });
+              // Remove older duplicates left behind by previous marker mismatches
+              for (const dup of botComments.slice(1)) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: dup.id,
+                });
+              }
             }
 
       # ---------------------------------------------------------------
