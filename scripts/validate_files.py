@@ -61,7 +61,7 @@ def main():
     if not suggestions:
         return 0
 
-    lines = ["### FILE Naming Quality"]
+    lines = ["### File Naming Quality", ""]
     for s in suggestions:
         lines.append(f"- {s}")
 
