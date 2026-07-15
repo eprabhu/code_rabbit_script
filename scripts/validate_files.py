@@ -61,7 +61,7 @@ def main():
     if not suggestions:
         return 0
 
-    lines = ["## Level 2 - File-level review\n", "**Suggestions:**"]
+    lines = ["### FILE NAMING Quality"]
     for s in suggestions:
         lines.append(f"- {s}")
 
