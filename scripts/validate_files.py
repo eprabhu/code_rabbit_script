@@ -2,18 +2,19 @@
 """
 validate_files.py  (Level 2 - file-level review)
 
-Advisory-only check for file NAMING. Right now it enforces a single rule:
+Advisory-only checks for file naming:
 
-  - DB script file names must be UPPERCASE.
-    Routines are committed as .sql, scripts as .yaml, so BOTH are checked.
+  - SQL routine file names must be UPPERCASE.
     e.g. MERGE_AWD_MASTER_DATA.sql  -> OK
-         PROCEDURES.yaml            -> OK
          merge_awd_master_data.sql  -> suggestion to rename
-         procedures.yaml            -> suggestion to rename
+  - Module-level YAML changelogs must use one of these common names:
+      PROCEDURES.yaml, FUNCTIONS.yaml, SCRIPTS.yaml, VIEWS.yaml
+    e.g. PROCEDURES.yaml   -> OK
+         proceduresss.yaml -> suggestion to use an approved common name
 
-Only the file name (the part before the extension) is checked; the extension
-itself is expected to stay lowercase. Underscores and digits are allowed
-inside the name.
+Higher-level aggregator/config files such as NTU.yaml, ALL.yaml, RELEASE.yaml,
+and properties.yaml are not module changelogs and are excluded from the common
+YAML-name rule.
 
 This script is ADVISORY ONLY: it prints Markdown suggestions and ALWAYS
 exits 0, so it can never block or reject a PR. If every file name is already
@@ -30,20 +31,40 @@ import sys
 
 # Extensions we review: routines (.sql) and scripts (.yaml).
 CHECKED_EXTENSIONS = (".sql", ".yaml")
+COMMON_YAML_NAMES = {
+    "PROCEDURES.yaml",
+    "FUNCTIONS.yaml",
+    "SCRIPTS.yaml",
+    "VIEWS.yaml",
+}
 
 
-def check_uppercase(path: str):
-    """Return a suggestion string if the file name is not uppercase, else None."""
+def check_file_name(path: str):
+    """Return a naming suggestion for a DB file, or None when valid."""
     norm = path.replace("\\", "/")
-    base = os.path.basename(norm)
-    stem, _ext = os.path.splitext(base)
+    # Deleted / missing paths are not naming issues for this PR tip.
+    if not os.path.isfile(path):
+        return None
 
-    # Compare the name portion against its uppercase form.
-    if stem != stem.upper():
+    base = os.path.basename(norm)
+    stem, ext = os.path.splitext(base)
+
+    if ext.lower() == ".sql" and stem != stem.upper():
         return (
             f"`{norm}`: file name should be UPPERCASE. "
             f"Consider renaming `{stem}` to `{stem.upper()}`."
         )
+
+    # Module changelogs follow:
+    # <release>/<client>/<module>/<COMMON_NAME>.yaml
+    is_module_yaml = ext.lower() == ".yaml" and len(norm.split("/")) >= 4
+    if is_module_yaml and base not in COMMON_YAML_NAMES:
+        allowed = ", ".join(f"`{name}`" for name in sorted(COMMON_YAML_NAMES))
+        return (
+            f"`{norm}`: module YAML file must use an approved common name. "
+            f"Allowed names: {allowed}."
+        )
+
     return None
 
 
@@ -53,15 +74,15 @@ def main():
 
     suggestions = []
     for path in db_files:
-        result = check_uppercase(path)
+        result = check_file_name(path)
         if result:
             suggestions.append(result)
 
-    # Only post a message when a file name is lowercase.
+    # Only post a message when a file name violates a naming rule.
     if not suggestions:
         return 0
 
-    lines = ["## Level 2 - File-level review\n", "**Suggestions:**"]
+    lines = ["### File Naming Quality", ""]
     for s in suggestions:
         lines.append(f"- {s}")
 
