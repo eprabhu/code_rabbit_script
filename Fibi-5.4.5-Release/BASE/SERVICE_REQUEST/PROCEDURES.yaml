@@ -34,7 +34,7 @@ databaseChangeLog:
   - changeSet: 
       id: FFIBI-7346-2
       author: Prabhu.E 
-        labels: 'PROCEDURES' 
+      labels: 'PROCEDURES' 
       comment: Modified Procedure
       runOnChange: true
       changes: 
