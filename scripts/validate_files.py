@@ -16,7 +16,8 @@ itself is expected to stay lowercase. Underscores and digits are allowed
 inside the name.
 
 This script is ADVISORY ONLY: it prints Markdown suggestions and ALWAYS
-exits 0, so it can never block or reject a PR.
+exits 0, so it can never block or reject a PR. If every file name is already
+uppercase, it prints nothing.
 
 Usage:
   python3 validate_files.py file1.sql file2.yaml ...
@@ -48,14 +49,7 @@ def check_uppercase(path: str):
 
 def main():
     files = sys.argv[1:]
-    lines = ["## Level 2 - File-level review\n"]
-
     db_files = [f for f in files if f.lower().endswith(CHECKED_EXTENSIONS)]
-
-    if not db_files:
-        lines.append("_No .sql or .yaml files to review._")
-        emit("\n".join(lines))
-        return 0
 
     suggestions = []
     for path in db_files:
@@ -63,12 +57,13 @@ def main():
         if result:
             suggestions.append(result)
 
-    if suggestions:
-        lines.append("**Suggestions:**")
-        for s in suggestions:
-            lines.append(f"- {s}")
-    else:
-        lines.append("All DB script file names are uppercase.")
+    # Only post a message when a file name is lowercase.
+    if not suggestions:
+        return 0
+
+    lines = ["## Level 2 - File-level review\n", "**Suggestions:**"]
+    for s in suggestions:
+        lines.append(f"- {s}")
 
     emit("\n".join(lines))
     return 0
