@@ -4,9 +4,11 @@ validate_files.py  (Level 2 - file-level review)
 
 Advisory-only checks for file naming:
 
-  - SQL routine file names must be UPPERCASE.
-    e.g. MERGE_AWD_MASTER_DATA.sql  -> OK
-         merge_awd_master_data.sql  -> suggestion to rename
+  - SQL routine files (.sql): file name must be UPPERCASE and must match the
+    routine name declared inside the file (CREATE PROCEDURE/FUNCTION/VIEW).
+    e.g. MERGE_AWD_MASTER_DATA.sql with CREATE PROCEDURE `MERGE_AWD_MASTER_DATA` -> OK
+         merge_awd_master_data.sql                                      -> suggestion
+         WRONG_NAME.sql with CREATE PROCEDURE `MERGE_AWD_MASTER_DATA`   -> suggestion
   - Module-level YAML changelogs must use one of these common names:
       PROCEDURES.yaml, FUNCTIONS.yaml, SCRIPTS.yaml, VIEWS.yaml
     e.g. PROCEDURES.yaml   -> OK
@@ -27,6 +29,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 
 # Extensions we review: routines (.sql) and scripts (.yaml).
@@ -38,34 +41,64 @@ COMMON_YAML_NAMES = {
     "VIEWS.yaml",
 }
 
+# CREATE [OR REPLACE] PROCEDURE|FUNCTION|VIEW|TRIGGER `NAME` or NAME
+ROUTINE_NAME_RE = re.compile(
+    r"CREATE\s+(?:OR\s+REPLACE\s+)?(?:DEFINER\s*=\s*\S+\s+)?"
+    r"(PROCEDURE|FUNCTION|VIEW|TRIGGER)\s+`?([A-Za-z0-9_]+)`?",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def read_routine_name(path: str):
+    """Return the routine/object name declared inside a .sql file, or None."""
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read(16384)
+    except OSError:
+        return None
+    match = ROUTINE_NAME_RE.search(content)
+    return match.group(2) if match else None
+
 
 def check_file_name(path: str):
-    """Return a naming suggestion for a DB file, or None when valid."""
+    """Return naming suggestions for a DB file (empty list when valid)."""
+    suggestions = []
     norm = path.replace("\\", "/")
-    # Deleted / missing paths are not naming issues for this PR tip.
     if not os.path.isfile(path):
-        return None
+        return suggestions
 
     base = os.path.basename(norm)
     stem, ext = os.path.splitext(base)
 
-    if ext.lower() == ".sql" and stem != stem.upper():
-        return (
-            f"`{norm}`: file name should be UPPERCASE. "
-            f"Consider renaming `{stem}` to `{stem.upper()}`."
-        )
+    if ext.lower() == ".sql":
+        if stem != stem.upper():
+            suggestions.append(
+                f"`{norm}`: file name should be UPPERCASE. "
+                f"Consider renaming `{stem}` to `{stem.upper()}`."
+            )
+
+        routine_name = read_routine_name(path)
+        if routine_name and routine_name.upper() != stem.upper():
+            expected = routine_name.upper()
+            suggestions.append(
+                f"`{norm}`: file name `{stem}` does not match the routine name "
+                f"`{routine_name}` inside the file. "
+                f"Consider renaming the file to `{expected}.sql`."
+            )
+
+        return suggestions
 
     # Module changelogs follow:
     # <release>/<client>/<module>/<COMMON_NAME>.yaml
     is_module_yaml = ext.lower() == ".yaml" and len(norm.split("/")) >= 4
     if is_module_yaml and base not in COMMON_YAML_NAMES:
         allowed = ", ".join(f"`{name}`" for name in sorted(COMMON_YAML_NAMES))
-        return (
+        suggestions.append(
             f"`{norm}`: module YAML file must use an approved common name. "
             f"Allowed names: {allowed}."
         )
 
-    return None
+    return suggestions
 
 
 def main():
@@ -74,9 +107,7 @@ def main():
 
     suggestions = []
     for path in db_files:
-        result = check_file_name(path)
-        if result:
-            suggestions.append(result)
+        suggestions.extend(check_file_name(path))
 
     # Only post a message when a file name violates a naming rule.
     if not suggestions:
