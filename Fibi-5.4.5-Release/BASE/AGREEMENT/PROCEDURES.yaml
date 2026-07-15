@@ -74,3 +74,18 @@ databaseChangeLog:
             relativeToChangelogFile: false 
             splitStatements: false
       rollback: empty
+
+  - changeSet: 
+      id: FIBI-7260-5
+      author: Prabhu.E 
+      labels: 'PROCEDURES' 
+      comment: Modified Procedure
+      runOnChange: true
+      changes: 
+        - sql: 
+            sql: DROP PROCEDURE IF EXISTS GET_ASSIGNEES_FOR_ADMINISTRATOR; 
+        - sqlFile: 
+            path: ROUTINES/BASE/AGREEMENT/PROCEDURES/GET_ASSIGNEES_FOR_ADMINISTRATOR.sql 
+            relativeToChangelogFile: false 
+            splitStatements: false
+      rollback: empty
