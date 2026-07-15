@@ -68,7 +68,7 @@ def main():
         for s in suggestions:
             lines.append(f"- {s}")
     else:
-        lines.append("OK - All DB script file names are uppercase.")
+        lines.append("All DB script file names are uppercase.")
 
     emit("\n".join(lines))
     return 0
