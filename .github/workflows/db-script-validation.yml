@@ -6,6 +6,9 @@ on:
     paths:
       - "**/*.sql"
       - "**/*.yaml"
+      - ".github/workflows/db-script-validation.yml"
+      - "scripts/validate_files.py"
+      - "scripts/validate_sql.py"
 
 permissions:
   contents: read
@@ -74,7 +77,9 @@ jobs:
         id: changed_files
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1
-          mapfile -t FILES < <(git diff --name-only "origin/${{ github.base_ref }}" "${{ github.sha }}" -- '*.sql' '*.yaml')
+          # Only Added/Copied/Modified/Renamed/Type-changed — skip Deleted paths
+          # so a rename away from a bad name does not keep flagging the old file.
+          mapfile -t FILES < <(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" "${{ github.sha }}" -- '*.sql' '*.yaml')
 
           if [ ${#FILES[@]} -eq 0 ]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
@@ -108,8 +113,11 @@ jobs:
       - name: Level 2 - File naming suggestions
         if: steps.changed_files.outputs.has_files == 'true'
         run: |
+          # Always rewrite so a previous sticky comment does not keep stale suggestions
+          : > level2_report.md
           python3 scripts/validate_files.py $(cat changed_db_files.txt) > level2_report.md
           cat level2_report.md
+        # When has_files is false, leave no level2_report.md — comment omits File Naming.
 
       # # ---------------------------------------------------------------
       # # 3. Run the SQL syntax / breaking-change validator

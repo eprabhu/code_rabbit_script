@@ -42,6 +42,10 @@ COMMON_YAML_NAMES = {
 def check_file_name(path: str):
     """Return a naming suggestion for a DB file, or None when valid."""
     norm = path.replace("\\", "/")
+    # Deleted / missing paths are not naming issues for this PR tip.
+    if not os.path.isfile(path):
+        return None
+
     base = os.path.basename(norm)
     stem, ext = os.path.splitext(base)
 
