@@ -160,7 +160,7 @@ jobs:
                 <img src="${logoUrl}" alt="Polus Logo" width="100" />
               </p>
 
-              ## Automated DB Script Validation
+              ## Automated PR Validation
 
               ### PR Quality
               ${prQualitySection}
