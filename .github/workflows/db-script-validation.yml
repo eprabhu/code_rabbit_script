@@ -80,6 +80,7 @@ jobs:
             # Clear previous reports so the sticky comment drops stale findings
             : > level2_report.md
             : > level3_report.md
+            : > level4_report.md
             echo "_No .sql or .yaml files changed in this PR._" > file_report.md
             echo "No .sql / .yaml files changed."
           else
@@ -135,6 +136,23 @@ jobs:
           cat level3_report.md
 
       # ---------------------------------------------------------------
+      # Level 4. SCRIPTS.yaml inline SQL review - suggestions only
+      # ---------------------------------------------------------------
+      - name: Level 4 - Scripts content suggestions
+        if: steps.changed_files.outputs.has_files == 'true'
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_HEAD_SHA: ${{ github.sha }}
+        run: |
+          : > level4_report.md
+          mapfile -t SCRIPTS_FILES < <(grep -i '/SCRIPTS\.yaml$' changed_db_files.txt || true)
+          if [ ${#SCRIPTS_FILES[@]} -gt 0 ]; then
+            python3 -m pip install --quiet PyYAML
+            python3 scripts/validate_scripts.py "${SCRIPTS_FILES[@]}" > level4_report.md
+          fi
+          cat level4_report.md
+
+      # ---------------------------------------------------------------
       # Post / update a single PR comment with all review results
       # ---------------------------------------------------------------
       - name: Post PR comment
@@ -166,6 +184,14 @@ jobs:
               level3Report = "";
             }
 
+            let level4Report = "";
+            if (fs.existsSync("level4_report.md")) {
+              level4Report = fs.readFileSync("level4_report.md", "utf8").trim();
+            }
+            if (!level4Report.includes("\n- ") && !level4Report.startsWith("- ")) {
+              level4Report = "";
+            }
+
             const hasDbFiles = '${{ steps.changed_files.outputs.has_files }}' === 'true';
 
             const prQualitySection = problems.length
@@ -174,7 +200,7 @@ jobs:
 
             const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
 
-            // Order: PR Quality -> Level 2 -> Level 3 -> Changed files last
+            // Order: PR Quality -> Level 2 -> Level 3 -> Level 4 -> Changed files last
             const sections = [
               `### PR Quality`,
               prQualitySection,
@@ -184,6 +210,9 @@ jobs:
             }
             if (hasDbFiles && level3Report) {
               sections.push("", level3Report);
+            }
+            if (hasDbFiles && level4Report) {
+              sections.push("", level4Report);
             }
             if (hasDbFiles) {
               sections.push("", fileReport);
@@ -232,7 +261,7 @@ jobs:
             }
 
       # ---------------------------------------------------------------
-      # Fail only for Level 1 PR-quality problems (Levels 2/3 are advisory)
+      # Fail only for Level 1 PR-quality problems (Levels 2/3/4 are advisory)
       # ---------------------------------------------------------------
       - name: Fail if problems were found
         if: steps.pr_quality.outputs.has_problems == 'true'
