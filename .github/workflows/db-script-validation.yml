@@ -122,6 +122,8 @@ jobs:
       # ---------------------------------------------------------------
       - name: Level 3 - YAML content suggestions
         if: steps.changed_files.outputs.has_files == 'true'
+        env:
+          GITHUB_BASE_REF: origin/${{ github.base_ref }}
         run: |
           : > level3_report.md
           mapfile -t YAML_FILES < <(grep -E '\.yaml$' changed_db_files.txt || true)
