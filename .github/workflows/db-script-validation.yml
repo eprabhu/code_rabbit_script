@@ -64,6 +64,22 @@ jobs:
             core.setOutput("problems", JSON.stringify(problems));
             core.setOutput("has_problems", problems.length > 0 ? "true" : "false");
 
+      - name: Check for tokens and database credentials
+        id: secrets_scan
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_HEAD_SHA: ${{ github.sha }}
+        run: |
+          set +e
+          python3 scripts/validate_secrets.py > secrets_report.md
+          status=$?
+          cat secrets_report.md
+          if [ "$status" -ne 0 ]; then
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "has_secrets=false" >> "$GITHUB_OUTPUT"
+
       # ---------------------------------------------------------------
       # 2. Find changed .sql / .yaml files in this PR
       # ---------------------------------------------------------------
@@ -192,6 +208,11 @@ jobs:
               level4Report = "";
             }
 
+            let secretsReport = "✅ No tokens or database credentials detected in PR commits.";
+            if (fs.existsSync("secrets_report.md")) {
+              secretsReport = fs.readFileSync("secrets_report.md", "utf8").trim();
+            }
+
             const hasDbFiles = '${{ steps.changed_files.outputs.has_files }}' === 'true';
 
             const prQualitySection = problems.length
@@ -200,10 +221,12 @@ jobs:
 
             const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
 
-            // Order: PR Quality -> Level 2 -> Level 3 -> Level 4 -> Changed files last
+            // Order: PR Quality -> Security -> Level 2 -> Level 3 -> Level 4 -> Changed files last
             const sections = [
               `### PR Quality`,
               prQualitySection,
+              "",
+              secretsReport,
             ];
             if (hasDbFiles && level2Report) {
               sections.push("", level2Report);
@@ -261,10 +284,10 @@ jobs:
             }
 
       # ---------------------------------------------------------------
-      # Fail only for Level 1 PR-quality problems (Levels 2/3/4 are advisory)
+      # Fail for Level 1 PR-quality or security problems (Levels 2/3/4 are advisory)
       # ---------------------------------------------------------------
       - name: Fail if problems were found
-        if: steps.pr_quality.outputs.has_problems == 'true'
+        if: steps.pr_quality.outputs.has_problems == 'true' || steps.secrets_scan.outputs.has_secrets == 'true'
         run: |
           echo "Validation failed — see PR comment for details."
           exit 1
