@@ -91,7 +91,7 @@ databaseChangeLog:
       rollback: empty
 
   - changeSet: 
-      id: FIBI-7260-5
+      id: FIBI-7260-6
       author: Prabhu.E 
       labels: 'PROCEDURES' 
       comment: Modified Procedure
