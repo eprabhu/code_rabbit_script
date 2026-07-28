@@ -34,6 +34,13 @@ def labels_include_ddl(labels_value: str) -> bool:
     return "DDL" in tokens
 
 
+def labels_include_dml(labels_value: str) -> bool:
+    """Return True when labels include the DML token."""
+    labels = display_value(labels_value.strip())
+    tokens = [token.strip() for token in labels.split(",") if token.strip()]
+    return "DML" in tokens
+
+
 def get_git_diff(path: str, base_sha: str, head_sha: str) -> Optional[str]:
     """Return git diff text for a file between base and head commits."""
     if not base_sha or not head_sha:

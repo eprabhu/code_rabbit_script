@@ -4,8 +4,11 @@
 Checks modified changeSets only (PR diff scoped) for:
   - Inline SQL quality (typos, semicolons, deprecated functions)
   - Disallowed USE database statements
+  - DML rules: UPDATE/INSERT only in DML-labelled changeSets
+  - UPDATE statements in DML changeSets must include SQL_SAFE_UPDATES = 0/1,
+    UPDATE_TIMESTAMP, and UPDATE_USER
+  - INSERT statements in DML changeSets must include UPDATE_TIMESTAMP and UPDATE_USER
   - Destructive UPDATE/DELETE without WHERE
-  - SQL_SAFE_UPDATES left at 0
   - Missing rollback on DDL changeSets
   - Required changeSet metadata (author, labels, comment, changes)
 
@@ -30,6 +33,7 @@ from changeset_utils import (  # noqa: E402
     get_modified_changesets,
     is_scripts_yaml,
     labels_include_ddl,
+    labels_include_dml,
 )
 from validate_sql import check_sql_content  # noqa: E402
 
@@ -38,6 +42,15 @@ UPDATE_DELETE_RE = re.compile(r"\b(UPDATE|DELETE)\b", re.IGNORECASE)
 WHERE_RE = re.compile(r"\bWHERE\b", re.IGNORECASE)
 SQL_SAFE_UPDATES_OFF_RE = re.compile(r"SQL_SAFE_UPDATES\s*=\s*0", re.IGNORECASE)
 SQL_SAFE_UPDATES_ON_RE = re.compile(r"SQL_SAFE_UPDATES\s*=\s*1", re.IGNORECASE)
+UPDATE_TABLE_RE = re.compile(
+    r"\bUPDATE\s+(?:`?[A-Za-z0-9_]+`?\.)?`?[A-Za-z0-9_]+`?",
+    re.IGNORECASE,
+)
+INSERT_INTO_RE = re.compile(r"\bINSERT\s+(?:IGNORE\s+)?INTO\b", re.IGNORECASE)
+UPDATE_TIMESTAMP_ASSIGN_RE = re.compile(r"\bUPDATE_TIMESTAMP\s*=", re.IGNORECASE)
+UPDATE_USER_ASSIGN_RE = re.compile(r"\bUPDATE_USER\s*=", re.IGNORECASE)
+UPDATE_TIMESTAMP_COL_RE = re.compile(r"\bUPDATE_TIMESTAMP\b", re.IGNORECASE)
+UPDATE_USER_COL_RE = re.compile(r"\bUPDATE_USER\b", re.IGNORECASE)
 VALID_LABELS = {"DDL", "DML"}
 REQUIRED_FIELDS = ("id", "author", "labels", "comment", "changes")
 
@@ -128,11 +141,79 @@ def check_destructive_sql(sql_text: str) -> List[str]:
     return warnings
 
 
+def has_update_statement(sql_text: str) -> bool:
+    """Return True when SQL contains a table UPDATE statement."""
+    return bool(UPDATE_TABLE_RE.search(sql_text))
+
+
+def has_insert_statement(sql_text: str) -> bool:
+    """Return True when SQL contains an INSERT INTO statement."""
+    return bool(INSERT_INTO_RE.search(sql_text))
+
+
+def check_dml_data_statements(
+    path: str,
+    changeset_id: str,
+    section: str,
+    sql_text: str,
+    labels_value: Any,
+) -> List[str]:
+    """Validate DML rules for UPDATE/INSERT statements in SCRIPTS.yaml."""
+    findings: List[str] = []
+    prefix = f"`{path}` (changeSet `{changeset_id}`, {section})"
+    is_dml = labels_include_dml(str(labels_value or ""))
+    has_update = has_update_statement(sql_text)
+    has_insert = has_insert_statement(sql_text)
+
+    if not has_update and not has_insert:
+        return findings
+
+    if not is_dml:
+        if has_update:
+            findings.append(
+                f"{prefix}: UPDATE statements are only allowed in DML-labelled changeSets."
+            )
+        if has_insert:
+            findings.append(
+                f"{prefix}: INSERT statements are only allowed in DML-labelled changeSets."
+            )
+        return findings
+
+    if has_update:
+        missing: List[str] = []
+        if not SQL_SAFE_UPDATES_OFF_RE.search(sql_text):
+            missing.append("SQL_SAFE_UPDATES = 0")
+        if not SQL_SAFE_UPDATES_ON_RE.search(sql_text):
+            missing.append("SQL_SAFE_UPDATES = 1")
+        if not UPDATE_TIMESTAMP_ASSIGN_RE.search(sql_text):
+            missing.append("UPDATE_TIMESTAMP")
+        if not UPDATE_USER_ASSIGN_RE.search(sql_text):
+            missing.append("UPDATE_USER")
+        if missing:
+            findings.append(
+                f"{prefix}: UPDATE statement must include: {', '.join(missing)}."
+            )
+
+    if has_insert:
+        missing: List[str] = []
+        if not UPDATE_TIMESTAMP_COL_RE.search(sql_text):
+            missing.append("UPDATE_TIMESTAMP")
+        if not UPDATE_USER_COL_RE.search(sql_text):
+            missing.append("UPDATE_USER")
+        if missing:
+            findings.append(
+                f"{prefix}: INSERT statement must include: {', '.join(missing)}."
+            )
+
+    return findings
+
+
 def check_scripts_sql(
     path: str,
     changeset_id: str,
     section: str,
     sql_text: str,
+    labels_value: Any,
 ) -> List[str]:
     """Return advisory findings for one inline SQL block."""
     findings: List[str] = []
@@ -150,10 +231,9 @@ def check_scripts_sql(
     for message in check_destructive_sql(sql_text):
         findings.append(f"{prefix}: {message}")
 
-    if SQL_SAFE_UPDATES_OFF_RE.search(sql_text) and not SQL_SAFE_UPDATES_ON_RE.search(sql_text):
-        findings.append(
-            f"{prefix}: SQL_SAFE_UPDATES is set to 0 but not reset to 1 in the same script block."
-        )
+    findings.extend(
+        check_dml_data_statements(path, changeset_id, section, sql_text, labels_value)
+    )
 
     return findings
 
@@ -213,8 +293,11 @@ def check_scripts_yaml(
 
         findings.extend(check_changeset_structure(norm, changeset))
 
+        labels_value = changeset.get("labels")
         for section, sql_text in extract_sql_sections(changeset):
-            findings.extend(check_scripts_sql(norm, changeset_id, section, sql_text))
+            findings.extend(
+                check_scripts_sql(norm, changeset_id, section, sql_text, labels_value)
+            )
 
     return findings
 
