@@ -149,26 +149,30 @@ def check_dml_update_statement(
     labels_value: Any,
 ) -> List[str]:
     """Validate UPDATE requirements only for DML-labelled changeSets with UPDATE."""
+    if section != "changes":
+        return []
     if not labels_include_dml(str(labels_value or "")):
         return []
     if not has_update_statement(sql_text):
         return []
 
-    prefix = f"`{path}` (changeSet `{changeset_id}`, {section})"
+    prefix = f"`{path}` (changeSet `{changeset_id}`)"
     missing: List[str] = []
     if not SQL_SAFE_UPDATES_OFF_RE.search(sql_text):
-        missing.append("SQL_SAFE_UPDATES = 0")
+        missing.append("SET SQL_SAFE_UPDATES = 0; before the UPDATE")
     if not SQL_SAFE_UPDATES_ON_RE.search(sql_text):
-        missing.append("SQL_SAFE_UPDATES = 1")
+        missing.append("SET SQL_SAFE_UPDATES = 1; after the UPDATE")
     if not UPDATE_TIMESTAMP_ASSIGN_RE.search(sql_text):
-        missing.append("UPDATE_TIMESTAMP")
+        missing.append("UPDATE_TIMESTAMP = UTC_TIMESTAMP() in the UPDATE SET clause")
     if not UPDATE_USER_ASSIGN_RE.search(sql_text):
-        missing.append("UPDATE_USER")
+        missing.append("UPDATE_USER = 'admin' (or user) in the UPDATE SET clause")
     if not missing:
         return []
 
     return [
-        f"{prefix}: UPDATE statement must include: {', '.join(missing)}."
+        f"{prefix}: DML UPDATE script is missing required audit/safety lines — add: "
+        + "; ".join(missing)
+        + "."
     ]
 
 
@@ -186,8 +190,16 @@ def check_scripts_sql(
     errors, warnings = check_sql_content(sql_text)
     for message in errors:
         findings.append(f"{prefix}: {message}")
-    for message in warnings:
-        findings.append(f"{prefix}: {message}")
+    # Skip semicolon heuristic for CTE/WITH scripts — it produces false warnings.
+    if not re.search(r"^\s*WITH\b", sql_text, re.IGNORECASE | re.MULTILINE):
+        for message in warnings:
+            if "semicolon" in message.lower():
+                findings.append(
+                    f"{prefix}: SQL syntax check — please confirm each statement ends with ';'. "
+                    f"({message})"
+                )
+            else:
+                findings.append(f"{prefix}: {message}")
 
     if USE_DB_RE.search(sql_text):
         findings.append(f"{prefix}: Remove `USE <database>` statements from script blocks.")

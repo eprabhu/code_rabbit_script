@@ -266,3 +266,62 @@ databaseChangeLog:
               UPDATE AGREEMENT_HEADER 
               SET ADMIN_ASSIGN_DATE = NULL 
               WHERE ADMIN_PERSON_ID IS NOT NULL AND ADMIN_ASSIGN_DATE IS NOT NULL;
+
+- changeSet:
+      id: FIBI-7422-2
+      author: Prabhu.E
+      labels: 'DML'
+      comment: Update Admin Assign Date in Agreement Header  
+      changes:
+        - sql:
+            sql: |
+              
+              WITH ActionLogParsed AS (
+                  SELECT 
+                      AGREEMENT_REQUEST_ID,
+                      UPDATE_TIMESTAMP
+                  FROM (
+                      SELECT 
+                          AGREEMENT_REQUEST_ID,
+                          UPDATE_TIMESTAMP,
+                          ACTION_TYPE_CODE,
+                          CASE 
+                              WHEN JSON_VALID(DESCRIPTION) 
+                                  THEN JSON_UNQUOTE(JSON_EXTRACT(DESCRIPTION, '$.Administrator'))
+                              ELSE DESCRIPTION
+                          END AS DESCRIPTION
+                      FROM agreement_action_log
+                  ) T
+                  WHERE 
+                      (
+                          T.ACTION_TYPE_CODE IN ('23', '24')
+                          OR 
+                          (T.ACTION_TYPE_CODE = '100' AND T.DESCRIPTION LIKE '%</b> admin')
+                          OR
+                          (T.DESCRIPTION LIKE 'New Admin%has been assigned')
+                      )
+                      AND EXISTS (
+                          SELECT 1 
+                          FROM AGREEMENT_HEADER AH 
+                          WHERE AH.AGREEMENT_REQUEST_ID = T.AGREEMENT_REQUEST_ID 
+                            AND AH.ADMIN_PERSON_ID IS NOT NULL
+                      )
+              ),
+              LatestUpdate AS (
+                  SELECT 
+                      AGREEMENT_REQUEST_ID, 
+                      MAX(UPDATE_TIMESTAMP) AS UPDATE_TIMESTAMP
+                  FROM ActionLogParsed
+                  GROUP BY AGREEMENT_REQUEST_ID
+              )
+              UPDATE AGREEMENT_HEADER AH
+              JOIN LatestUpdate LU ON AH.AGREEMENT_REQUEST_ID = LU.AGREEMENT_REQUEST_ID
+              SET AH.ADMIN_ASSIGN_DATE = LU.UPDATE_TIMESTAMP;
+              
+
+      rollback:
+        - sql:
+            sql: |
+              UPDATE AGREEMENT_HEADER 
+              SET ADMIN_ASSIGN_DATE = NULL 
+              WHERE ADMIN_PERSON_ID IS NOT NULL AND ADMIN_ASSIGN_DATE IS NOT NULL;
