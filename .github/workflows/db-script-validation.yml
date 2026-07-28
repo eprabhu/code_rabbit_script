@@ -64,6 +64,22 @@ jobs:
             core.setOutput("problems", JSON.stringify(problems));
             core.setOutput("has_problems", problems.length > 0 ? "true" : "false");
 
+      - name: Check for tokens and database credentials
+        id: secrets_scan
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_HEAD_SHA: ${{ github.sha }}
+        run: |
+          set +e
+          python3 scripts/validate_secrets.py > secrets_report.md
+          status=$?
+          cat secrets_report.md
+          if [ "$status" -ne 0 ]; then
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "has_secrets=false" >> "$GITHUB_OUTPUT"
+
       # ---------------------------------------------------------------
       # 2. Find changed .sql / .yaml files in this PR
       # ---------------------------------------------------------------
@@ -80,6 +96,7 @@ jobs:
             # Clear previous reports so the sticky comment drops stale findings
             : > level2_report.md
             : > level3_report.md
+            : > level4_report.md
             echo "_No .sql or .yaml files changed in this PR._" > file_report.md
             echo "No .sql / .yaml files changed."
           else
@@ -122,6 +139,9 @@ jobs:
       # ---------------------------------------------------------------
       - name: Level 3 - YAML content suggestions
         if: steps.changed_files.outputs.has_files == 'true'
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_HEAD_SHA: ${{ github.sha }}
         run: |
           : > level3_report.md
           mapfile -t YAML_FILES < <(grep -E '\.yaml$' changed_db_files.txt || true)
@@ -130,6 +150,23 @@ jobs:
             python3 scripts/validate_yaml.py "${YAML_FILES[@]}" > level3_report.md
           fi
           cat level3_report.md
+
+      # ---------------------------------------------------------------
+      # Level 4. SCRIPTS.yaml inline SQL review - suggestions only
+      # ---------------------------------------------------------------
+      - name: Level 4 - Scripts content suggestions
+        if: steps.changed_files.outputs.has_files == 'true'
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_HEAD_SHA: ${{ github.sha }}
+        run: |
+          : > level4_report.md
+          mapfile -t SCRIPTS_FILES < <(grep -i '/SCRIPTS\.yaml$' changed_db_files.txt || true)
+          if [ ${#SCRIPTS_FILES[@]} -gt 0 ]; then
+            python3 -m pip install --quiet PyYAML
+            python3 scripts/validate_scripts.py "${SCRIPTS_FILES[@]}" > level4_report.md
+          fi
+          cat level4_report.md
 
       # ---------------------------------------------------------------
       # Post / update a single PR comment with all review results
@@ -163,6 +200,19 @@ jobs:
               level3Report = "";
             }
 
+            let level4Report = "";
+            if (fs.existsSync("level4_report.md")) {
+              level4Report = fs.readFileSync("level4_report.md", "utf8").trim();
+            }
+            if (!level4Report.includes("\n- ") && !level4Report.startsWith("- ")) {
+              level4Report = "";
+            }
+
+            let secretsReport = "✅ No tokens or database credentials detected in PR commits.";
+            if (fs.existsSync("secrets_report.md")) {
+              secretsReport = fs.readFileSync("secrets_report.md", "utf8").trim();
+            }
+
             const hasDbFiles = '${{ steps.changed_files.outputs.has_files }}' === 'true';
 
             const prQualitySection = problems.length
@@ -171,16 +221,21 @@ jobs:
 
             const logoUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${context.payload.repository.default_branch}/.github/images/polus-logo.png`;
 
-            // Order: PR Quality -> Level 2 -> Level 3 -> Changed files last
+            // Order: PR Quality -> Security -> Level 2 -> Level 3 -> Level 4 -> Changed files last
             const sections = [
               `### PR Quality`,
               prQualitySection,
+              "",
+              secretsReport,
             ];
             if (hasDbFiles && level2Report) {
               sections.push("", level2Report);
             }
             if (hasDbFiles && level3Report) {
               sections.push("", level3Report);
+            }
+            if (hasDbFiles && level4Report) {
+              sections.push("", level4Report);
             }
             if (hasDbFiles) {
               sections.push("", fileReport);
@@ -229,10 +284,10 @@ jobs:
             }
 
       # ---------------------------------------------------------------
-      # Fail only for Level 1 PR-quality problems (Levels 2/3 are advisory)
+      # Fail for Level 1 PR-quality or security problems (Levels 2/3/4 are advisory)
       # ---------------------------------------------------------------
       - name: Fail if problems were found
-        if: steps.pr_quality.outputs.has_problems == 'true'
+        if: steps.pr_quality.outputs.has_problems == 'true' || steps.secrets_scan.outputs.has_secrets == 'true'
         run: |
           echo "Validation failed — see PR comment for details."
           exit 1

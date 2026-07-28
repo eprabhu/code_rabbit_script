@@ -3,7 +3,7 @@ databaseChangeLog:
 - changeSet:
       id: FC-6991-1
       author: Prabhu.E
-      labels: 'DML'
+      labels: 'DDL'
       comment:  added new action type for agreement upload
       changes:
         - sql:
