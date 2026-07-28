@@ -71,6 +71,14 @@ def check_file(path: str):
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         raw = f.read()
 
+    return check_sql_content(raw)
+
+
+def check_sql_content(raw: str):
+    """Return (errors, warnings) for inline or file SQL content."""
+    errors = []
+    warnings = []
+
     code = strip_comments(raw)
 
     # 1. Unmatched single quotes (naive: count of ' should be even,

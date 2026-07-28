@@ -4,29 +4,58 @@
 Checks:
   - YAML syntax/indentation errors.
   - Duplicate changeSet IDs within the same file.
+  - DDL changeSets added in SCRIPTS.yaml (change-request document reminder).
 
 The script always exits 0. Findings are suggestions and never block a PR.
 PyYAML is installed by the GitHub Actions workflow.
 """
 
+from __future__ import annotations
+
 import os
-import re
 import sys
 from collections import defaultdict
+from typing import List, Optional
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 
 import yaml
 
+from changeset_utils import (
+    CHANGESET_RE,
+    ID_RE,
+    collect_modified_ddl_changesets,
+    display_value,
+    get_modified_changesets,
+    is_scripts_yaml,
+)
 
-CHANGESET_RE = re.compile(r"^(\s*)-\s*changeSet\s*:\s*(?:#.*)?$")
-ID_RE = re.compile(r"^(\s*)id\s*:\s*(.*?)\s*(?:#.*)?$")
 
+def check_scripts_yaml_ddl(
+    path: str,
+    base_sha: Optional[str],
+    head_sha: Optional[str],
+) -> List[str]:
+    """Return DDL change-request reminders for modified SCRIPTS.yaml changeSets."""
+    if not is_scripts_yaml(path):
+        return []
 
-def display_value(value: str) -> str:
-    """Remove optional YAML quotes from a scalar used as a changeSet ID."""
-    value = value.strip()
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-        return value[1:-1]
-    return value
+    norm = path.replace("\\", "/")
+    lines, touched_lines, _modified_ids = get_modified_changesets(path, base_sha, head_sha)
+    if not touched_lines:
+        return []
+
+    ddl_changeset_ids = collect_modified_ddl_changesets(lines, touched_lines)
+
+    findings = []
+    for changeset_id in ddl_changeset_ids:
+        findings.append(
+            f"`{norm}` (changeSet `{changeset_id}`): "
+            "Is Change Request Document available for this DDL change?"
+        )
+    return findings
 
 
 def collect_changeset_ids(lines: list[str]) -> dict[str, list[int]]:
@@ -98,13 +127,23 @@ def main() -> int:
     yaml_files = [
         path for path in sys.argv[1:] if path.lower().endswith(".yaml")
     ]
-    findings = []
-    for path in yaml_files:
-        findings.extend(check_file(path))
+    base_sha = os.environ.get("GITHUB_BASE_SHA", "").strip() or None
+    head_sha = os.environ.get("GITHUB_HEAD_SHA", "").strip() or None
+    yaml_findings: List[str] = []
+    ddl_findings: List[str] = []
 
-    if findings:
+    for path in yaml_files:
+        yaml_findings.extend(check_file(path))
+        ddl_findings.extend(check_scripts_yaml_ddl(path, base_sha, head_sha))
+
+    if ddl_findings:
+        print("### DDL Change Review\n")
+        for finding in ddl_findings:
+            print(f"- {finding}")
+
+    if yaml_findings:
         print("### YAML Content Quality\n")
-        for finding in findings:
+        for finding in yaml_findings:
             print(f"- {finding}")
 
     return 0
