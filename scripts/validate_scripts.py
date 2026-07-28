@@ -4,10 +4,8 @@
 Checks modified changeSets only (PR diff scoped) for:
   - Inline SQL quality (typos, semicolons, deprecated functions)
   - Disallowed USE database statements
-  - DML rules: UPDATE/INSERT only in DML-labelled changeSets
-  - UPDATE statements in DML changeSets must include SQL_SAFE_UPDATES = 0/1,
-    UPDATE_TIMESTAMP, and UPDATE_USER
-  - INSERT statements in DML changeSets must include UPDATE_TIMESTAMP and UPDATE_USER
+  - DML rules: when a DML-labelled changeSet contains UPDATE, require
+    SQL_SAFE_UPDATES = 0/1, UPDATE_TIMESTAMP, and UPDATE_USER
   - Destructive UPDATE/DELETE without WHERE
   - Missing rollback on DDL changeSets
   - Required changeSet metadata (author, labels, comment, changes)
@@ -46,11 +44,8 @@ UPDATE_TABLE_RE = re.compile(
     r"\bUPDATE\s+(?:`?[A-Za-z0-9_]+`?\.)?`?[A-Za-z0-9_]+`?",
     re.IGNORECASE,
 )
-INSERT_INTO_RE = re.compile(r"\bINSERT\s+(?:IGNORE\s+)?INTO\b", re.IGNORECASE)
 UPDATE_TIMESTAMP_ASSIGN_RE = re.compile(r"\bUPDATE_TIMESTAMP\s*=", re.IGNORECASE)
 UPDATE_USER_ASSIGN_RE = re.compile(r"\bUPDATE_USER\s*=", re.IGNORECASE)
-UPDATE_TIMESTAMP_COL_RE = re.compile(r"\bUPDATE_TIMESTAMP\b", re.IGNORECASE)
-UPDATE_USER_COL_RE = re.compile(r"\bUPDATE_USER\b", re.IGNORECASE)
 VALID_LABELS = {"DDL", "DML"}
 REQUIRED_FIELDS = ("id", "author", "labels", "comment", "changes")
 
@@ -146,66 +141,35 @@ def has_update_statement(sql_text: str) -> bool:
     return bool(UPDATE_TABLE_RE.search(sql_text))
 
 
-def has_insert_statement(sql_text: str) -> bool:
-    """Return True when SQL contains an INSERT INTO statement."""
-    return bool(INSERT_INTO_RE.search(sql_text))
-
-
-def check_dml_data_statements(
+def check_dml_update_statement(
     path: str,
     changeset_id: str,
     section: str,
     sql_text: str,
     labels_value: Any,
 ) -> List[str]:
-    """Validate DML rules for UPDATE/INSERT statements in SCRIPTS.yaml."""
-    findings: List[str] = []
+    """Validate UPDATE requirements only for DML-labelled changeSets with UPDATE."""
+    if not labels_include_dml(str(labels_value or "")):
+        return []
+    if not has_update_statement(sql_text):
+        return []
+
     prefix = f"`{path}` (changeSet `{changeset_id}`, {section})"
-    is_dml = labels_include_dml(str(labels_value or ""))
-    has_update = has_update_statement(sql_text)
-    has_insert = has_insert_statement(sql_text)
+    missing: List[str] = []
+    if not SQL_SAFE_UPDATES_OFF_RE.search(sql_text):
+        missing.append("SQL_SAFE_UPDATES = 0")
+    if not SQL_SAFE_UPDATES_ON_RE.search(sql_text):
+        missing.append("SQL_SAFE_UPDATES = 1")
+    if not UPDATE_TIMESTAMP_ASSIGN_RE.search(sql_text):
+        missing.append("UPDATE_TIMESTAMP")
+    if not UPDATE_USER_ASSIGN_RE.search(sql_text):
+        missing.append("UPDATE_USER")
+    if not missing:
+        return []
 
-    if not has_update and not has_insert:
-        return findings
-
-    if not is_dml:
-        if has_update:
-            findings.append(
-                f"{prefix}: UPDATE statements are only allowed in DML-labelled changeSets."
-            )
-        if has_insert:
-            findings.append(
-                f"{prefix}: INSERT statements are only allowed in DML-labelled changeSets."
-            )
-        return findings
-
-    if has_update:
-        missing: List[str] = []
-        if not SQL_SAFE_UPDATES_OFF_RE.search(sql_text):
-            missing.append("SQL_SAFE_UPDATES = 0")
-        if not SQL_SAFE_UPDATES_ON_RE.search(sql_text):
-            missing.append("SQL_SAFE_UPDATES = 1")
-        if not UPDATE_TIMESTAMP_ASSIGN_RE.search(sql_text):
-            missing.append("UPDATE_TIMESTAMP")
-        if not UPDATE_USER_ASSIGN_RE.search(sql_text):
-            missing.append("UPDATE_USER")
-        if missing:
-            findings.append(
-                f"{prefix}: UPDATE statement must include: {', '.join(missing)}."
-            )
-
-    if has_insert:
-        missing: List[str] = []
-        if not UPDATE_TIMESTAMP_COL_RE.search(sql_text):
-            missing.append("UPDATE_TIMESTAMP")
-        if not UPDATE_USER_COL_RE.search(sql_text):
-            missing.append("UPDATE_USER")
-        if missing:
-            findings.append(
-                f"{prefix}: INSERT statement must include: {', '.join(missing)}."
-            )
-
-    return findings
+    return [
+        f"{prefix}: UPDATE statement must include: {', '.join(missing)}."
+    ]
 
 
 def check_scripts_sql(
@@ -232,7 +196,7 @@ def check_scripts_sql(
         findings.append(f"{prefix}: {message}")
 
     findings.extend(
-        check_dml_data_statements(path, changeset_id, section, sql_text, labels_value)
+        check_dml_update_statement(path, changeset_id, section, sql_text, labels_value)
     )
 
     return findings

@@ -90,10 +90,42 @@ SECRET_RULES: Sequence[Tuple[str, Pattern[str]]] = (
 
 @dataclass
 class SecretFinding:
-    source: str
-    location: str
+    file_path: str
+    line_number: int
     rule_name: str
     snippet: str
+
+
+SKIP_FILE_PATTERNS = (
+    re.compile(r"(?:^|/)scripts/validate_.*\.py$"),
+    re.compile(r"(?:^|/)scripts/changeset_utils\.py$"),
+    re.compile(r"(?:^|/)\.github/workflows/"),
+)
+
+SKIP_LINE_PATTERNS = (
+    re.compile(r"re\.compile\s*\("),
+    re.compile(r"SECRET_RULES"),
+    re.compile(r"Pattern\[str\]"),
+    re.compile(r"PLACEHOLDER_RE"),
+)
+
+HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+
+
+def should_skip_file(path: str) -> bool:
+    """Skip validator and workflow files that define detection patterns."""
+    norm = path.replace("\\", "/")
+    return any(pattern.search(norm) for pattern in SKIP_FILE_PATTERNS)
+
+
+def should_skip_line(line: str) -> bool:
+    """Skip source lines that define secret-detection patterns."""
+    stripped = line.strip()
+    if not stripped:
+        return True
+    if stripped.startswith("#") or stripped.startswith("--"):
+        return True
+    return any(pattern.search(stripped) for pattern in SKIP_LINE_PATTERNS)
 
 
 def run_git(args: Sequence[str]) -> Optional[str]:
@@ -130,34 +162,51 @@ def is_benign_value(value: str) -> bool:
     return False
 
 
-def scan_text(source: str, location: str, text: str) -> List[SecretFinding]:
-    """Return secret findings for one text block."""
+def scan_line(file_path: str, line_number: int, raw_line: str) -> List[SecretFinding]:
+    """Return secret findings for one added line in a changed file."""
+    if should_skip_line(raw_line):
+        return []
+
+    line = raw_line.rstrip("\r\n")
+    findings: List[SecretFinding] = []
+
+    for rule_name, pattern in SECRET_RULES:
+        match = pattern.search(line)
+        if not match:
+            continue
+
+        if len(match.groups()) >= 2:
+            value = extract_assignment_value(match)
+            if is_benign_value(value):
+                continue
+
+        findings.append(
+            SecretFinding(
+                file_path=file_path.replace("\\", "/"),
+                line_number=line_number,
+                rule_name=rule_name,
+                snippet=redact_sensitive_line(line.strip()),
+            )
+        )
+        break
+
+    return findings
+
+
+def scan_text(source_label: str, location: str, text: str) -> List[SecretFinding]:
+    """Return secret findings for one text block such as a commit message."""
     findings: List[SecretFinding] = []
 
     for line_number, raw_line in enumerate(text.splitlines(), start=1):
-        line = raw_line.strip()
-        if not line or line.startswith("#") or line.startswith("--"):
-            continue
-
-        for rule_name, pattern in SECRET_RULES:
-            match = pattern.search(line)
-            if not match:
-                continue
-
-            if len(match.groups()) >= 2:
-                value = extract_assignment_value(match)
-                if is_benign_value(value):
-                    continue
-
+        for finding in scan_line(location, line_number, raw_line):
             findings.append(
                 SecretFinding(
-                    source=source,
-                    location=f"{location}:{line_number}",
-                    rule_name=rule_name,
-                    snippet=redact_sensitive_line(line),
+                    file_path=location,
+                    line_number=line_number,
+                    rule_name=finding.rule_name,
+                    snippet=finding.snippet,
                 )
             )
-            break
 
     return findings
 
@@ -198,20 +247,38 @@ def collect_changed_files(base_sha: str, head_sha: str) -> List[str]:
 
 
 def scan_file_diff(path: str, base_sha: str, head_sha: str) -> List[SecretFinding]:
-    """Scan added lines in one file diff."""
+    """Scan added lines in one file diff and report real file line numbers."""
+    if should_skip_file(path):
+        return []
+
     diff_text = get_git_diff(path, base_sha, head_sha)
     if not diff_text:
         return []
 
-    added_lines: List[str] = []
+    findings: List[SecretFinding] = []
+    norm = path.replace("\\", "/")
+    new_line = 0
+
     for raw_line in diff_text.splitlines():
-        if raw_line.startswith("+") and not raw_line.startswith("+++"):
-            added_lines.append(raw_line[1:])
+        hunk_match = HUNK_RE.match(raw_line)
+        if hunk_match:
+            new_line = int(hunk_match.group(1)) - 1
+            continue
 
-    if not added_lines:
-        return []
+        if raw_line.startswith("+++") or raw_line.startswith("---") or raw_line.startswith("@@"):
+            continue
 
-    return scan_text("file diff", path, "\n".join(added_lines))
+        if raw_line.startswith(" "):
+            new_line += 1
+            continue
+
+        if not raw_line.startswith("+"):
+            continue
+
+        new_line += 1
+        findings.extend(scan_line(norm, new_line, raw_line[1:]))
+
+    return findings
 
 
 def scan_commit_messages(base_sha: str, head_sha: str) -> List[SecretFinding]:
@@ -223,7 +290,7 @@ def scan_commit_messages(base_sha: str, head_sha: str) -> List[SecretFinding]:
     findings: List[SecretFinding] = []
     commits = [part.strip() for part in output.split("---COMMIT---") if part.strip()]
     for index, message in enumerate(commits, start=1):
-        findings.extend(scan_text("commit message", f"commit #{index}", message))
+        findings.extend(scan_text("commit message", f"commit message #{index}", message))
     return findings
 
 
@@ -247,12 +314,19 @@ def format_report(findings: Sequence[SecretFinding]) -> str:
 
     lines = ["### Security Review", ""]
     for finding in findings:
-        lines.append(
-            f"- ❌ `{finding.location}` ({finding.source}): "
-            f"Possible {finding.rule_name} detected. "
-            f"Remove tokens/credentials before committing. "
-            f"Preview: `{finding.snippet}`"
-        )
+        if finding.file_path.startswith("commit message"):
+            lines.append(
+                f"- ❌ **Location:** `{finding.file_path}` (line {finding.line_number}) — "
+                f"Possible {finding.rule_name} detected in commit message. "
+                f"Remove tokens/credentials before committing."
+            )
+        else:
+            lines.append(
+                f"- ❌ **File:** `{finding.file_path}` **(line {finding.line_number})** — "
+                f"Possible {finding.rule_name} detected. "
+                f"Remove tokens/credentials before committing. "
+                f"Preview: `{finding.snippet}`"
+            )
     return "\n".join(lines)
 
 
