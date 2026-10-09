@@ -1,6 +1,6 @@
 databaseChangeLog:
 
-   changeSet:
+  - changeSet:
       id: FIBI-8766-5
       author: Vishnu B H
       labels: 'DDL'
