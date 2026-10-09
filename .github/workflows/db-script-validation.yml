@@ -2,11 +2,9 @@ name: Liquibase changelog check
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   validate:
@@ -33,7 +31,6 @@ jobs:
             echo "has_files=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_files=false" >> "$GITHUB_OUTPUT"
-            echo "_No Liquibase changelog files changed in this pull request._" > liquibase_report.md
           fi
 
       - name: Setup Liquibase
@@ -41,10 +38,9 @@ jobs:
         uses: liquibase/setup-liquibase@v1
         with:
           version: "4.32.0"
-          edition: community
+          edition: oss
 
       - name: Validate changelogs
-        id: validate
         if: steps.changed.outputs.has_files == 'true'
         env:
           LIQUIBASE_COMMAND_URL: jdbc:h2:mem:check
@@ -52,89 +48,11 @@ jobs:
           LIQUIBASE_COMMAND_PASSWORD: ""
         run: |
           failed=0
-          {
-            echo "### Result"
-            echo ""
-          } > liquibase_report.md
-
           while IFS= read -r file; do
             [ -n "$file" ] || continue
             echo "Validating $file"
-            set +e
-            liquibase --changelog-file="$file" validate > validate.out 2>&1
-            status=$?
-            set -e
-            if [ "$status" -eq 0 ]; then
-              echo "- \`$file\`: passed" >> liquibase_report.md
-            else
+            if ! liquibase --changelog-file="$file" validate; then
               failed=1
-              {
-                echo "- \`$file\`: failed"
-                echo ""
-                echo '```'
-                tail -n 40 validate.out
-                echo '```'
-                echo ""
-              } >> liquibase_report.md
             fi
           done < changed_changelogs.txt
-
-          echo "failed=$failed" >> "$GITHUB_OUTPUT"
-          cat liquibase_report.md
-
-      - name: Comment on pull request
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const report = fs.existsSync('liquibase_report.md')
-              ? fs.readFileSync('liquibase_report.md', 'utf8').trim()
-              : '_No Liquibase changelog files changed in this pull request._';
-            const failed = '${{ steps.validate.outputs.failed }}' === '1';
-            const status = failed
-              ? 'Liquibase could not load one or more changelogs. Fix the indentation or changelog structure, then push again.'
-              : 'Liquibase loaded every changed changelog.';
-            const body = [
-              '## Liquibase changelog check',
-              '',
-              status,
-              '',
-              report,
-            ].join('\n');
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const marker = 'Liquibase changelog check';
-            const botComments = comments.filter(
-              (comment) => comment.user.type === 'Bot' && comment.body.includes(marker)
-            );
-
-            if (botComments.length === 0) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            } else {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComments[0].id,
-                body,
-              });
-              for (const duplicate of botComments.slice(1)) {
-                await github.rest.issues.deleteComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: duplicate.id,
-                });
-              }
-            }
-
-      - name: Fail when Liquibase cannot load a changelog
-        if: steps.validate.outputs.failed == '1'
-        run: exit 1
+          exit "$failed"
